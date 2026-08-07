@@ -857,8 +857,7 @@ document.getElementById('fetchBtn').addEventListener('click', async ()=>{
     }
     statusEl.textContent = `${submissions.length}건 불러왔습니다. 클릭해서 선택하세요.`;
     listEl.innerHTML = submissions.map((sub, idx) => {
-      const responses = sub.responses || {};
-      const name = responses.bizName || `신청 #${idx+1}`;
+      const name = deepFind(sub, 'bizName') || `신청 #${idx+1}`;
       const date = sub.submittedAt || sub.createdAt || '';
       return `<div class="sub-item" data-idx="${idx}"><div class="sub-name">${name}</div><div class="sub-date">${date}</div></div>`;
     }).join('');
@@ -871,39 +870,53 @@ document.getElementById('fetchBtn').addEventListener('click', async ()=>{
   }
 });
 
-function getVal(responses, key){
-  return (responses && responses[key] !== undefined) ? responses[key] : null;
+// 탈리 응답 데이터는 구조가 중첩되어 있을 수 있어, 어디에 있든 해당 key를 찾아내는 재귀 탐색 함수
+function deepFind(obj, key, seen){
+  seen = seen || new Set();
+  if(obj===null || typeof obj!=='object') return undefined;
+  if(seen.has(obj)) return undefined;
+  seen.add(obj);
+  if(Object.prototype.hasOwnProperty.call(obj, key)) return obj[key];
+  if(Array.isArray(obj)){
+    for(const item of obj){ const found = deepFind(item, key, seen); if(found!==undefined) return found; }
+  } else {
+    for(const k in obj){ const found = deepFind(obj[k], key, seen); if(found!==undefined) return found; }
+  }
+  return undefined;
+}
+
+function getVal(sub, key){
+  const v = deepFind(sub, key);
+  return (v===undefined) ? null : v;
 }
 
 function fillFromSubmission(sub){
-  const responses = sub.responses || {};
-
-  const bizName = getVal(responses, 'bizName');
+  const bizName = getVal(sub, 'bizName');
   if(bizName!==null) document.getElementById('bizName').value = bizName;
 
-  const corpType = getVal(responses, 'corpType');
+  const corpType = getVal(sub, 'corpType');
   if(corpType && REVERSE_MAP.corpType[corpType]) document.getElementById('axCorp').value = REVERSE_MAP.corpType[corpType];
 
-  const taxType = getVal(responses, 'taxType');
+  const taxType = getVal(sub, 'taxType');
   if(taxType && REVERSE_MAP.taxType[taxType]) document.getElementById('axTax').value = REVERSE_MAP.taxType[taxType];
 
-  const reportType = getVal(responses, 'reportType');
+  const reportType = getVal(sub, 'reportType');
   if(reportType && REVERSE_MAP.reportType[reportType]) document.getElementById('axReport').value = REVERSE_MAP.reportType[reportType];
 
-  const industryType = getVal(responses, 'industryType');
+  const industryType = getVal(sub, 'industryType');
   if(industryType && REVERSE_MAP.industryType[industryType]) document.getElementById('axIndustry').value = REVERSE_MAP.industryType[industryType];
 
-  const revYear = getVal(responses, 'revYear');
+  const revYear = getVal(sub, 'revYear');
   if(revYear!==null) document.getElementById('revYear').value = revYear;
 
   ['staffCnt','dailyCnt','freelanceCnt','etcWithholdCnt','corpAcctCnt'].forEach(id=>{
-    const v = getVal(responses, id);
+    const v = getVal(sub, id);
     if(v!==null) document.getElementById(id).value = v;
   });
 
   ['hasOverseas','hasOnline','hasOtherRevenue','hasForeignAccount'].forEach((key, i)=>{
     const targetId = ['axOverseas','axOnline','axOtherRevenue','axForeignAccount'][i];
-    const v = getVal(fields, key);
+    const v = getVal(sub, key);
     if(v!==null) document.getElementById(targetId).checked = (v==='예');
   });
 
