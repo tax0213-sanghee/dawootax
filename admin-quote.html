@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>세무서비스 견적서 출력기 (관리자용)</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<style>
+  @font-face{ font-family:'KakaoBigFont'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2503@1.0/KakaoBigSans-Regular.woff2') format('woff2'); font-weight:400; font-display:swap; }
+  @font-face{ font-family:'KakaoBigFont'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2503@1.0/KakaoBigSans-Bold.woff2') format('woff2'); font-weight:700; font-display:swap; }
+  @font-face{ font-family:'KakaoBigFont'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2503@1.0/KakaoBigSans-ExtraBold.woff2') format('woff2'); font-weight:800; font-display:swap; }
+  @font-face{ font-family:'Cafe24 Ssurround'; font-weight:normal; font-style:normal; font-display:swap;
+    src:url('https://cdn.jsdelivr.net/gh/fonts-archive/Cafe24Ssurround/Cafe24Ssurround.woff2') format('woff2'),
+        url('https://cdn.jsdelivr.net/gh/fonts-archive/Cafe24Ssurround/Cafe24Ssurround.woff') format('woff'); }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  :root{
+    --brand:#7C4DFF; --brand-deep:#5B32C4;
+    --ink:#18181F; --ink-soft:#6B6675; --ink-faint:#9A94A6;
+    --bg:#FBF6EA; --card:#FFFFFF; --card-2:#F1ECFB;
+    --line:#E5DFF2; --deep:#18181F;
+    --shadow:0 3px 14px rgba(40,20,80,0.08);
+  }
+  html,body{ background:var(--bg); color:var(--ink); font-family:'KakaoBigFont','Pretendard Variable',-apple-system,'Malgun Gothic',sans-serif; }
+  body{ line-height:1.55; padding:32px 20px 80px; }
+  .wrap{ max-width:1180px; margin:0 auto; }
+  h1{ font-family:'Cafe24 Ssurround','KakaoBigFont',sans-serif; font-weight:normal; font-size:24px; color:var(--deep); margin-bottom:6px; }
+  .lead{ color:var(--ink-soft); font-size:14px; margin-bottom:28px; }
+
+  .layout{ display:grid; grid-template-columns:380px 1fr; gap:24px; align-items:start; }
+  @media (max-width:900px){ .layout{ grid-template-columns:1fr; } }
+
+  .panel{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px; box-shadow:var(--shadow); }
+  .panel h2{ font-size:15px; font-weight:700; color:var(--deep); margin-bottom:14px; }
+  .field{ margin-bottom:12px; }
+  .field label{ display:block; font-size:12px; font-weight:600; color:var(--ink-soft); margin-bottom:4px; }
+  .field input, .field select{
+    width:100%; padding:9px 10px; border:1.5px solid var(--line); border-radius:9px;
+    font-size:13.5px; font-family:inherit; background:#FDFEFD;
+  }
+  .field input:focus, .field select:focus{ outline:none; border-color:var(--brand); box-shadow:0 0 0 3px rgba(124,77,255,.18); }
+  .field-row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .divider{ height:1px; background:var(--line); margin:16px 0; }
+  .section-label{ font-size:12px; font-weight:700; color:var(--brand); margin-bottom:8px; }
+
+  .btn.secondary{ background:var(--card-2); color:var(--deep); border:1.5px solid var(--line); }
+  .btn.secondary:hover{ background:var(--line); }
+  .sub-item{
+    padding:8px 10px; border:1px solid var(--line); border-radius:8px; margin-bottom:6px;
+    cursor:pointer; font-size:12.5px; transition:.12s;
+  }
+  .sub-item:hover{ background:var(--card-2); border-color:var(--brand); }
+  .sub-item .sub-name{ font-weight:700; color:var(--deep); }
+  .sub-item .sub-date{ color:var(--ink-faint); font-size:11px; }
+
+  .btn{ width:100%; padding:12px; border-radius:999px; border:none; background:var(--brand); color:#fff;
+    font-weight:700; font-size:14.5px; cursor:pointer; font-family:inherit; margin-top:8px; }
+  .btn:hover{ background:var(--brand-deep); }
+
+  /* 견적서 미리보기 */
+  .quote{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:36px 40px; box-shadow:var(--shadow); }
+  .quote-header{ text-align:center; border-bottom:2px solid var(--deep); padding-bottom:16px; margin-bottom:20px; }
+  .quote-title{ font-family:'Cafe24 Ssurround','KakaoBigFont',sans-serif; font-weight:normal; font-size:22px; color:var(--deep); letter-spacing:.02em; }
+  .quote-date{ font-size:12px; color:var(--ink-faint); margin-top:4px; }
+
+  .quote-summary{
+    display:grid; grid-template-columns:1fr 1fr; gap:8px 20px;
+    border:1px solid var(--line); border-radius:12px; padding:16px 18px; margin-bottom:20px; font-size:13px;
+  }
+  .quote-summary .item{ display:flex; justify-content:space-between; border-bottom:1px dotted var(--line); padding:4px 0; }
+  .quote-summary .item.wide{ grid-column:1/3; }
+  .quote-summary .item span:first-child{ color:var(--ink-faint); }
+  .quote-summary .item b{ color:var(--ink); font-weight:600; }
+
+  .quote-totals{ background:var(--card-2); border:1.5px solid var(--line); border-left:5px solid var(--brand); border-radius:14px; padding:22px; color:var(--ink); }
+  .quote-totals .row{ display:flex; justify-content:space-between; align-items:baseline; padding:6px 0; font-size:14px; color:var(--ink); }
+  .quote-totals .row.main{ font-size:15px; font-weight:700; border-top:1.5px solid var(--line); margin-top:8px; padding-top:14px; }
+  .quote-totals .row.main b{ font-size:24px; color:var(--brand-deep); }
+  .quote-totals .row span:first-child{ color:var(--ink-soft); }
+
+  .quote-vat{ text-align:center; font-size:11.5px; color:var(--ink-faint); margin-top:14px; }
+  .quote-cta{ text-align:center; font-size:13px; font-weight:600; line-height:1.6; color:var(--brand-deep); margin-top:18px; padding:16px; background:var(--card-2); border-radius:10px; }
+  .quote-office{ text-align:center; margin-top:24px; padding-top:16px; border-top:1px solid var(--line); }
+  .quote-office .name{ font-weight:700; color:var(--deep); font-size:14px; }
+  .quote-office .detail{ font-size:11.5px; color:var(--ink-faint); margin-top:4px; }
+
+  @media print{
+    body{ padding:0; background:#fff; }
+    .panel, h1, .lead, .btn{ display:none !important; }
+    .layout{ display:block; }
+    .quote{ box-shadow:none; border:none; }
+    @page{ margin:16mm; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>세무서비스 견적서 출력기 (관리자용)</h1>
+  <p class="lead">탈리 응답에 있는 값을 그대로 옮겨 적으면, 오른쪽에 정식 견적서 형태로 정리되고 인쇄할 수 있습니다.</p>
+
+  <div class="layout">
+    <div class="panel">
+      <h2>탈리에서 불러오기</h2>
+      <button class="btn secondary" id="fetchBtn" type="button">최근 신청 목록 불러오기</button>
+      <div id="fetchStatus" style="font-size:12px; color:var(--ink-faint); margin-top:8px;"></div>
+      <div id="submissionList" style="margin-top:10px; max-height:220px; overflow-y:auto;"></div>
+      <div class="divider"></div>
+
+      <h2>탈리 응답 값 입력 (직접 수정 가능)</h2>
+
+      <div class="section-label">기본 정보</div>
+      <div class="field"><label>사업장명 (bizName)</label><input type="text" id="bizName" placeholder="예: 다우세무"></div>
+      <div class="field-row">
+        <div class="field"><label>구분① (corpType)</label>
+          <select id="corpType"><option value="법인사업자">법인사업자</option><option value="개인사업자">개인사업자</option></select>
+        </div>
+        <div class="field"><label>구분② (taxType)</label>
+          <select id="taxType"><option value="과세사업자">과세사업자</option><option value="면세사업자">면세사업자</option><option value="겸영사업자">겸영사업자</option></select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>구분③ (reportType)</label>
+          <select id="reportType"><option value="성실신고확인대상자 아님">성실신고확인대상자 아님</option><option value="성실신고확인대상자">성실신고확인대상자</option></select>
+        </div>
+        <div class="field"><label>업종 (industryType)</label>
+          <select id="industryType"><option value="일반업종">일반업종</option><option value="부동산임대업">부동산임대업</option><option value="제조업/도급업">제조업/도급업</option><option value="병의원">병의원</option><option value="대부업">대부업</option></select>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="section-label">매출 · 인원 현황</div>
+      <div class="field"><label>연매출액 (revYear, 원)</label><input type="text" id="revYear" placeholder="예: 500,000,000"></div>
+      <div class="field-row">
+        <div class="field"><label>직원 (staffCnt)</label><input type="text" id="staffCnt" value="0"></div>
+        <div class="field"><label>일용직 (dailyCnt)</label><input type="text" id="dailyCnt" value="0"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>프리랜서 (freelanceCnt)</label><input type="text" id="freelanceCnt" value="0"></div>
+        <div class="field"><label>기타원천징수 (etcWithholdCnt)</label><input type="text" id="etcWithholdCnt" value="0"></div>
+      </div>
+      <div class="field"><label>법인계좌 수 (corpAcctCnt)</label><input type="text" id="corpAcctCnt" value="0"></div>
+
+      <div class="divider"></div>
+      <div class="section-label">추가 특성</div>
+      <div class="field-row">
+        <div class="field"><label>해외매출 (hasOverseas)</label><select id="hasOverseas"><option value="아니오">아니오</option><option value="예">예</option></select></div>
+        <div class="field"><label>온라인매출 (hasOnline)</label><select id="hasOnline"><option value="아니오">아니오</option><option value="예">예</option></select></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>기타매출 (hasOtherRevenue)</label><select id="hasOtherRevenue"><option value="아니오">아니오</option><option value="예">예</option></select></div>
+        <div class="field"><label>외화계좌 (hasForeignAccount)</label><select id="hasForeignAccount"><option value="아니오">아니오</option><option value="예">예</option></select></div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="section-label">계산된 요금 (탈리에서 그대로 옮겨적기, 만원 단위)</div>
+      <div class="field"><label>월 기장료 합계 (monthlyFee)</label><input type="text" id="monthlyFee" value="0"></div>
+      <div class="field"><label>조정료 (adjFee)</label><input type="text" id="adjFee" value="0"></div>
+      <div class="field"><label>성실신고확인보수 (faithfulFee)</label><input type="text" id="faithfulFee" value="0"></div>
+      <div class="field"><label>연간 예상 총액 (totalFee)</label><input type="text" id="totalFee" value="0"></div>
+
+      <button class="btn" onclick="window.print()">인쇄 / PDF 저장</button>
+    </div>
+
+    <div class="quote">
+      <div class="quote-header">
+        <div class="quote-title">세무서비스 요금 견적서</div>
+        <div class="quote-date" id="quoteDate"></div>
+      </div>
+
+      <div class="quote-summary">
+        <div class="item wide"><span>사업장명</span><b id="qBizName">-</b></div>
+        <div class="item wide"><span>구분</span><b id="qClass">-</b></div>
+        <div class="item"><span>업종</span><b id="qIndustry">-</b></div>
+        <div class="item"><span>연매출액</span><b id="qRevYear">-</b></div>
+        <div class="item"><span>직원 / 일용직</span><b id="qStaff">-</b></div>
+        <div class="item"><span>프리랜서 / 기타원천징수</span><b id="qEtc">-</b></div>
+        <div class="item"><span>법인계좌 수</span><b id="qCorpAcct">-</b></div>
+        <div class="item"><span>추가 특성</span><b id="qTraits">-</b></div>
+      </div>
+
+      <div class="quote-totals">
+        <div class="row"><span>월 기장료 합계</span><b id="qMonthly">0 만원</b></div>
+        <div class="row"><span>조정료 (연 1회)</span><b id="qAdj">0 만원</b></div>
+        <div class="row"><span>성실신고확인보수 (연 1회, 별도)</span><b id="qFaithful">0 만원</b></div>
+        <div class="row main"><span>연간 예상 총액</span><b id="qTotal">0 만원</b></div>
+      </div>
+      <div class="quote-vat">※ 표시된 모든 금액은 부가가치세(VAT) 10% 별도입니다.</div>
+      <div class="quote-cta">비즈니스에서 중요한 결정은 그리 오래 걸리지 않습니다.<br>'선택하길 참 잘했다'는 확신, 첫 달부터 바로 느껴보세요.</div>
+
+      <div class="quote-office">
+        <div class="name">세무법인 다우</div>
+        <div class="detail">제주특별자치도 서귀포시 동일하모로149번길 4 2층 · Tel. 064-900-7170 · 사업자등록번호 274-85-01403</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function v(id){ return document.getElementById(id).value || '0'; }
+function t(id){ return document.getElementById(id).value || ''; }
+
+function render(){
+  document.getElementById('qBizName').textContent = t('bizName') || '-';
+  document.getElementById('qClass').textContent = `${t('corpType')} · ${t('taxType')} · ${t('reportType')}`;
+  document.getElementById('qIndustry').textContent = t('industryType');
+  document.getElementById('qRevYear').textContent = v('revYear') + '원';
+  document.getElementById('qStaff').textContent = `${v('staffCnt')}명 / ${v('dailyCnt')}명`;
+  document.getElementById('qEtc').textContent = `${v('freelanceCnt')}명 / ${v('etcWithholdCnt')}명`;
+  document.getElementById('qCorpAcct').textContent = v('corpAcctCnt') + '개';
+
+  const traits = [];
+  if(t('hasOverseas')==='예') traits.push('해외매출');
+  if(t('hasOnline')==='예') traits.push('온라인매출');
+  if(t('hasOtherRevenue')==='예') traits.push('기타매출');
+  if(t('hasForeignAccount')==='예') traits.push('외화계좌');
+  document.getElementById('qTraits').textContent = traits.length ? traits.join(', ') : '해당없음';
+
+  document.getElementById('qMonthly').textContent = v('monthlyFee') + ' 만원';
+  document.getElementById('qAdj').textContent = v('adjFee') + ' 만원';
+  document.getElementById('qFaithful').textContent = v('faithfulFee') + ' 만원';
+  document.getElementById('qTotal').textContent = v('totalFee') + ' 만원';
+}
+
+document.querySelectorAll('input,select').forEach(el=> el.addEventListener('input', render));
+document.querySelectorAll('input,select').forEach(el=> el.addEventListener('change', render));
+
+// 탈리 히든필드 key와 이 도구의 input id가 동일하다고 가정하고 매칭
+const FIELD_KEYS = ['bizName','corpType','taxType','reportType','industryType','revYear',
+  'staffCnt','dailyCnt','freelanceCnt','etcWithholdCnt','corpAcctCnt',
+  'hasOverseas','hasOnline','hasOtherRevenue','hasForeignAccount',
+  'monthlyFee','adjFee','faithfulFee','totalFee'];
+
+document.getElementById('fetchBtn').addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('fetchStatus');
+  const listEl = document.getElementById('submissionList');
+  statusEl.textContent = '불러오는 중...';
+  listEl.innerHTML = '';
+  try {
+    const res = await fetch('/.netlify/functions/get-submissions');
+    const data = await res.json();
+    if(!res.ok || data.error){
+      statusEl.textContent = '오류: ' + (data.error || res.status);
+      console.error(data);
+      return;
+    }
+    const submissions = data.submissions || data.data || [];
+    if(submissions.length === 0){
+      statusEl.textContent = '아직 신청 내역이 없습니다.';
+      return;
+    }
+    statusEl.textContent = `${submissions.length}건 불러왔습니다. 클릭해서 선택하세요.`;
+    listEl.innerHTML = submissions.map((sub, idx) => {
+      const bizField = (sub.fields||[]).find(f => (f.key||f.label)==='bizName');
+      const name = bizField ? bizField.value : `신청 #${idx+1}`;
+      const date = sub.submittedAt || sub.createdAt || '';
+      return `<div class="sub-item" data-idx="${idx}"><div class="sub-name">${name}</div><div class="sub-date">${date}</div></div>`;
+    }).join('');
+
+    listEl.querySelectorAll('.sub-item').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        const sub = submissions[+el.dataset.idx];
+        fillFromSubmission(sub);
+      });
+    });
+  } catch(err){
+    statusEl.textContent = '불러오기 실패: ' + err.message;
+    console.error(err);
+  }
+});
+
+function fillFromSubmission(sub){
+  const fields = sub.fields || [];
+  FIELD_KEYS.forEach(key=>{
+    const match = fields.find(f => (f.key===key) || (f.label===key));
+    if(match && document.getElementById(key)){
+      document.getElementById(key).value = match.value ?? '';
+    }
+  });
+  render();
+}
+
+const d = new Date();
+document.getElementById('quoteDate').textContent = `발행일: ${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일`;
+
+render();
+</script>
+</body>
+</html>

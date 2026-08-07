@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>세무서비스 요금 견적서</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<style>
+  @font-face{ font-family:'KakaoBigFont'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2503@1.0/KakaoBigSans-Regular.woff2') format('woff2'); font-weight:400; font-display:swap; }
+  @font-face{ font-family:'KakaoBigFont'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2503@1.0/KakaoBigSans-Bold.woff2') format('woff2'); font-weight:700; font-display:swap; }
+  @font-face{ font-family:'KakaoBigFont'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2503@1.0/KakaoBigSans-ExtraBold.woff2') format('woff2'); font-weight:800; font-display:swap; }
+  @font-face{ font-family:'Cafe24 Ssurround'; font-weight:normal; font-style:normal; font-display:swap;
+    src:url('https://cdn.jsdelivr.net/gh/fonts-archive/Cafe24Ssurround/Cafe24Ssurround.woff2') format('woff2'),
+        url('https://cdn.jsdelivr.net/gh/fonts-archive/Cafe24Ssurround/Cafe24Ssurround.woff') format('woff'); }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root{
+    --kakao: #FEE500; --kakao-deep:#F5D800;
+    --brand: #7C4DFF; --brand-deep:#5B32C4;
+    --ink: #18181F; --ink-soft: #6B6675; --ink-faint:#9A94A6;
+    --bg: #FBF6EA; --card:#FFFFFF; --card-2:#F1ECFB;
+    --line: #E5DFF2; --brown:#18181F;
+    --good:#3E8E5B; --shadow: 0 3px 14px rgba(40,20,80,0.08);
+  }
+  html,body{ background: var(--bg); color: var(--ink); font-family:'KakaoBigFont','Pretendard Variable','Pretendard',-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif; }
+  body{ line-height:1.55; padding-bottom:90px; }
+  .wrap{ max-width:1220px; margin:0 auto; padding:0 24px; }
+
+  header.top{ background: linear-gradient(180deg, #EDE7FA 0%, var(--bg) 100%); padding:40px 0 20px; position:relative; overflow:hidden; text-align:center; }
+  header.top .wrap{ max-width:840px; }
+  header.top p.sub, header.top p.vat-note{ margin-left:auto; margin-right:auto; }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:14px; font-weight:600; color:#fff;
+    background: var(--brand); padding:6px 14px; border-radius:999px; letter-spacing:.02em; margin-bottom:16px;
+  }
+  h1{ font-family:'Cafe24 Ssurround','KakaoBigFont','Pretendard Variable',sans-serif; font-weight:normal; font-size:35.5px; letter-spacing:-.01em; color:var(--ink); line-height:1.35; }
+  h1 .accent{ background: var(--brand); color:#fff; padding:2px 10px; border-radius:8px; }
+  header.top p.sub{ margin-top:12px; color:var(--ink-soft); font-size:16.5px; max-width:640px; line-height:1.7; }
+  header.top p.vat-note{ margin-top:10px; color:var(--ink-faint); font-size:12.5px; font-weight:500; }
+  .sparkle{ color: var(--brand); font-size:16.5px; }
+
+  main.grid{ display:grid; grid-template-columns:1fr; max-width:840px; margin:12px auto 0; align-items:start; }
+
+  .panel{ background:var(--card); border:1px solid var(--line); border-radius:20px; margin-bottom:20px; box-shadow: var(--shadow); overflow:hidden; }
+  .panel-head{ padding:20px 24px 16px; display:flex; align-items:center; gap:11px; }
+  .panel-head .num{
+    width:30px; height:30px; border-radius:9px; background:var(--brand);
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; color:#fff; font-size:15px; flex-shrink:0;
+  }
+  .panel-head h2{ font-family:'Cafe24 Ssurround','KakaoBigFont',sans-serif; font-weight:normal; font-size:18px; color:var(--ink); }
+  .panel-head .sub-h{ font-size:13px; color:var(--ink-faint); margin-left:auto; }
+  .panel-body{ padding:0 24px 22px; }
+  .panel-body.no-head{ padding-top:20px; }
+
+  .section-tag{
+    display:inline-flex; align-items:center; gap:7px;
+    font-size:14px; font-weight:800; color:#fff; background:var(--brand);
+    padding:8px 16px; border-radius:999px; letter-spacing:.01em;
+    margin:30px 0 14px; box-shadow: var(--shadow);
+  }
+  .section-tag.alt{ background:var(--brown); color:#EAF1EC; }
+  .section-tag.gold{ background: linear-gradient(90deg, var(--brand), var(--brand-deep)); color:#fff; }
+
+  .info-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px 16px; }
+  @media (max-width:760px){ .info-grid{ grid-template-columns:1fr 1fr; } }
+  @media (max-width:480px){
+    .info-grid{ grid-template-columns:1fr; }
+    .field.wide, .field.full{ grid-column:1/-1; }
+    .check-inline.row3{ flex-direction:column; align-items:stretch; }
+    .check-inline.row3 label{ white-space:normal; }
+    .wrap{ padding:0 14px; }
+    .panel-body{ padding:0 14px 18px; }
+    .panel-body.no-head{ padding-top:16px; }
+  }
+  .field label{ display:block; font-size:13px; color:var(--ink-soft); margin-bottom:6px; font-weight:500; }
+  input[type=text],input[type=number],select{
+    width:100%; padding:10px 11px; border:1.5px solid var(--line); border-radius:11px;
+    background:#FFFDF6; font-size:15px; color:var(--ink); font-family:inherit; font-weight:400; transition:.15s;
+  }
+  select{
+    appearance:none; -webkit-appearance:none;
+    padding-right:34px; cursor:pointer;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%236F6B62' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 8l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 10px center; background-size:16px;
+  }
+  select:disabled{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23C9C3B4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 8l5 5 5-5'/%3E%3C/svg%3E");
+  }
+  input:focus,select:focus{ outline:none; border-color:var(--brand); background:#fff; box-shadow:0 0 0 3px rgba(124,77,255,.18); }
+  input:disabled,select:disabled{ background:#ECEFEB; color:var(--ink-faint); cursor:not-allowed; border-color:var(--line); box-shadow:none; }
+  input[type=checkbox]:disabled{ accent-color:#C9C3B4; opacity:.7; cursor:not-allowed; }
+  .step-btn:disabled{ background:transparent; color:#C9C3B4; cursor:not-allowed; }
+  .step-btn:disabled:hover{ background:transparent; color:#C9C3B4; }
+  .field.wide{ grid-column: span 2; }
+  .field.full{ grid-column: 1 / -1; }
+  .check-inline{ display:flex; flex-direction:column; gap:6px; padding:9px 0; }
+  .check-inline.row3{ flex-direction:row; flex-wrap:wrap; align-items:flex-start; gap:8px; padding:2px 0 0; }
+  .check-inline.row3 label{
+    white-space:nowrap; flex:1 1 0; justify-content:flex-start;
+    border:1.5px solid var(--line); border-radius:11px; background:#FFFDF6;
+    padding:9px 10px; font-size:12.5px; transition:.15s;
+  }
+  .check-inline.row3 label:hover{ border-color:var(--brand); }
+  .check-inline.row3 label:has(input:checked){ border-color:var(--brand); background:var(--card-2); }
+  .check-inline label{ display:flex; align-items:center; gap:6px; font-size:13.5px; color:var(--ink); cursor:pointer; }
+  .check-inline input[type=checkbox]{ width:16px; height:16px; accent-color:var(--brand); cursor:pointer; }
+  .stepper{ position:relative; }
+  .stepper-input{ width:100%; padding-right:34px; }
+  .stepper .spin{ position:absolute; right:1px; top:1px; bottom:1px; width:26px; display:flex; flex-direction:column; }
+  .stepper .step-btn{
+    flex:1; border:none; background:transparent; color:var(--ink-faint); font-size:9.5px;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0; line-height:1;
+  }
+  .stepper .step-btn:first-child{ border-radius:0 10px 0 0; }
+  .stepper .step-btn:last-child{ border-radius:0 0 10px 0; }
+  .stepper .step-btn:hover{ background:var(--brand); color:#fff; }
+
+  .svc-group-title{ font-size:14px; font-weight:700; color:var(--brown); margin:16px 0 8px; padding:6px 0 0; }
+  .svc-group-title:first-child{ margin-top:2px; }
+
+  .row{ display:grid; grid-template-columns:26px 1fr 220px 112px; gap:10px; align-items:center; padding:6px 10px; border-radius:13px; transition:.12s; }
+  .row.compact{ grid-template-columns:26px 1fr 112px; }
+  .row:hover{ background:#FFFCF0; }
+  @media (max-width:780px){
+    .row{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 8px; padding:9px 8px; }
+    .row input[type=checkbox]{ order:1; flex-shrink:0; }
+    .row .desc{ order:2; flex:1 1 90px; min-width:0; }
+    .row .ctrl{ order:3; flex-shrink:0; }
+    .row .price{ order:4; flex-shrink:0; margin-left:auto; }
+  }
+  .row input[type=checkbox]{ width:19px; height:19px; accent-color: var(--brand); cursor:pointer; }
+  .row .desc .name{ font-size:15px; font-weight:500; }
+  .recommend-badge{ font-size:11.5px; font-weight:700; color:#B08900; margin-left:6px; white-space:nowrap; }
+  .row.disabled{ opacity:.45; }
+  .row.disabled .desc .name{ color:var(--ink-faint); }
+  .row .ctrl{ display:flex; align-items:center; gap:6px; }
+  .row .ctrl select,.row .ctrl input[type=number]{ font-size:14px; padding:7px 8px; }
+  .row .ctrl .unit{ font-size:13px; color:var(--ink-soft); white-space:nowrap; }
+  .row .ctrl .auto-val{ font-size:13.5px; color:var(--ink-soft); font-weight:400; background:#F5F1E4; padding:5px 10px; border-radius:8px; }
+  .row .price{ text-align:right; font-weight:600; font-size:16px; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .row .price .won{ font-size:12px; font-weight:400; color:var(--ink-faint); }
+
+  .subtotal-line{
+    display:flex; justify-content:space-between; padding:13px 14px; margin-top:8px; border-radius:13px;
+    font-size:15px; font-weight:600; color:var(--brown); background:var(--card-2);
+  }
+
+  .sidebar{ position:sticky; top:20px; }
+
+  /* 카카오톡 말풍선 스타일 결과 카드 */
+  .bubble{
+    background: var(--brand); border-radius:20px; padding:22px 22px 20px; position:relative;
+    box-shadow: var(--shadow);
+  }
+  .bubble .label{ font-size:13.5px; font-weight:600; color:#fff; opacity:.85; }
+  .bubble .amount{ font-weight:700; font-size:30.5px; margin-top:6px; color:#fff; font-variant-numeric:tabular-nums; }
+  .bubble .amount small{ font-size:14.5px; font-weight:500; color:#6B540A; }
+  .divider-thin{ height:1px; background: rgba(58,43,29,.15); margin:14px 0; }
+  .sub-line{ display:flex; justify-content:space-between; font-size:14px; color:#5A431A; padding:3px 0; }
+  .sub-line b{ color:var(--brown); font-variant-numeric:tabular-nums; font-weight:500; }
+  .bell-badge{
+    position:absolute; top:16px; right:16px; width:40px; height:40px; border-radius:50%;
+    background:#fff; display:flex; align-items:center; justify-content:center; font-size:19.5px;
+    opacity:0; transform:scale(.6) rotate(-14deg); transition:.3s;
+  }
+  .bell-badge.show{ opacity:1; transform:scale(1) rotate(0deg); }
+
+  .action-row{ display:flex; gap:10px; margin-top:16px; }
+  .apply-note{ text-align:center; font-size:12.5px; color:var(--ink-faint); margin-top:10px; }
+  .kakao-channel-btn{
+    position:fixed; right:32px; bottom:90px; z-index:100;
+    display:flex; align-items:center; justify-content:center;
+    width:58px; height:58px; padding:0;
+    background:var(--kakao); color:#3A1D1D; text-decoration:none;
+    border-radius:50%; box-shadow:0 4px 16px rgba(58,29,29,.28); transition:.15s;
+  }
+  .kakao-channel-btn svg{ width:28px; height:28px; }
+  .kakao-channel-btn:hover{ background:var(--kakao-deep); transform:scale(1.06); }
+  .office-info{
+    margin-top:24px; padding-top:16px; padding-bottom:10px; border-top:1px solid var(--line);
+    text-align:center;
+  }
+  .office-info .office-name{ font-size:15px; font-weight:700; color:var(--brown); letter-spacing:.02em; }
+  .office-info .office-detail{ font-size:12px; color:var(--ink-faint); margin-top:4px; line-height:1.6; }
+  .btn{ flex:1; padding:12px 10px; border-radius:999px; border:none; font-size:14.5px; font-weight:600; cursor:pointer; font-family:inherit; transition:.15s; }
+  .btn.primary{ background:var(--brand); color:#fff; box-shadow: var(--shadow); }
+  .btn.primary:hover{ background:var(--brand-deep); transform:translateY(-1px); }
+  .btn.ghost{ background:#fff; color:var(--ink-soft); border:1.5px solid var(--line); }
+  .btn.ghost:hover{ background:#FFFCF0; }
+
+  footer.note{ margin-top:28px; font-size:13px; color:var(--ink-faint); text-align:center; padding:20px 0 0; line-height:1.7; }
+
+  .customer-hidden{ display:none!important; }
+  .print-disclaimer{ display:none; }
+  .print-header{ display:none; }
+  .print-summary{ display:none; }
+  .bubble-print-vat-note{ display:none; }
+
+  @media print{
+    @page{ margin:14mm 12mm; }
+    body{ padding-bottom:0; }
+    header.top{ display:none!important; }
+    .action-row{ display:none!important; } .row.disabled{ display:none; }
+    input[type=checkbox]{ display:none; } .sidebar{ position:static; }
+    .panel{ break-inside:avoid; box-shadow:none; border-color:#DDD; }
+    #panel-book, #panel-file, #panel-consult, #panel-adj, #panel-faithful, .section-tag, #panel-classify{ display:none!important; }
+    footer.note{ display:none!important; }
+    .kakao-channel-btn{ display:none!important; }
+
+    .print-header{
+      display:block; text-align:center; margin-bottom:16px; padding-bottom:12px; border-bottom:2px solid var(--brown);
+    }
+    .print-header .print-title{ font-size:22px; font-weight:800; color:var(--brown); letter-spacing:.02em; }
+    .print-header .print-date{ font-size:11px; color:var(--ink-faint); margin-top:4px; }
+
+    main.grid{ grid-template-columns:1fr; gap:0; margin-top:0; }
+    .sidebar{ margin-top:16px; }
+    .col-main{ min-width:0; }
+
+    .print-summary{
+      display:grid; grid-template-columns:1fr 1fr; gap:6px 16px;
+      border:1px solid #DDD; border-radius:10px; padding:14px 16px; font-size:11.5px;
+    }
+    .print-summary .ps-item{ display:flex; justify-content:space-between; gap:8px; border-bottom:1px dotted #E6E0D0; padding:3px 0; }
+    .print-summary .ps-item span:first-child{ color:var(--ink-faint); }
+    .print-summary .ps-item b{ color:var(--ink); font-weight:600; }
+    .print-summary .ps-item.wide{ grid-column:1/3; }
+
+    .bubble{
+      background:#fff!important; border:1.5px solid var(--brown); box-shadow:none!important;
+      border-radius:10px; padding:16px;
+    }
+    .bubble .label, .bubble .amount, .bubble .amount small{ color:var(--ink)!important; }
+    .bell-badge{ display:none!important; }
+    .bubble-print-vat-note{
+      display:block; text-align:center; font-size:10.5px; color:var(--ink-faint);
+      margin-top:12px; padding-top:8px; border-top:1px dashed #DDD;
+    }
+    .eyebrow{ display:none!important; }
+    .divider-thin{ background:none!important; height:0; border-top:1px solid #B8AF9A; margin:10px 0; }
+
+    .office-info{
+      position:static; margin-top:16px; padding-top:12px;
+      border-top:1px solid var(--line); page-break-inside:avoid;
+    }
+    .print-disclaimer{
+      display:block; font-size:13px; color:var(--ink-faint); line-height:1.6;
+      text-align:center; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line);
+    }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="eyebrow">💛 무료 견적 상담</div>
+    <h1>지금 사업장 정보를 남기면,<br><span class="accent">맞춤 상담</span>이 시작됩니다</h1>
+    <p class="sub"><span class="sparkle">✦</span> 번거로운 절차 없이, 필요한 정보만 간단히 남겨주세요.</p>
+  </div>
+</header>
+
+<div class="print-header">
+  <div class="print-title">세무서비스 요금 견적서</div>
+  <div class="print-date" id="printDate"></div>
+</div>
+
+<div class="wrap">
+<main class="grid">
+  <div class="col-main">
+
+    <section class="panel" id="panel-classify">
+      <div class="panel-head"><h2>사업장 분류</h2><span class="sub-h">체크·선택 즉시 관련 요금에 자동 반영됩니다</span></div>
+      <div class="panel-body">
+        <div class="info-grid">
+          <div class="field wide"><label>사업장명</label><input type="text" id="bizName" placeholder="예: 대표 상호"></div>
+          <div class="field"><label>구분①</label>
+            <select id="axCorp"><option value="corp">법인사업자</option><option value="indiv">개인사업자</option></select>
+          </div>
+          <div class="field"><label>구분②</label>
+            <select id="axTax"><option value="taxable">과세사업자</option><option value="exempt">면세사업자</option><option value="mixed">겸영사업자</option></select>
+          </div>
+          <div class="field"><label>구분③</label>
+            <select id="axReport"><option value="general">성실신고대상자 아님</option><option value="faithful">성실신고대상자</option></select>
+          </div>
+          <div class="field"><label>업종</label>
+            <select id="axIndustry"><option value="general">일반업종</option><option value="realestate">부동산임대업</option><option value="manufacturing">제조업/도급업</option><option value="clinic">병의원</option><option value="loan">대부업</option></select>
+          </div>
+          <div class="field"><label>연매출액 (원)</label><input type="text" inputmode="numeric" id="revYear" value="0" placeholder="예: 500,000,000"></div>
+          <div class="field"><label>법인계좌 수 (개)</label>
+            <div class="stepper"><input type="text" inputmode="numeric" id="corpAcctCnt" value="0" class="stepper-input"><span class="spin"><button type="button" class="step-btn" data-target="corpAcctCnt" data-dir="1">▲</button><button type="button" class="step-btn" data-target="corpAcctCnt" data-dir="-1">▼</button></span></div>
+          </div>
+          <div class="field"><label>직원 (명)</label>
+            <div class="stepper"><input type="text" inputmode="numeric" id="staffCnt" value="0" class="stepper-input"><span class="spin"><button type="button" class="step-btn" data-target="staffCnt" data-dir="1">▲</button><button type="button" class="step-btn" data-target="staffCnt" data-dir="-1">▼</button></span></div>
+          </div>
+          <div class="field"><label>일용직 (명)</label>
+            <div class="stepper"><input type="text" inputmode="numeric" id="dailyCnt" value="0" class="stepper-input"><span class="spin"><button type="button" class="step-btn" data-target="dailyCnt" data-dir="1">▲</button><button type="button" class="step-btn" data-target="dailyCnt" data-dir="-1">▼</button></span></div>
+          </div>
+          <div class="field"><label>프리랜서(3.3%) (명)</label>
+            <div class="stepper"><input type="text" inputmode="numeric" id="freelanceCnt" value="0" class="stepper-input"><span class="spin"><button type="button" class="step-btn" data-target="freelanceCnt" data-dir="1">▲</button><button type="button" class="step-btn" data-target="freelanceCnt" data-dir="-1">▼</button></span></div>
+          </div>
+          <div class="field"><label>기타원천징수 (명)</label>
+            <div class="stepper"><input type="text" inputmode="numeric" id="etcWithholdCnt" value="0" class="stepper-input"><span class="spin"><button type="button" class="step-btn" data-target="etcWithholdCnt" data-dir="1">▲</button><button type="button" class="step-btn" data-target="etcWithholdCnt" data-dir="-1">▼</button></span></div>
+          </div>
+          <div class="field full"><label>추가 특성 (해당되는 항목 모두 체크)</label>
+            <div class="check-inline row3">
+              <label><input type="checkbox" id="axOverseas"> 해외매출 있음</label>
+              <label><input type="checkbox" id="axOnline"> 온라인 · PG사이트 · 배달앱 매출 있음</label>
+              <label><input type="checkbox" id="axOtherRevenue"> 기타매출(홈택스확인매출 외) 있음</label>
+              <label><input type="checkbox" id="axForeignAccount"> 외화계좌 있음</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="action-row">
+      <button class="btn primary" id="applyBtn">견적 확인하기</button>
+    </div>
+    <div class="print-summary" id="printSummary"></div>
+
+    <div class="customer-hidden">
+      <div class="section-tag alt"><span class="sparkle" style="color:var(--brand);">✦</span> 기장료 (매월) = 장부작성요금 + 신고요금 + 부가서비스요금</div>
+
+      <section class="panel" id="panel-book">
+        <div class="panel-head"><span class="num">1</span><h2>장부작성요금</h2></div>
+        <div class="panel-body" id="rows-book"></div>
+      </section>
+
+      <section class="panel" id="panel-file">
+        <div class="panel-head"><span class="num">2</span><h2>신고요금</h2></div>
+        <div class="panel-body" id="rows-file"></div>
+      </section>
+
+      <section class="panel" id="panel-consult">
+        <div class="panel-head"><span class="num">3</span><h2>부가서비스요금</h2></div>
+        <div class="panel-body" id="rows-consult"></div>
+      </section>
+
+      <div class="section-tag alt"><span class="sparkle" style="color:var(--brand);">✦</span> 조정료 (연 1회, 법인 3월 · 개인 5월)</div>
+
+      <section class="panel" id="panel-adj">
+        <div class="panel-body no-head" id="rows-adj"></div>
+      </section>
+
+      <div class="section-tag alt"><span class="sparkle" style="color:var(--brand);">✦</span> 성실신고확인보수 (별도 항목, 조정료와 분리 청구)</div>
+
+      <section class="panel" id="panel-faithful">
+        <div class="panel-body no-head" id="rows-faithful"></div>
+      </section>
+    </div>
+
+  </div>
+
+  <aside class="sidebar">
+    <div class="bubble customer-hidden">
+      <div class="bell-badge" id="stampBadge">🔔</div>
+      <div class="label">월 기장료 합계</div>
+      <div class="amount" id="monthlyTotal">0<small> 만원</small></div>
+      <div class="divider-thin"></div>
+      <div class="sub-line"><span>· 장부작성요금</span><b id="bookSub">0 만원</b></div>
+      <div class="sub-line"><span>· 신고요금</span><b id="fileSub">0 만원</b></div>
+      <div class="sub-line"><span>· 부가서비스요금</span><b id="consultSub">0 만원</b></div>
+      <div class="divider-thin"></div>
+      <div class="sub-line"><span>조정료 (연 1회)</span><b id="adjTotal">0 만원</b></div>
+      <div class="sub-line"><span>성실신고확인보수 (연 1회, 별도)</span><b id="faithfulTotal">0 만원</b></div>
+      <div class="divider-thin"></div>
+      <div class="sub-line" style="font-size:15.5px;"><span>연간 예상 총액</span><b id="yearlyTotal" style="font-size:16.5px;">0 만원</b></div>
+      <div class="sub-line" style="opacity:.65; font-size:12.5px;"><span>= 월기장료×12 + 조정료 + 성실신고확인보수</span><span></span></div>
+      <div class="bubble-print-vat-note">※ 표시된 모든 금액은 부가가치세(VAT) 10% 별도입니다.</div>
+    </div>
+  </aside>
+</main>
+
+<a href="http://pf.kakao.com/_eslmK/chat" target="_blank" rel="noopener" class="kakao-channel-btn" aria-label="카카오톡 채널로 문의하기">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.48 3 2 6.58 2 11c0 2.86 1.87 5.37 4.68 6.79-.15.53-.98 3.4-1.01 3.62 0 0-.02.17.09.24.11.06.24.01.24.01.32-.04 3.7-2.42 4.28-2.83.55.08 1.12.12 1.72.12 5.52 0 10-3.58 10-8S17.52 3 12 3z"/></svg>
+</a>
+
+<div class="office-info">
+  <div class="office-name">세무법인 다우</div>
+  <div class="office-detail">제주특별자치도 서귀포시 동일하모로149번길 4 2층 · Tel. 064-900-7170 · 사업자등록번호 274-85-01403</div>
+</div>
+</div>
+
+<script>
+/* ============ 공통 유틸 ============ */
+function man(m){ return (Math.round(m*10)/10).toLocaleString('ko-KR', {maximumFractionDigits:1}); }
+function won(m){ return Math.round(m*10000).toLocaleString('ko-KR'); }
+// 콤마가 섞인 입력값(예: "500,000,000")을 안전하게 숫자로 변환
+function numOf(id){ const raw=document.getElementById(id).value||''; return +raw.replace(/,/g,'')||0; }
+
+// 5명(또는 5단위) 계단식: t1까지 p1, t2까지 p2, 이후 step당 extra 가산
+function stepTier(n, t1,p1,t2,p2,step,extra){
+  if(n<=0) return 0;
+  if(n<=t1) return p1;
+  if(n<=t2) return p2;
+  return p2 + Math.ceil((n-t2)/step)*extra;
+}
+// 노션 "미등록카드/계좌입력"류: 2단위 계단식 (base부터 시작, unit당 add)
+function pairTier(n, unit, base, add){ // n=개수, unit=2, base=1~2개 가격, add=매 unit마다 추가
+  if(n<=0) return 0;
+  return base + Math.ceil(Math.max(0,n-unit)/unit)*add;
+}
+// 세무상담(담당직원)료: 2억 이하 1만, 이후 3억 구간마다 +1만 (30억까지) · 30억 초과부터는 5억마다 +1만
+function advisoryFee(eok){
+  if(eok<=2) return 1;
+  if(eok<=30) return 1 + Math.ceil((eok-2)/3)*1;
+  const base30 = 1 + Math.ceil((30-2)/3)*1; // 30억 시점 금액
+  const steps = Math.ceil((eok-30)/5);
+  return base30 + steps*1;
+}
+// 세무고문(세무사)료: 세무상담(담당직원) 산식 × 4 (모든 매출 구간에서 항상 정확히 4배 유지)
+function advisoryFeeSenior(eok){
+  return advisoryFee(eok) * 4;
+}
+// 조정계산서요금 요율: 기본 0.1%, 30억 초과부터 5억마다 -0.005%p씩 차감 (0.1→0.095→0.09→0.085→0.08...)
+function taxAdjustmentRate(eok){
+  if(eok<=30) return 0.001;
+  const steps = Math.ceil((eok-30)/5);
+  return Math.max(0, 0.001 - 0.00005*steps);
+}
+// 급여대장작성전달: 1-5명 1만, 이후 5명마다 +0.5만
+function payrollFee(n){
+  if(n<=0) return 0;
+  return 1 + Math.ceil(Math.max(0,n-5)/5)*0.5;
+}
+// 등차 계단식: 1~unit명 base, 이후 unit명마다 inc씩 균일 증가 (원천세/4대보험/근로내용확인 등)
+function arithTier(n, unit, base, inc){
+  if(n<=0) return 0;
+  return base + Math.floor((n-1)/unit)*inc;
+}
+// 성실신고확인보수 (한국세무사회 기준표, 만원)
+function faithfulFee(eok){
+  if(eok<8) return 170;
+  if(eok<10) return 200;
+  if(eok<15) return 230;
+  if(eok<30) return 250;
+  return 300;
+}
+// 원 단위 입력값을 억원으로 환산 (구간표 조회용)
+function toEok(won){ return won/100000000; }
+
+/* ============ 행 생성 ============ */
+const state = { items:{} };
+function makeRow(container, cfg){
+  const row = document.createElement('div'); row.className='row'; row.id='row-'+cfg.id;
+  const cb = document.createElement('input'); cb.type='checkbox'; cb.checked = cfg.defaultIncluded!==false;
+  if(cfg.locked){ cb.disabled = true; } // 필수 항목: 체크 해제 불가하도록 영구 잠금
+  cb.addEventListener('change', recalc);
+  const desc = document.createElement('div'); desc.className='desc';
+  desc.innerHTML = `<div class="name">${cfg.name}</div>`;
+  const ctrl = document.createElement('div'); ctrl.className='ctrl'; ctrl.innerHTML = cfg.ctrlHtml || '';
+  const price = document.createElement('div'); price.className='price'; price.innerHTML='0 <span class="won">만원</span>';
+  row.appendChild(cb); row.appendChild(desc);
+  if(cfg.hideCtrl){ row.classList.add('compact'); } else { row.appendChild(ctrl); }
+  row.appendChild(price);
+  container.appendChild(row);
+  row.ctrl = ctrl; // hideCtrl이어도 참조는 유지 (라벨 갱신용, 화면엔 표시 안 됨)
+  if(cfg.auto) row.classList.add('auto');
+  state.items[cfg.id] = { cb, ctrl, priceEl:price, row, desc, compute:cfg.compute, name:cfg.name, group:cfg.group, auto:!!cfg.auto };
+  ctrl.querySelectorAll('input,select').forEach(i=> i.addEventListener('input', recalc));
+  return row;
+}
+function groupTitle(container, text){ const t=document.createElement('div'); t.className='svc-group-title'; t.textContent=text; container.appendChild(t); }
+function subtotalLine(container, id, label){ const l=document.createElement('div'); l.className='subtotal-line'; l.innerHTML=`<span>${label}</span><span id="${id}">0 만원</span>`; container.appendChild(l); }
+
+/* ============ 1. 장부작성요금 ============ */
+function buildBook(){
+  const c = document.getElementById('rows-book');
+  makeRow(c,{ id:'bk1', group:'book', name:'(세금)계산서 · 신용카드매출 · 사업용카드입력', locked:true, compute:()=>2 });
+  makeRow(c,{ id:'bk2', group:'book', name:'온라인 · PG사이트 · 배달앱 · 기타매출입력', auto:true, hideCtrl:true, note:'자동: "온라인·PG사이트·배달앱 매출 있음" 또는 "기타매출(홈택스확인매출 외) 있음" 체크 시 적용 (둘 다 체크해도 정액 2만원)',
+    compute:()=>{ const online=document.getElementById('axOnline').checked; const other=document.getElementById('axOtherRevenue').checked; return (online||other) ? 2 : null; } });
+  makeRow(c,{ id:'bk3', group:'book', name:'수출입자료입력', auto:true, hideCtrl:true, note:'자동: "해외매출 있음" 체크 시 적용',
+    compute:()=>{ const overseas=document.getElementById('axOverseas').checked; return overseas ? 3 : null; } });
+  makeRow(c,{ id:'bk6', group:'book', name:'법인계좌입력', auto:true, hideCtrl:true, note:'자동: 상단 법인계좌 수 × 2만원 (법인사업자만 적용), "외화계좌 있음" 체크 시 × 1.3배',
+    compute:()=>{ const corp=document.getElementById('axCorp').value; if(corp!=='corp') return null; const n=numOf('corpAcctCnt'); const foreignAcct=document.getElementById('axForeignAccount').checked; const base=n*2; return foreignAcct ? base*1.3 : base; } });
+  makeRow(c,{ id:'bk7', group:'book', name:'인건비 · 4대보험입력', note:'1-5명 1만 · 6-10명 2만 · 11-15명 3만 · 이후 5명당 +1만', auto:true, locked:true, hideCtrl:true,
+    compute:()=>{ const n=numOf('staffCnt'); return stepTier(n,5,1,10,2,5,1); } });
+  makeRow(c,{ id:'bk4', group:'book', name:'기타자료입력(영수증,보험료,대출이자 외)', locked:true, compute:()=>1 });
+  makeRow(c,{ id:'bk5', group:'book', name:'미등록카드입력', note:'1-2개 2만 · 3-4개 4만 · 5-6개 6만 · 이후 2개당 +2만', defaultIncluded:false,
+    ctrlHtml:`<input type="number" min="0" value="0" data-role="qty" style="width:70px"><span class="unit">개</span>`,
+    compute:(row)=>{ const n=+row.ctrl.querySelector('[data-role=qty]').value||0; return pairTier(n,2,2,2); } });
+  subtotalLine(c, 'bookSubtotalLine', '장부작성요금 소계');
+}
+
+/* ============ 2. 신고요금 ============ */
+function buildFile(){
+  const c = document.getElementById('rows-file');
+  makeRow(c,{ id:'fl1', group:'file', name:'부가가치세 신고', auto:true, hideCtrl:true,
+    note:'자동: 구분①×업종에 따른 매트릭스 적용',
+    ctrlHtml:`<span class="auto-val" data-role="label">-</span>`,
+    compute:(row)=>{
+      const corp = document.getElementById('axCorp').value;
+      const tax = document.getElementById('axTax').value;
+      const industry = document.getElementById('axIndustry').value;
+      const overseas = document.getElementById('axOverseas').checked;
+      if(tax==='exempt') return null; // 면세사업자는 이 항목 비활성 처리 (아래 fl2 사용)
+      const table = { corp:{general:5, realestate:3, overseas:7}, indiv:{general:3, realestate:2, overseas:4} };
+      const vatIndustry = overseas ? 'overseas' : (industry==='realestate' ? 'realestate' : 'general'); // 제조업 등은 부가세 매트릭스상 일반업종 요율 적용, 해외매출 있으면 수출입 요율 우선 적용
+      return table[corp][vatIndustry];
+    }});
+  makeRow(c,{ id:'fl2', group:'file', name:'면세사업장현황신고', auto:true, hideCtrl:true, note:'자동: 구분②가 면세사업자일 때만 적용 (정액 2만원)',
+    ctrlHtml:`<span class="auto-val" data-role="label">-</span>`,
+    compute:()=>{ const tax = document.getElementById('axTax').value; return tax==='exempt' ? 2 : null; }});
+  makeRow(c,{ id:'fl3', group:'file', name:'원천세신고 · 간이지급명세서제출', auto:true, locked:true, hideCtrl:true, note:'인원 = 직원수 + 일용직 + 프리랜서(3.3%) + 기타원천징수 자동 합산 · 1-5명 2만 · 6-10명 3만 · 이후 5명당 +1만',
+    ctrlHtml:`<span class="auto-val" data-role="label">0명</span>`,
+    compute:()=>{ const n=numOf('staffCnt')+numOf('dailyCnt')+numOf('freelanceCnt')+numOf('etcWithholdCnt'); return arithTier(n,5,2,1); } });
+  makeRow(c,{ id:'fl6', group:'file', name:'지급명세서 제출(연말정산 포함)', auto:true, locked:true, hideCtrl:true, note:'자동: (일용직+프리랜서+기타원천징수) 합계인원 기준 1-5명 0.5만 · 이후 5명당 +0.5만, 이 값을 ×1/12 하고, 여기에 근로자(직원수) 기준 한국세무사회 연말정산 보수표(10인 이하 1인당 1.5만·초과분 1인당 1만) × 1/12 를 더함',
+    ctrlHtml:`<span class="auto-val" data-role="label">0명</span>`,
+    compute:()=>{
+      const combinedN = numOf('dailyCnt')+numOf('freelanceCnt')+numOf('etcWithholdCnt');
+      const base = arithTier(combinedN,5,0.5,0.5);
+      const staffN = numOf('staffCnt');
+      const yearly = staffN<=10 ? staffN*1.5 : 10*1.5+(staffN-10)*1;
+      return base/12 + yearly/12;
+    } });
+  makeRow(c,{ id:'fl4', group:'file', name:'취득 · 상실 · 보수총액신고', auto:true, locked:true, hideCtrl:true, note:'1-5명 0.5만 · 6-10명 1만 · 11-15명 1.5만 · 16-20명 2만 · 이후 5명당 +0.5만',
+    ctrlHtml:`<span class="auto-val" data-role="label">0명</span>`,
+    compute:()=>{ const n=numOf('staffCnt'); return arithTier(n,5,0.5,0.5); } });
+  makeRow(c,{ id:'fl5', group:'file', name:'근로내용확인신고서 제출', auto:true, hideCtrl:true, note:'자동: 상단 일용직 인원 기준 · 1-5명 0.5만 · 6-10명 1만 · 이후 5명당 +0.5만',
+    ctrlHtml:`<span class="auto-val" data-role="label">0명</span>`,
+    compute:()=>{ const n=numOf('dailyCnt'); return arithTier(n,5,0.5,0.5); } });
+  makeRow(c,{ id:'fl7', group:'file', name:'교육세 신고', hideCtrl:true, defaultIncluded:false, note:'자동: 업종이 대부업일 때만 필수 적용 (월 1.5만원 정액)',
+    compute:()=>1.5 });
+  subtotalLine(c, 'fileSubtotalLine', '신고요금 소계');
+}
+
+/* ============ 3. 부가서비스요금 ============ */
+function buildConsult(){
+  const c = document.getElementById('rows-consult');
+  makeRow(c,{ id:'cn1', group:'consult', name:'세무상담(담당직원)', auto:true, locked:true, hideCtrl:true, note:'자동: 상단 연매출액 기준 산정',
+    ctrlHtml:`<span class="auto-val" data-role="label">0억원</span>`,
+    compute:()=>{ const won=numOf('revYear'); return advisoryFee(toEok(won)); } });
+  makeRow(c,{ id:'cn2', group:'consult', name:'민원서류발급 · 세무서대응(전화)', defaultIncluded:true, locked:true, hideCtrl:true, compute:()=>1 });
+  makeRow(c,{ id:'cn7', group:'consult', name:'온라인서류제출(SMINFO · KOFIND 외)', hideCtrl:true, defaultIncluded:false, note:'선택 시 정액 2만원',
+    compute:()=>2 });
+
+  makeRow(c,{ id:'cn3', group:'consult', name:'급여대장 작성(급여이체용)', hideCtrl:true, defaultIncluded:false, note:'선택 시 자동 계산: 1-5명 1만 · 6-10명 1.5만 · 이후 5명당 +0.5만 (직원수 자동연동)',
+    compute:()=>{ const n=numOf('staffCnt'); return payrollFee(n); } });
+  makeRow(c,{ id:'cn4', group:'consult', name:'급여명세서 발송', hideCtrl:true, defaultIncluded:false, note:'선택 시 자동 계산: 직원 1명당 5,000원',
+    compute:()=>{ const n=numOf('staffCnt'); return n*0.5; } });
+  makeRow(c,{ id:'cn6', group:'consult', name:'가결산', defaultIncluded:false, note:'선택한 주기에 따라 자동 계산: 월별=장부결산요금÷12 · 분기별=장부결산요금÷3÷12 · 반기별=장부결산요금÷6÷12',
+    ctrlHtml:`<select data-role="period" style="width:100px"><option value="monthly">월별</option><option value="quarterly">분기별</option><option value="semiannual" selected>반기별</option></select>`,
+    compute:(row)=>{
+      const period = row.ctrl.querySelector('[data-role=period]').value;
+      const settlement = getSettlementFee();
+      if(period==='monthly') return settlement/12;
+      if(period==='quarterly') return settlement/3/12;
+      return settlement/6/12;
+    } });
+  makeRow(c,{ id:'cn5', group:'consult', name:'세무고문(세무사)', hideCtrl:true, defaultIncluded:false, note:'선택 시 자동 계산(월 정액, 세무상담(담당직원) 산식 × 4). 업종이 병의원이면 필수, 그 외에는 매출과 무관하게 항상 선택 사항',
+    compute:()=>{ const won=numOf('revYear'); const eok=toEok(won); return advisoryFeeSenior(eok); } });
+  subtotalLine(c, 'consultSubtotalLine', '부가서비스요금 소계');
+}
+
+/* ============ 4. 조정료 구성항목 ============ */
+function buildAdj(){
+  const c = document.getElementById('rows-adj');
+  makeRow(c,{ id:'aj2', group:'adj', name:'장부결산', auto:true, locked:true, hideCtrl:true, note:'자동: 장부작성요금 소계 × 12개월 × 40% (제조업/도급업이면 60%)',
+    ctrlHtml:`<span class="auto-val" data-role="label">0 만원</span>`,
+    compute:()=>{ return getSettlementFee(); } });
+  makeRow(c,{ id:'aj3', group:'adj', name:'조정계산서요금(세무조정)', auto:true, locked:true, hideCtrl:true, note:'자동: 연매출액(억원) × 요율(기본 0.1%, 30억 초과부터 5억마다 -0.005%p: 0.095%, 0.09%, 0.085%, 0.08%...) + 최종신고요금(법인 40만/개인 20만)',
+    ctrlHtml:`<span class="auto-val" data-role="label">0 만원</span>`,
+    compute:()=>{
+      const won=numOf('revYear');
+      const eok=toEok(won);
+      const rate = taxAdjustmentRate(eok);
+      const adjBase = won*rate/10000;
+      const corp = document.getElementById('axCorp').value;
+      const finalReportFee = corp==='corp' ? 40 : 20;
+      return adjBase + finalReportFee;
+    } });
+  subtotalLine(c, 'adjSubtotalLine', '조정료 합계');
+}
+
+/* ============ 5. 성실신고확인보수 (조정료와 분리) ============ */
+function buildFaithful(){
+  const c = document.getElementById('rows-faithful');
+  makeRow(c,{ id:'aj4', group:'faithful', name:'성실신고확인보수', auto:true, hideCtrl:true, note:'8억미만 170만 · 8~10억 200만 · 10~15억 230만 · 15~30억 250만 · 30억이상 300만',
+    ctrlHtml:`<span class="auto-val" data-role="label">-</span>`,
+    compute:()=>{ const rep=document.getElementById('axReport').value; if(rep!=='faithful') return null; const won=numOf('revYear'); return faithfulFee(toEok(won)); } });
+  subtotalLine(c, 'faithfulSubtotalLine', '성실신고확인보수 합계');
+}
+
+/* ============ 소계/전체 계산 ============ */
+const bookIds=['bk1','bk2','bk3','bk4','bk5','bk6','bk7'];
+const fileIds=['fl1','fl2','fl3','fl4','fl5','fl6','fl7'];
+const consultIds=['cn1','cn2','cn3','cn4','cn5','cn6','cn7'];
+const adjIds=['aj2','aj3'];
+const faithfulIds=['aj4'];
+
+function computeGroupSum(ids){
+  let sum=0;
+  ids.forEach(id=>{
+    const it=state.items[id]; if(!it) return;
+    if(!it.cb.checked) return;
+    const v = it.compute(it.row);
+    if(v===null || v===undefined) return; // 자동 비활성(예: 면세사업자일 때 부가세 매트릭스)
+    sum += v;
+  });
+  return sum;
+}
+function getBookSubtotal(){ return computeGroupSum(bookIds); }
+function getSettlementFee(){ // 장부결산 요금 (장부작성요금 소계 × 12개월 × 40%/60%)
+  const industry = document.getElementById('axIndustry').value;
+  const ratio = industry==='manufacturing' ? 0.6 : 0.4;
+  return getBookSubtotal()*12*ratio;
+}
+
+function updateAutoLabels(){
+  const staff = numOf('staffCnt');
+  const daily = numOf('dailyCnt');
+  const freelance = numOf('freelanceCnt');
+  const etcWithhold = numOf('etcWithholdCnt');
+  const whStaff = staff + daily + freelance + etcWithhold;
+  const revYear = numOf('revYear');
+  const corp = document.getElementById('axCorp').value;
+  const tax = document.getElementById('axTax').value;
+  const rep = document.getElementById('axReport').value;
+  const industry = document.getElementById('axIndustry').value;
+  const overseas = document.getElementById('axOverseas').checked;
+  const online = document.getElementById('axOnline').checked;
+  const otherRevenue = document.getElementById('axOtherRevenue').checked;
+  const foreignAcct = document.getElementById('axForeignAccount').checked;
+  const industryLabel = {general:'일반업종', realestate:'부동산임대업', manufacturing:'제조업/도급업', clinic:'병의원', loan:'대부업'}[industry] + (overseas?' · 해외매출':'') + (online?' · 온라인매출':'') + (otherRevenue?' · 기타매출':'') + (foreignAcct?' · 외화계좌':'');
+
+  // fl7 교육세 신고: 업종이 대부업일 때만 필수(잠금+체크)
+  const fl7cb = state.items['fl7'].cb;
+  fl7cb.disabled = true;
+  fl7cb.checked = (industry==='loan');
+
+  // cn5 세무고문(세무사): 업종이 병의원이면 필수(잠금+체크), 그 외에는 매출과 무관하게 항상 자유 선택
+  const cn5cb = state.items['cn5'].cb;
+  if(industry==='clinic'){ cn5cb.disabled = true; cn5cb.checked = true; }
+  else{ cn5cb.disabled = false; }
+
+  // 세무고문(세무사): 연매출 30억 이상이면 "★ 30억 이상 권장" 배지 표시 (강제는 아님)
+  const cn5NameEl = state.items['cn5'].desc.querySelector('.name');
+  const existingBadge = cn5NameEl.querySelector('.recommend-badge');
+  if(toEok(revYear) >= 30){
+    if(!existingBadge){ cn5NameEl.insertAdjacentHTML('beforeend', ' <span class="recommend-badge">★ 매출액 30억 이상 권장</span>'); }
+  } else if(existingBadge){ existingBadge.remove(); }
+
+  // bk2 온라인·기타매출입력: 온라인매출 또는 기타매출 체크 시 자동 적용
+  const bk2cb = state.items['bk2'].cb;
+  bk2cb.disabled = true;
+  bk2cb.checked = (online || otherRevenue);
+
+  // bk3 수출입자료입력: 해외매출 체크 시 자동 적용
+  const bk3cb = state.items['bk3'].cb;
+  bk3cb.disabled = true;
+  bk3cb.checked = overseas;
+
+  // bk6 계좌입력: 법인사업자일 때만 자동 적용, 상단 법인계좌 수 입력창도 함께 활성/비활성
+  const bk6cb = state.items['bk6'].cb;
+  bk6cb.disabled = true;
+  bk6cb.checked = (corp==='corp');
+  const corpAcctInput = document.getElementById('corpAcctCnt');
+  corpAcctInput.disabled = (corp!=='corp');
+  document.querySelectorAll('.step-btn[data-target=corpAcctCnt]').forEach(b=> b.disabled = (corp!=='corp'));
+
+  // fl1 / fl2 : 부가세 / 면세
+  const fl1cb = state.items['fl1'].cb, fl2cb = state.items['fl2'].cb;
+  if(tax==='exempt'){ fl1cb.checked=false; fl2cb.checked=true; }
+  else { fl1cb.checked=true; fl2cb.checked=false; }
+  fl1cb.disabled = true;
+  fl2cb.disabled = true;
+  state.items['fl1'].row.style.display = (tax==='exempt') ? 'none' : '';
+  state.items['fl2'].row.style.display = (tax==='exempt') ? '' : 'none';
+  state.items['fl1'].ctrl.querySelector('[data-role=label]').textContent = `${corp==='corp'?'법인':'개인'} · ${industryLabel}`;
+  state.items['fl2'].ctrl.querySelector('[data-role=label]').textContent = '면세사업장현황신고 적용';
+
+  ['bk7','fl4'].forEach(id=>{
+    const lbl = state.items[id].ctrl.querySelector('[data-role=label]') || state.items[id].ctrl.querySelector('[data-role=qtylabel]');
+    if(lbl) lbl.textContent = `${staff}명`;
+  });
+  state.items['fl3'].ctrl.querySelector('[data-role=label]').textContent = `${whStaff}명 (직원 ${staff} + 일용직 ${daily} + 프리랜서 ${freelance} + 기타 ${etcWithhold})`;
+  state.items['cn1'].ctrl.querySelector('[data-role=label]').textContent = `${revYear.toLocaleString('ko-KR')}원 (${toEok(revYear).toFixed(2)}억원)`;
+
+  // fl5 근로내용확인신고서: 일용직 인원이 있을 때만 자동 적용
+  const fl5cb = state.items['fl5'].cb;
+  fl5cb.disabled = true;
+  fl5cb.checked = (daily>0);
+  state.items['fl5'].ctrl.querySelector('[data-role=label]').textContent = daily>0 ? `${daily}명` : '일용직 없음 → 비적용';
+
+  // aj4 성실신고
+  const aj4cb = state.items['aj4'].cb;
+  aj4cb.disabled = true;
+  if(rep!=='faithful') aj4cb.checked=false; else aj4cb.checked=true;
+  state.items['aj4'].ctrl.querySelector('[data-role=label]').textContent = rep==='faithful' ? `${man(faithfulFee(toEok(revYear)))} 만원 (연매출 ${toEok(revYear).toFixed(2)}억 기준)` : '성실신고대상자 아님 → 비적용';
+
+  // (법인세/종합소득세 신고는 조정계산서요금에 통합되어 별도 항목 없음)
+  state.items['aj3'].desc.querySelector('.name').textContent = corp==='corp' ? '법인세신고(세무조정 포함)' : '종합소득세신고(세무조정 포함)';
+
+  buildPrintSummary();
+}
+
+// 인쇄용: 사업장 분류 입력값을 견적서 형식의 깔끔한 텍스트 요약으로 변환
+function buildPrintSummary(){
+  const bizName = document.getElementById('bizName').value || '-';
+  const corp = document.getElementById('axCorp').value;
+  const tax = document.getElementById('axTax').value;
+  const rep = document.getElementById('axReport').value;
+  const industry = document.getElementById('axIndustry').value;
+  const overseas = document.getElementById('axOverseas').checked;
+  const online = document.getElementById('axOnline').checked;
+  const otherRevenue = document.getElementById('axOtherRevenue').checked;
+  const foreignAcct = document.getElementById('axForeignAccount').checked;
+  const corpLabel = { corp:'법인사업자', indiv:'개인사업자' }[corp];
+  const taxLabel = { taxable:'과세사업자', exempt:'면세사업자', mixed:'겸영사업자' }[tax];
+  const repLabel = { general:'성실신고대상자 아님', faithful:'성실신고대상자' }[rep];
+  const baseIndustryLabel = { general:'일반업종', realestate:'부동산임대업', manufacturing:'제조업/도급업', clinic:'병의원', loan:'대부업' }[industry];
+  const extraTraits = [overseas?'해외매출':null, online?'온라인매출':null, otherRevenue?'기타매출':null, foreignAcct?'외화계좌':null].filter(Boolean);
+  const industryLabel = baseIndustryLabel + (extraTraits.length ? ` (${extraTraits.join(', ')})` : '');
+  const revYear = numOf('revYear');
+  const staff = numOf('staffCnt'), daily = numOf('dailyCnt'), freelance = numOf('freelanceCnt'), etcW = numOf('etcWithholdCnt'), corpAcct = numOf('corpAcctCnt');
+
+  const items = [
+    ['사업장명', bizName, true],
+    ['구분', `${corpLabel} · ${taxLabel} · ${repLabel}`, true],
+    ['업종', industryLabel],
+    ['연매출액', `${revYear.toLocaleString('ko-KR')}원`],
+    ['직원 / 일용직', `${staff}명 / ${daily}명`],
+    ['프리랜서(3.3%) / 기타원천징수', `${freelance}명 / ${etcW}명`],
+    ['법인계좌 수', corp==='corp' ? `${corpAcct}개` : '해당없음'],
+  ];
+  document.getElementById('printSummary').innerHTML = items.map(([label,val,wide])=>
+    `<div class="ps-item${wide?' wide':''}"><span>${label}</span><b>${val}</b></div>`
+  ).join('');
+}
+
+// 인쇄용 발행일 표시
+(function(){
+  const d = new Date();
+  document.getElementById('printDate').textContent = `발행일: ${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일`;
+})();
+
+function recalc(){
+  updateAutoLabels();
+
+  [...bookIds,...fileIds,...consultIds,...adjIds,...faithfulIds].forEach(id=>{
+    const it = state.items[id];
+    const checked = it.cb.checked;
+    it.row.classList.toggle('disabled', !checked);
+    it.ctrl.querySelectorAll('input,select').forEach(x=> x.disabled = !checked);
+    let price = checked ? it.compute(it.row) : null;
+    if(price===null || price===undefined){
+      it.priceEl.innerHTML = `— <span class="won"></span>`;
+    } else {
+      it.priceEl.innerHTML = `${man(price)} <span class="won">만원</span>`;
+    }
+  });
+
+  const bookSum = computeGroupSum(bookIds);
+  const fileSum = computeGroupSum(fileIds);
+  const consultSum = computeGroupSum(consultIds);
+  const monthlySum = bookSum+fileSum+consultSum;
+  const adjSum = computeGroupSum(adjIds);
+  const faithfulSum = computeGroupSum(faithfulIds);
+
+  document.getElementById('bookSubtotalLine').textContent = man(bookSum)+' 만원';
+  document.getElementById('fileSubtotalLine').textContent = man(fileSum)+' 만원';
+  document.getElementById('consultSubtotalLine').textContent = man(consultSum)+' 만원';
+  document.getElementById('adjSubtotalLine').textContent = man(adjSum)+' 만원';
+  document.getElementById('faithfulSubtotalLine').textContent = man(faithfulSum)+' 만원';
+
+  document.getElementById('monthlyTotal').innerHTML = `${man(monthlySum)}<small> 만원</small>`;
+  document.getElementById('bookSub').textContent = man(bookSum)+' 만원';
+  document.getElementById('fileSub').textContent = man(fileSum)+' 만원';
+  document.getElementById('consultSub').textContent = man(consultSum)+' 만원';
+  document.getElementById('adjTotal').textContent = man(adjSum)+' 만원';
+  document.getElementById('faithfulTotal').textContent = man(faithfulSum)+' 만원';
+  document.getElementById('yearlyTotal').textContent = man(monthlySum*12+adjSum+faithfulSum)+' 만원';
+
+  const stamp=document.getElementById('stampBadge');
+  stamp.classList.toggle('show', (monthlySum>0||adjSum>0||faithfulSum>0));
+
+  // 신청하기(탈리 전달)에서 사용할 수 있도록 최신 계산값 저장
+  state.totals = { monthlySum, adjSum, faithfulSum, yearlyTotal: monthlySum*12+adjSum+faithfulSum };
+}
+
+/* ============ 이벤트 바인딩 ============ */
+['axCorp','axTax','axReport','axIndustry','axOverseas','axOnline','axOtherRevenue','axForeignAccount'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', recalc);
+  document.getElementById(id).addEventListener('change', recalc);
+});
+
+// 콤마 자동 포맷이 필요한 숫자 입력창들(연매출액, 직원수, 기타원천신고 인원): 타이핑 중 천단위 콤마 삽입 + 재계산
+['revYear','staffCnt','dailyCnt','freelanceCnt','etcWithholdCnt','corpAcctCnt'].forEach(id=>{
+  const input = document.getElementById(id);
+  input.addEventListener('input', ()=>{
+    const cursorFromEnd = input.value.length - input.selectionStart;
+    const digits = input.value.replace(/[^\d]/g,'');
+    const formatted = digits ? Number(digits).toLocaleString('ko-KR') : '';
+    input.value = formatted;
+    const pos = Math.max(0, input.value.length - cursorFromEnd);
+    input.setSelectionRange(pos, pos);
+    recalc();
+  });
+});
+
+// 인원수 필드 옆 +/- 버튼: 클릭하면 숫자가 바로 증가/감소
+document.querySelectorAll('.step-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const targetId = btn.dataset.target;
+    const dir = +btn.dataset.dir;
+    const input = document.getElementById(targetId);
+    const current = numOf(targetId);
+    const next = Math.max(0, current + dir);
+    input.value = next.toLocaleString('ko-KR');
+    recalc();
+  });
+});
+document.getElementById('applyBtn').addEventListener('click', ()=>{
+  const corpLabelMap = { corp:'법인사업자', indiv:'개인사업자' };
+  const taxLabelMap = { taxable:'과세사업자', exempt:'면세사업자', mixed:'겸영사업자' };
+  const reportLabelMap = { general:'성실신고확인대상자 아님', faithful:'성실신고확인대상자' };
+  const industryLabelMap = { general:'일반업종', realestate:'부동산임대업', manufacturing:'제조업/도급업', clinic:'병의원', loan:'대부업' };
+
+  const corp = document.getElementById('axCorp').value;
+  const tax = document.getElementById('axTax').value;
+  const rep = document.getElementById('axReport').value;
+  const industry = document.getElementById('axIndustry').value;
+  const totals = state.totals || { monthlySum:0, adjSum:0, faithfulSum:0, yearlyTotal:0 };
+
+  const params = {
+    bizName: document.getElementById('bizName').value || '',
+    corpType: corpLabelMap[corp] || '',
+    taxType: taxLabelMap[tax] || '',
+    reportType: reportLabelMap[rep] || '',
+    industryType: industryLabelMap[industry] || '',
+    revYear: document.getElementById('revYear').value || '0',
+    staffCnt: numOf('staffCnt'),
+    dailyCnt: numOf('dailyCnt'),
+    freelanceCnt: numOf('freelanceCnt'),
+    etcWithholdCnt: numOf('etcWithholdCnt'),
+    corpAcctCnt: numOf('corpAcctCnt'),
+    hasOverseas: document.getElementById('axOverseas').checked ? '예' : '아니오',
+    hasOnline: document.getElementById('axOnline').checked ? '예' : '아니오',
+    hasOtherRevenue: document.getElementById('axOtherRevenue').checked ? '예' : '아니오',
+    hasForeignAccount: document.getElementById('axForeignAccount').checked ? '예' : '아니오',
+    monthlyFee: man(totals.monthlySum),
+    adjFee: man(totals.adjSum),
+    faithfulFee: man(totals.faithfulSum),
+    totalFee: man(totals.yearlyTotal)
+  };
+
+  const query = Object.entries(params)
+    .map(([k,v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+    .join('&');
+
+  window.open(`https://tally.so/r/q4qkq7?${query}`, '_blank');
+});
+
+buildBook(); buildFile(); buildConsult(); buildAdj(); buildFaithful();
+recalc();
+</script>
+</body>
+</html>
