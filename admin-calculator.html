@@ -189,11 +189,18 @@
   .btn.primary{ background:var(--brand); color:var(--brand-ink); box-shadow: var(--shadow); }
   .sub-item{
     padding:9px 12px; border:1px solid var(--line); border-radius:9px; margin-bottom:6px;
-    cursor:pointer; font-size:12.5px; transition:.12s; background:var(--card);
+    font-size:12.5px; transition:.12s; background:var(--card);
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
   }
   .sub-item:hover{ background:var(--card-2); border-color:var(--brand); }
+  .sub-item .sub-main{ cursor:pointer; flex:1 1 auto; min-width:0; }
   .sub-item .sub-name{ font-weight:700; color:var(--brown); }
   .sub-item .sub-date{ color:var(--ink-faint); font-size:11px; }
+  .sub-item .sub-del{
+    flex-shrink:0; width:22px; height:22px; border-radius:50%; border:none;
+    background:transparent; color:var(--ink-faint); font-size:15px; cursor:pointer; line-height:1;
+  }
+  .sub-item .sub-del:hover{ background:#FBE4E4; color:#C0392B; }
   .btn.primary:hover{ background:var(--brand-deep); transform:translateY(-1px); }
   .btn.ghost{ background:#fff; color:var(--ink-soft); border:1.5px solid var(--line); }
   .btn.ghost:hover{ background:#FFFCF0; }
@@ -324,12 +331,6 @@
       </div>
     </section>
 
-    <div class="action-row">
-      <button class="btn ghost" id="fetchBtn" type="button" style="padding:16px 10px; font-size:16px; font-weight:700;">탈리에서 불러오기</button>
-    </div>
-    <div id="fetchStatus" style="font-size:12px; color:var(--ink-faint); margin-top:8px; text-align:center;"></div>
-    <div id="submissionList" style="margin-top:10px;"></div>
-
     <div class="print-summary" id="printSummary"></div>
 
     <div class="customer-hidden">
@@ -385,6 +386,12 @@
     <div class="action-row" style="margin-top:14px;">
       <button class="btn primary" id="printBtn">인쇄 / PDF 저장</button>
     </div>
+
+    <div class="action-row" style="margin-top:14px;">
+      <button class="btn ghost" id="fetchBtn" type="button" style="padding:14px 10px; font-size:14.5px; font-weight:700;">탈리에서 불러오기</button>
+    </div>
+    <div id="fetchStatus" style="font-size:12px; color:var(--ink-faint); margin-top:8px; text-align:center;"></div>
+    <div id="submissionList" style="margin-top:10px;"></div>
   </aside>
 </main>
 
@@ -837,6 +844,37 @@ const REVERSE_MAP = {
   industryType: { '일반업종':'general', '부동산임대업':'realestate', '제조업/도급업':'manufacturing', '병의원':'clinic', '대부업':'loan' }
 };
 
+let currentSubmissions = [];
+
+function renderSubmissionList(){
+  const statusEl = document.getElementById('fetchStatus');
+  const listEl = document.getElementById('submissionList');
+  if(currentSubmissions.length === 0){
+    statusEl.textContent = '표시할 목록이 없습니다.';
+    listEl.innerHTML = '';
+    return;
+  }
+  statusEl.textContent = `${currentSubmissions.length}건. 클릭해서 선택, ×로 목록에서 지우기.`;
+  listEl.innerHTML = currentSubmissions.map((sub, idx) => {
+    const name = deepFind(sub, 'bizName') || `신청 #${idx+1}`;
+    const date = sub.submittedAt || sub.createdAt || '';
+    return `<div class="sub-item" data-idx="${idx}">
+      <div class="sub-main" data-idx="${idx}"><div class="sub-name">${name}</div><div class="sub-date">${date}</div></div>
+      <button class="sub-del" type="button" data-idx="${idx}" title="목록에서 지우기">×</button>
+    </div>`;
+  }).join('');
+  listEl.querySelectorAll('.sub-main').forEach(el=>{
+    el.addEventListener('click', ()=> fillFromSubmission(currentSubmissions[+el.dataset.idx]));
+  });
+  listEl.querySelectorAll('.sub-del').forEach(el=>{
+    el.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      currentSubmissions.splice(+el.dataset.idx, 1);
+      renderSubmissionList();
+    });
+  });
+}
+
 document.getElementById('fetchBtn').addEventListener('click', async ()=>{
   const statusEl = document.getElementById('fetchStatus');
   const listEl = document.getElementById('submissionList');
@@ -855,15 +893,8 @@ document.getElementById('fetchBtn').addEventListener('click', async ()=>{
       statusEl.textContent = '아직 신청 내역이 없습니다.';
       return;
     }
-    statusEl.textContent = `${submissions.length}건 불러왔습니다. 클릭해서 선택하세요.`;
-    listEl.innerHTML = submissions.map((sub, idx) => {
-      const name = deepFind(sub, 'bizName') || `신청 #${idx+1}`;
-      const date = sub.submittedAt || sub.createdAt || '';
-      return `<div class="sub-item" data-idx="${idx}"><div class="sub-name">${name}</div><div class="sub-date">${date}</div></div>`;
-    }).join('');
-    listEl.querySelectorAll('.sub-item').forEach(el=>{
-      el.addEventListener('click', ()=> fillFromSubmission(submissions[+el.dataset.idx]));
-    });
+    currentSubmissions = submissions;
+    renderSubmissionList();
   } catch(err){
     statusEl.textContent = '불러오기 실패: ' + err.message;
     console.error(err);
