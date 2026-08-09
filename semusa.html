@@ -265,13 +265,13 @@
   .sub-item .sub-main{ cursor:pointer; flex:1 1 auto; min-width:0; }
   .sub-item .sub-name{ font-weight:700; color:var(--brown); }
   .contact-info{
-    margin-top:12px; padding:14px; border-radius:12px;
+    margin-top:12px; padding:12px 14px; border-radius:12px;
     background:var(--card-2); border:1px solid var(--line);
     font-size:12.5px; color:var(--ink-soft); line-height:1.6;
-    display:flex; justify-content:space-around; text-align:center; gap:10px;
+    display:flex; justify-content:space-around; align-items:center; text-align:center; gap:10px; flex-wrap:wrap;
   }
-  .contact-info span:first-child{ color:var(--ink-faint); font-size:11px; }
-  .contact-info b{ display:block; margin-top:3px; color:var(--brand-deep); font-weight:700; font-size:13.5px; }
+  .contact-info span:first-child{ color:var(--ink-faint); }
+  .contact-info b{ display:inline; margin-left:5px; color:var(--brand-deep); font-weight:700; font-size:13.5px; }
   .contact-info a{ color:var(--brand-deep); text-decoration:none; }
   .contact-info a:hover{ text-decoration:underline; }
   .new-badge{
@@ -466,7 +466,7 @@
             <select id="axIndustry"><option value="general">일반업종</option><option value="wholesale">도매/소매업</option><option value="hospitality">숙박/음식점업</option><option value="service">서비스업</option><option value="realestate">부동산임대업</option><option value="manufacturing">제조/도급/건설업</option><option value="clinic">병의원</option><option value="loan">대부업</option></select>
           </div>
           <div class="field"><label>연매출액 (원)</label><input type="text" inputmode="numeric" id="revYear" value="0" placeholder="예: 500,000,000"></div>
-          <div class="field"><label>법인계좌 수 (개)</label>
+          <div class="field"><label>법인통장 수 (개)</label>
             <div class="stepper"><input type="text" inputmode="numeric" id="corpAcctCnt" value="0" class="stepper-input"><span class="spin"><button type="button" class="step-btn" data-target="corpAcctCnt" data-dir="1">▲</button><button type="button" class="step-btn" data-target="corpAcctCnt" data-dir="-1">▼</button></span></div>
           </div>
           <div class="field"><label>사업용카드 수 (개)</label>
@@ -879,7 +879,7 @@ function buildBook(){
     compute:()=>{ const overseas=document.getElementById('axOverseas').checked; const healthIns=document.getElementById('axHealthIns').checked; return (overseas||healthIns) ? 2 : null; } });
   makeRow(c,{ id:'bk8', group:'book', name:'사업용카드 입력', auto:true, hideCtrl:true, locked:true, note:'자동: 상단 사업용카드 수 × 1만원',
     compute:()=>{ const n=numOf('cardCnt'); return n*1; } });
-  makeRow(c,{ id:'bk6', group:'book', name:'법인계좌 입력', auto:true, hideCtrl:true, note:'자동: 상단 법인계좌 수 × 2만원 (법인사업자만 적용), "외화계좌 있음" 체크 시 × 1.3배',
+  makeRow(c,{ id:'bk6', group:'book', name:'법인통장 입력', auto:true, hideCtrl:true, note:'자동: 상단 법인통장 수 × 2만원 (법인사업자만 적용), "외화계좌 있음" 체크 시 × 1.3배',
     compute:()=>{ const corp=getCorp(); if(corp!=='corp') return null; const n=numOf('corpAcctCnt'); const foreignAcct=document.getElementById('axForeignAccount').checked; const base=n*2; return foreignAcct ? base*1.3 : base; } });
   makeRow(c,{ id:'bk7', group:'book', name:'인건비 · 4대보험 입력', note:'1-5명 1만 · 6-10명 2만 · 11-15명 3만 · 이후 5명당 +1만', auto:true, locked:true, hideCtrl:true,
     compute:()=>{ const n=numOf('staffCnt'); return stepTier(n,5,1,10,2,5,1); } });
@@ -1128,7 +1128,7 @@ function updateAutoLabels(){
   bk3cb.disabled = true;
   bk3cb.checked = (overseas || healthIns);
 
-  // bk6 계좌입력: 법인사업자일 때만 자동 적용, 상단 법인계좌 수 입력창도 함께 활성/비활성
+  // bk6 계좌입력: 법인사업자일 때만 자동 적용, 상단 법인통장 수 입력창도 함께 활성/비활성
   const bk6cb = state.items['bk6'].cb;
   bk6cb.disabled = true;
   bk6cb.checked = (corp==='corp');
@@ -1197,7 +1197,7 @@ function buildPrintSummary(){
     ['연매출액', `${revYear.toLocaleString('ko-KR')}원`],
     ['직원 / 일용직', `${staff}명 / ${daily}명`],
     ['프리랜서(3.3%) / 기타원천징수', `${freelance}명 / ${etcW}명`],
-    ['법인계좌 수', corp==='corp' ? `${corpAcct}개` : '해당없음'],
+    ['법인통장 수', corp==='corp' ? `${corpAcct}개` : '해당없음'],
     ['사업용카드 수', `${card}개`],
   ];
   document.getElementById('printSummary').innerHTML = items.map(([label,val,wide,adminOnly,extraClass])=>
@@ -1581,7 +1581,7 @@ function fillFromSubmission(sub){
   const contactEl = document.getElementById('contactInfo');
   if(contactName || contactPhone){
     const phoneLink = contactPhone ? `<a href="tel:${contactPhone.replace(/[^0-9]/g,'')}">${contactPhone}</a>` : '-';
-    contactEl.innerHTML = `<span>담당자<br><b>${contactName || '-'}</b></span><span>연락처<br><b>${phoneLink}</b></span>`;
+    contactEl.innerHTML = `<span>담당자 <b>${contactName || '-'}</b></span><span>연락처 <b>${phoneLink}</b></span>`;
   } else {
     contactEl.textContent = '담당자 정보를 불러오려면 위에서 신청건을 선택하세요.';
   }
