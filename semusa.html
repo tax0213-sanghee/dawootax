@@ -1590,6 +1590,40 @@ function fillFromSubmission(sub){
 }
 
 buildBook(); buildFile(); buildConsult(); buildAdj(); buildFaithful();
+
+// CSS만으로 모바일 레이아웃이 제대로 안 먹히는 환경 대비: JS로 직접 강제 적용 (인라인 스타일이 최우선순위라 무조건 이김)
+function applyMobileLayoutFix(){
+  const isMobile = window.innerWidth <= 760;
+  const infoGrid = document.querySelector('.info-grid');
+  if(infoGrid) infoGrid.style.gridTemplateColumns = isMobile ? '1fr' : '';
+  document.querySelectorAll('.check-inline.row3').forEach(el=>{
+    el.style.flexDirection = isMobile ? 'column' : '';
+  });
+  document.querySelectorAll('.check-inline.row3 label').forEach(el=>{
+    if(isMobile){
+      el.style.width = '100%';
+      el.style.flex = 'none';
+      el.style.whiteSpace = 'normal';
+    } else {
+      el.style.width = '';
+      el.style.flex = '';
+      el.style.whiteSpace = '';
+    }
+  });
+  document.querySelectorAll('.check-inline.row3 label span').forEach(el=>{
+    if(isMobile){
+      el.style.whiteSpace = 'normal';
+      el.style.overflow = 'visible';
+      el.style.textOverflow = 'clip';
+    } else {
+      el.style.whiteSpace = '';
+      el.style.overflow = '';
+      el.style.textOverflow = '';
+    }
+  });
+}
+applyMobileLayoutFix();
+window.addEventListener('resize', applyMobileLayoutFix);
 recalc();
 </script>
 </body>
