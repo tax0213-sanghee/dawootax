@@ -247,6 +247,13 @@
   }
   .office-info .office-name{ font-size:15px; font-weight:700; color:var(--brown); letter-spacing:.02em; }
   .office-info .office-detail{ font-size:12px; color:var(--ink-faint); margin-top:4px; line-height:1.6; }
+  .notify-setting{ max-width:1220px; margin:10px auto 20px; text-align:center; }
+  .notify-setting button{
+    background:none; border:none; color:var(--ink-faint); font-size:11.5px; font-family:inherit;
+    cursor:pointer; text-decoration:underline; text-underline-offset:3px; padding:4px;
+  }
+  .notify-setting button:hover{ color:var(--brand-deep); }
+  .notify-setting #notifyStatus{ display:block; font-size:11px; color:var(--ink-faint); margin-top:4px; }
   .btn{ flex:1; padding:12px 10px; border-radius:999px; border:none; font-size:14.5px; font-weight:600; cursor:pointer; font-family:inherit; transition:.15s; }
   .btn.primary{ background:var(--brand); color:var(--brand-ink); box-shadow: var(--shadow); }
   .sub-item{
@@ -258,11 +265,13 @@
   .sub-item .sub-main{ cursor:pointer; flex:1 1 auto; min-width:0; }
   .sub-item .sub-name{ font-weight:700; color:var(--brown); }
   .contact-info{
-    margin-top:12px; padding:12px 14px; border-radius:12px;
+    margin-top:12px; padding:14px; border-radius:12px;
     background:var(--card-2); border:1px solid var(--line);
-    font-size:12.5px; color:var(--ink-soft); line-height:1.7;
+    font-size:12.5px; color:var(--ink-soft); line-height:1.6;
+    display:flex; justify-content:space-around; text-align:center; gap:10px;
   }
-  .contact-info b{ color:var(--brand-deep); font-weight:700; }
+  .contact-info span:first-child{ color:var(--ink-faint); font-size:11px; }
+  .contact-info b{ display:block; margin-top:3px; color:var(--brand-deep); font-weight:700; font-size:13.5px; }
   .contact-info a{ color:var(--brand-deep); text-decoration:none; }
   .contact-info a:hover{ text-decoration:underline; }
   .new-badge{
@@ -296,7 +305,7 @@
     .action-row{ display:none!important; } .row.disabled{ display:none; }
     .row.zero-amount{ display:none!important; }
     .paren-note{ display:none!important; }
-    #fetchStatus, #submissionList, #contactInfo{ display:none!important; }
+    #fetchStatus, #submissionList, #contactInfo, #notifyBtn, #notifyStatus, .notify-setting{ display:none!important; }
     input[type=checkbox]{ display:none; } .sidebar{ position:static; }
     .panel{ break-inside:avoid; box-shadow:none; border-color:#DDD; }
     #panel-book, #panel-file, #panel-consult, #panel-adj-settle, #panel-adj-report, #panel-faithful, .section-tag, .svc-group-title, #panel-classify{ display:none!important; }
@@ -613,6 +622,11 @@
 <div class="office-info">
   <div class="office-name">세무법인 다우</div>
   <div class="office-detail">제주특별자치도 서귀포시 동일하모로149번길 4 2층 · Tel. 064-900-7170 · 사업자등록번호 274-85-01403</div>
+</div>
+
+<div class="notify-setting">
+  <button type="button" id="notifyBtn">🔔 이 PC에서 새 신청 알림 받기</button>
+  <span id="notifyStatus"></span>
 </div>
 </div>
 
@@ -1181,10 +1195,10 @@ function buildPrintSummary(){
     ['구분', `${corpLabel} · ${taxLabel} · ${repLabel}`, true],
     ['업종', industryLabel],
     ['연매출액', `${revYear.toLocaleString('ko-KR')}원`],
-    ['법인계좌 수', corp==='corp' ? `${corpAcct}개` : '해당없음'],
-    ['사업용카드 수', `${card}개`],
     ['직원 / 일용직', `${staff}명 / ${daily}명`],
     ['프리랜서(3.3%) / 기타원천징수', `${freelance}명 / ${etcW}명`],
+    ['법인계좌 수', corp==='corp' ? `${corpAcct}개` : '해당없음'],
+    ['사업용카드 수', `${card}개`],
   ];
   document.getElementById('printSummary').innerHTML = items.map(([label,val,wide,adminOnly,extraClass])=>
     `<div class="ps-item${wide?' wide':''}${adminOnly?' ps-admin-only':''}${extraClass?' '+extraClass:''}"><span>${label}</span><b>${val}</b></div>`
@@ -1345,6 +1359,77 @@ function saveSeenIds(idSet){
   catch(e){ /* 저장 실패해도 화면 표시엔 영향 없음 */ }
 }
 
+// ===== PC 알림 기능 =====
+let notifyEnabled = false;
+const originalTitle = document.title;
+let titleFlashInterval = null;
+
+document.getElementById('notifyBtn').addEventListener('click', ()=>{
+  const statusEl = document.getElementById('notifyStatus');
+  if(!('Notification' in window)){
+    statusEl.textContent = '이 브라우저는 알림 기능을 지원하지 않습니다.';
+    return;
+  }
+  Notification.requestPermission().then(perm=>{
+    notifyEnabled = (perm === 'granted');
+    if(notifyEnabled){
+      statusEl.textContent = '🔔 알림이 켜졌습니다. 이 창을 계속 열어두세요.';
+      new Notification('세무법인 다우', { body: '새 신청 알림이 켜졌습니다.' });
+    } else {
+      statusEl.textContent = '알림이 차단되어 있어요. 브라우저 주소창 왼쪽 자물쇠 아이콘에서 알림을 허용해주세요.';
+    }
+  });
+});
+
+function flashTitle(msg){
+  if(titleFlashInterval) return; // 이미 깜빡이는 중이면 중복 실행 방지
+  let toggle = false;
+  titleFlashInterval = setInterval(()=>{
+    document.title = toggle ? msg : originalTitle;
+    toggle = !toggle;
+  }, 1000);
+  window.addEventListener('focus', function stopFlash(){
+    clearInterval(titleFlashInterval);
+    titleFlashInterval = null;
+    document.title = originalTitle;
+    window.removeEventListener('focus', stopFlash);
+  });
+}
+
+// 몇 분마다 자동으로 탈리를 확인해서, 새 신청이 있으면 목록 갱신 + PC 알림 + 탭 제목 깜빡임
+async function autoCheckNewSubmissions(){
+  try {
+    const res = await fetch('/.netlify/functions/get-submissions');
+    const data = await res.json();
+    if(!res.ok || data.error) return;
+    const submissions = data.submissions || data.data || [];
+    if(submissions.length === 0) return;
+
+    const seenIds = getSeenIds();
+    const newOnes = submissions.filter(sub=>{
+      const name = deepFind(sub, 'bizName') || '';
+      const date = sub.submittedAt || sub.createdAt || '';
+      const subId = sub.submissionId || sub.id || name+date;
+      return !seenIds.has(subId);
+    });
+
+    lastFetchData = data;
+    currentSubmissions = submissions;
+    renderSubmissionList();
+
+    if(newOnes.length > 0){
+      const names = newOnes.slice(0,3).map(sub=> deepFind(sub,'bizName') || '신청건').join(', ');
+      if(notifyEnabled){
+        new Notification('탈리 새 신청 도착', { body: `${newOnes.length}건: ${names}` });
+      }
+      flashTitle(`🔴 새 신청 ${newOnes.length}건`);
+    }
+  } catch(e){ console.error(e); }
+}
+
+// 5분마다 자동 확인 (이 페이지를 열어두고 있는 동안만 작동)
+setInterval(autoCheckNewSubmissions, 5*60*1000);
+
 function renderSubmissionList(){
   const statusEl = document.getElementById('fetchStatus');
   const listEl = document.getElementById('submissionList');
@@ -1496,7 +1581,7 @@ function fillFromSubmission(sub){
   const contactEl = document.getElementById('contactInfo');
   if(contactName || contactPhone){
     const phoneLink = contactPhone ? `<a href="tel:${contactPhone.replace(/[^0-9]/g,'')}">${contactPhone}</a>` : '-';
-    contactEl.innerHTML = `담당자: <b>${contactName || '-'}</b> · 연락처: <b>${phoneLink}</b>`;
+    contactEl.innerHTML = `<span>담당자<br><b>${contactName || '-'}</b></span><span>연락처<br><b>${phoneLink}</b></span>`;
   } else {
     contactEl.textContent = '담당자 정보를 불러오려면 위에서 신청건을 선택하세요.';
   }
