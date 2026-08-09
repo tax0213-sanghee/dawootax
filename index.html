@@ -32,7 +32,7 @@
   body{ line-height:1.55; padding-bottom:90px; }
   .wrap{ max-width:1220px; margin:0 auto; padding:0 24px; }
 
-  header.top{ background: linear-gradient(180deg, #EDE7FA 0%, var(--bg) 100%); padding:80px 0 32px; position:relative; overflow:hidden; text-align:center; }
+  header.top{ background: linear-gradient(180deg, #EDE7FA 0%, var(--bg) 100%); padding:50px 0 32px; position:relative; overflow:hidden; text-align:center; }
   header.top .wrap{ max-width:840px; }
   header.top p.sub, header.top p.vat-note{ margin-left:auto; margin-right:auto; }
   .eyebrow{
@@ -46,7 +46,7 @@
   header.top p.vat-note{ margin-top:10px; color:var(--ink-faint); font-size:12.5px; font-weight:500; }
   .sparkle{ color: var(--brand); font-size:16.5px; }
 
-  main.grid{ display:grid; grid-template-columns:1fr; max-width:840px; margin:28px auto 0; align-items:start; }
+  main.grid{ display:grid; grid-template-columns:1fr; max-width:840px; margin:18px auto 0; align-items:start; }
 
   .panel{ background:var(--card); border:1px solid var(--line); border-radius:20px; margin-bottom:20px; box-shadow: var(--shadow); overflow:hidden; }
   .panel-head{ padding:20px 24px 16px; display:flex; align-items:center; gap:11px; }
@@ -70,8 +70,7 @@
   .section-tag.gold{ background: linear-gradient(90deg, var(--brand), var(--brand-deep)); color:#fff; }
 
   .info-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px 16px; }
-  @media (max-width:760px){ .info-grid{ grid-template-columns:1fr 1fr; } }
-  @media (max-width:480px){
+  @media (max-width:760px){
     .info-grid{ grid-template-columns:1fr; }
     .field.wide, .field.full{ grid-column:1/-1; }
     .check-inline.row3{ flex-direction:column; align-items:stretch; }
@@ -126,7 +125,7 @@
   .svc-group-title{ font-size:14px; font-weight:700; color:var(--brown); margin:16px 0 8px; padding:6px 0 0; }
   .svc-group-title:first-child{ margin-top:2px; }
 
-  .row{ display:grid; grid-template-columns:26px 1fr 220px 112px; gap:10px; align-items:center; padding:6px 10px; border-radius:13px; transition:.12s; }
+  .row{ display:grid; grid-template-columns:26px 1fr 220px 112px; gap:10px; align-items:center; padding:3px 10px; border-radius:13px; transition:.12s; }
   .row.compact{ grid-template-columns:26px 1fr 112px; }
   .row:hover{ background:#FFFCF0; }
   @media (max-width:780px){
@@ -211,7 +210,7 @@
     .action-row{ display:none!important; } .row.disabled{ display:none; }
     input[type=checkbox]{ display:none; } .sidebar{ position:static; }
     .panel{ break-inside:avoid; box-shadow:none; border-color:#DDD; }
-    #panel-book, #panel-file, #panel-consult, #panel-adj, #panel-faithful, .section-tag, #panel-classify{ display:none!important; }
+    #panel-book, #panel-file, #panel-consult, #panel-adj-settle, #panel-adj-report, #panel-faithful, .section-tag, #panel-classify{ display:none!important; }
     footer.note{ display:none!important; }
     .kakao-channel-btn{ display:none!important; }
 
@@ -336,7 +335,7 @@
     <div class="print-summary" id="printSummary"></div>
 
     <div class="customer-hidden">
-      <div class="section-tag alt"><span class="sparkle" style="color:var(--brand);">✦</span> 기장료 (매월) = 장부작성요금 + 신고요금 + 부가서비스요금</div>
+      <div class="section-tag alt"><span class="sparkle" style="color:var(--brand);">✦</span> 기장료 (매월)</div>
 
       <section class="panel" id="panel-book">
         <div class="panel-head"><span class="num">1</span><h2>장부작성요금</h2></div>
@@ -353,13 +352,19 @@
         <div class="panel-body" id="rows-consult"></div>
       </section>
 
-      <div class="section-tag alt"><span class="sparkle" style="color:var(--brand);">✦</span> 조정료 (연 1회, 법인 3월 · 개인 5월)</div>
+      <div class="section-tag alt"><span class="sparkle" style="color:var(--brand);">✦</span> 조정료 (연 1회)</div>
 
-      <section class="panel" id="panel-adj">
-        <div class="panel-body no-head" id="rows-adj"></div>
+      <section class="panel" id="panel-adj-settle">
+        <div class="panel-head"><span class="num">1</span><h2>결산요금</h2></div>
+        <div class="panel-body" id="rows-adj-settle"></div>
       </section>
 
-      <div class="section-tag alt"><span class="sparkle" style="color:var(--brand);">✦</span> 성실신고확인보수 (별도 항목, 조정료와 분리 청구)</div>
+      <section class="panel" id="panel-adj-report">
+        <div class="panel-head"><span class="num">2</span><h2 id="adjReportTitle">신고요금</h2></div>
+        <div class="panel-body" id="rows-adj-report"></div>
+      </section>
+
+      <div class="section-tag alt"><span class="sparkle" style="color:var(--brand);">✦</span> 성실신고확인보수 (연 1회, 별도항목)</div>
 
       <section class="panel" id="panel-faithful">
         <div class="panel-body no-head" id="rows-faithful"></div>
@@ -378,8 +383,10 @@
       <div class="sub-line"><span>· 신고요금</span><b id="fileSub">0 만원</b></div>
       <div class="sub-line"><span>· 부가서비스요금</span><b id="consultSub">0 만원</b></div>
       <div class="divider-thin"></div>
-      <div class="sub-line"><span>조정료 (연 1회)</span><b id="adjTotal">0 만원</b></div>
-      <div class="sub-line"><span>성실신고확인보수 (연 1회, 별도)</span><b id="faithfulTotal">0 만원</b></div>
+      <div class="sub-line" style="font-weight:700;"><span>조정료 합계 (연 1회)</span><b id="adjTotal">0 만원</b></div>
+      <div class="sub-line"><span>· 결산요금</span><b id="adjSettleTotal">0 만원</b></div>
+      <div class="sub-line"><span>· 신고요금(세무조정 포함)</span><b id="adjReportTotal">0 만원</b></div>
+      <div class="sub-line" style="font-weight:700;"><span>성실신고확인보수 (연 1회, 별도)</span><b id="faithfulTotal">0 만원</b></div>
       <div class="divider-thin"></div>
       <div class="sub-line" style="font-size:15.5px;"><span>연간 예상 총액</span><b id="yearlyTotal" style="font-size:16.5px;">0 만원</b></div>
       <div class="sub-line" style="opacity:.65; font-size:12.5px;"><span>= 월기장료×12 + 조정료 + 성실신고확인보수</span><span></span></div>
@@ -548,7 +555,7 @@ function buildFile(){
 /* ============ 3. 부가서비스요금 ============ */
 function buildConsult(){
   const c = document.getElementById('rows-consult');
-  makeRow(c,{ id:'cn1', group:'consult', name:'세무상담 · 세무서 기본대응(담당직원)', auto:true, locked:true, hideCtrl:true, note:'자동: 상단 연매출액 기준 산정',
+  makeRow(c,{ id:'cn1', group:'consult', name:'업무대응 · 상담(담당직원)', auto:true, locked:true, hideCtrl:true, note:'자동: 상단 연매출액 기준 산정',
     ctrlHtml:`<span class="auto-val" data-role="label">0억원</span>`,
     compute:()=>{ const won=numOf('revYear'); return advisoryFee(toEok(won)); } });
   makeRow(c,{ id:'cn2', group:'consult', name:'기타제요금(민원서류발급 외)', defaultIncluded:true, locked:true, hideCtrl:true, compute:()=>1 });
@@ -575,22 +582,35 @@ function buildConsult(){
 
 /* ============ 4. 조정료 구성항목 ============ */
 function buildAdj(){
-  const c = document.getElementById('rows-adj');
-  makeRow(c,{ id:'aj2', group:'adj', name:'장부결산', auto:true, locked:true, hideCtrl:true, note:'자동: 장부작성요금 소계 × 12개월 × 40% (제조업/도급업이면 60%)',
+  const cSettle = document.getElementById('rows-adj-settle');
+  const cReport = document.getElementById('rows-adj-report');
+
+  makeRow(cSettle,{ id:'aj2', group:'adj', name:'기본결산요금', auto:true, locked:true, hideCtrl:true, note:'자동: 장부작성요금 소계 × 12개월 × 40%',
     ctrlHtml:`<span class="auto-val" data-role="label">0 만원</span>`,
-    compute:()=>{ return getSettlementFee(); } });
-  makeRow(c,{ id:'aj3', group:'adj', name:'조정계산서요금(세무조정)', auto:true, locked:true, hideCtrl:true, note:'자동: 연매출액(억원) × 요율(기본 0.1%, 30억 초과부터 5억마다 -0.005%p: 0.095%, 0.09%, 0.085%, 0.08%...) + 최종신고요금(법인 40만/개인 20만)',
+    compute:()=>{ return getBookSubtotal()*12*0.4; } });
+  makeRow(cSettle,{ id:'aj2b', group:'adj', name:'추가결산요금<span class="paren-note">(제조/도급/건설업)</span>', auto:true, locked:true, hideCtrl:true, note:'자동: 제조업/도급업/건설업일 때만 장부작성요금 소계 × 12개월 × 20% 추가',
+    ctrlHtml:`<span class="auto-val" data-role="label">0 만원</span>`,
+    compute:()=>{
+      const industry = document.getElementById('axIndustry').value;
+      return industry==='manufacturing' ? getBookSubtotal()*12*0.2 : 0;
+    } });
+  subtotalLine(cSettle, 'adjSettleSubtotalLine', '결산요금 소계');
+
+  makeRow(cReport,{ id:'aj3a', group:'adj', name:'기본신고요금', auto:true, locked:true, hideCtrl:true, note:'자동: 법인 40만 / 개인 20만',
+    ctrlHtml:`<span class="auto-val" data-role="label">0 만원</span>`,
+    compute:()=>{
+      const corp = getCorp();
+      return corp==='corp' ? 40 : 20;
+    } });
+  makeRow(cReport,{ id:'aj3b', group:'adj', name:'세무조정요금', auto:true, locked:true, hideCtrl:true, note:'자동: 연매출액(억원) × 요율(기본 0.1%, 30억 초과부터 5억마다 -0.005%p: 0.095%, 0.09%, 0.085%, 0.08%...)',
     ctrlHtml:`<span class="auto-val" data-role="label">0 만원</span>`,
     compute:()=>{
       const won=numOf('revYear');
       const eok=toEok(won);
       const rate = taxAdjustmentRate(eok);
-      const adjBase = won*rate/10000;
-      const corp = getCorp();
-      const finalReportFee = corp==='corp' ? 40 : 20;
-      return adjBase + finalReportFee;
+      return won*rate/10000;
     } });
-  subtotalLine(c, 'adjSubtotalLine', '조정료 합계');
+  subtotalLine(cReport, 'adjReportSubtotalLine', '신고요금 소계');
 }
 
 /* ============ 5. 성실신고확인보수 (조정료와 분리) ============ */
@@ -606,7 +626,8 @@ function buildFaithful(){
 const bookIds=['bk1','bk2','bk3','bk8','bk4','bk5','bk6','bk7'];
 const fileIds=['fl1','fl2','fl3','fl4','fl5','fl6','fl7'];
 const consultIds=['cn1','cn2','cn3','cn4','cn5','cn6','cn7'];
-const adjIds=['aj2','aj3'];
+const adjSettleIds=['aj2','aj2b'];
+const adjReportIds=['aj3a','aj3b'];
 const faithfulIds=['aj4'];
 
 function computeGroupSum(ids){
@@ -709,9 +730,6 @@ function updateAutoLabels(){
   if(rep!=='faithful') aj4cb.checked=false; else aj4cb.checked=true;
   state.items['aj4'].ctrl.querySelector('[data-role=label]').textContent = rep==='faithful' ? `${man(faithfulFee(toEok(revYear)))} 만원 (연매출 ${toEok(revYear).toFixed(2)}억 기준)` : '성실신고대상자 아님 → 비적용';
 
-  // (법인세/종합소득세 신고는 조정계산서요금에 통합되어 별도 항목 없음)
-  state.items['aj3'].desc.querySelector('.name').textContent = corp==='corp' ? '법인세신고(세무조정 포함)' : '종합소득세신고(세무조정 포함)';
-
   buildPrintSummary();
 }
 
@@ -740,10 +758,10 @@ function buildPrintSummary(){
     ['구분', `${corpLabel} · ${taxLabel} · ${repLabel}`, true],
     ['업종', industryLabel],
     ['연매출액', `${revYear.toLocaleString('ko-KR')}원`],
-    ['직원 / 일용직', `${staff}명 / ${daily}명`],
-    ['프리랜서(3.3%) / 기타원천징수', `${freelance}명 / ${etcW}명`],
     ['법인계좌 수', corp==='corp' ? `${corpAcct}개` : '해당없음'],
     ['사업용카드 수', `${card}개`],
+    ['직원 / 일용직', `${staff}명 / ${daily}명`],
+    ['프리랜서(3.3%) / 기타원천징수', `${freelance}명 / ${etcW}명`],
   ];
   document.getElementById('printSummary').innerHTML = items.map(([label,val,wide])=>
     `<div class="ps-item${wide?' wide':''}"><span>${label}</span><b>${val}</b></div>`
@@ -759,7 +777,7 @@ function buildPrintSummary(){
 function recalc(){
   updateAutoLabels();
 
-  [...bookIds,...fileIds,...consultIds,...adjIds,...faithfulIds].forEach(id=>{
+  [...bookIds,...fileIds,...consultIds,...adjSettleIds,...adjReportIds,...faithfulIds].forEach(id=>{
     const it = state.items[id];
     const checked = it.cb.checked;
     it.row.classList.toggle('disabled', !checked);
@@ -776,14 +794,21 @@ function recalc(){
   const fileSum = computeGroupSum(fileIds);
   const consultSum = computeGroupSum(consultIds);
   const monthlySum = bookSum+fileSum+consultSum;
-  const adjSum = computeGroupSum(adjIds);
+  const adjSettleSum = computeGroupSum(adjSettleIds);
+  const adjReportSum = computeGroupSum(adjReportIds);
+  const adjSum = adjSettleSum + adjReportSum;
   const faithfulSum = computeGroupSum(faithfulIds);
 
   document.getElementById('bookSubtotalLine').textContent = man(bookSum)+' 만원';
   document.getElementById('fileSubtotalLine').textContent = man(fileSum)+' 만원';
   document.getElementById('consultSubtotalLine').textContent = man(consultSum)+' 만원';
-  document.getElementById('adjSubtotalLine').textContent = man(adjSum)+' 만원';
+  document.getElementById('adjSettleSubtotalLine').textContent = man(adjSettleSum)+' 만원';
+  document.getElementById('adjReportSubtotalLine').textContent = man(adjReportSum)+' 만원';
   document.getElementById('faithfulSubtotalLine').textContent = man(faithfulSum)+' 만원';
+
+  // 신고요금 패널 제목을 법인/개인 구분에 따라 동적으로 표시
+  const adjReportTitleEl = document.getElementById('adjReportTitle');
+  if(adjReportTitleEl){ adjReportTitleEl.textContent = getCorp()==='corp' ? '법인세 신고요금' : '종합소득세 신고요금'; }
 
   document.getElementById('monthlyTotal').innerHTML = `${man(monthlySum)}<small> 만원</small>`;
   document.getElementById('bookSub').textContent = man(bookSum)+' 만원';
@@ -801,7 +826,7 @@ function recalc(){
 }
 
 /* ============ 이벤트 바인딩 ============ */
-['axCorpTax','axReport','axIndustry','axOverseas','axOnline','axHealthIns','axForeignAccount'].forEach(id=>{
+['bizName','axCorpTax','axReport','axIndustry','axOverseas','axOnline','axHealthIns','axForeignAccount'].forEach(id=>{
   document.getElementById(id).addEventListener('input', recalc);
   document.getElementById(id).addEventListener('change', recalc);
 });
