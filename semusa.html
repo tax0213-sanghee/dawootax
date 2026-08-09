@@ -71,8 +71,7 @@
   .section-tag.gold{ background: linear-gradient(90deg, var(--brand), var(--brand-deep)); color:var(--brand-ink); }
 
   .info-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px 16px; }
-  @media (max-width:760px){ .info-grid{ grid-template-columns:1fr 1fr; } }
-  @media (max-width:480px){
+  @media (max-width:760px){
     .info-grid{ grid-template-columns:1fr; }
     .field.wide, .field.full{ grid-column:1/-1; }
     .check-inline.row3{ flex-direction:column; align-items:stretch; }
@@ -134,7 +133,7 @@
   .svc-group-title{ font-size:14px; font-weight:700; color:var(--brown); margin:16px 0 8px; padding:6px 0 0; }
   .svc-group-title:first-child{ margin-top:2px; }
 
-  .row{ display:grid; grid-template-columns:26px 1fr 220px 132px; gap:10px; align-items:center; padding:3px 10px; border-radius:13px; transition:.12s; }
+  .row{ display:grid; grid-template-columns:26px 1fr 220px 132px; gap:10px; align-items:center; padding:1px 10px; border-radius:13px; transition:.12s; }
   .row.compact{ grid-template-columns:26px 1fr 132px; }
   .row:hover{ background:#FFFCF0; }
   @media (max-width:780px){
@@ -258,6 +257,14 @@
   .sub-item:hover{ background:var(--card-2); border-color:var(--brand); }
   .sub-item .sub-main{ cursor:pointer; flex:1 1 auto; min-width:0; }
   .sub-item .sub-name{ font-weight:700; color:var(--brown); }
+  .contact-info{
+    margin-top:12px; padding:12px 14px; border-radius:12px;
+    background:var(--card-2); border:1px solid var(--line);
+    font-size:12.5px; color:var(--ink-soft); line-height:1.7;
+  }
+  .contact-info b{ color:var(--brand-deep); font-weight:700; }
+  .contact-info a{ color:var(--brand-deep); text-decoration:none; }
+  .contact-info a:hover{ text-decoration:underline; }
   .new-badge{
     display:inline-block; background:#FF4D4D; color:#fff; font-size:9.5px; font-weight:800;
     padding:1.5px 6px; border-radius:999px; margin-left:5px; letter-spacing:.02em; vertical-align:middle;
@@ -289,7 +296,7 @@
     .action-row{ display:none!important; } .row.disabled{ display:none; }
     .row.zero-amount{ display:none!important; }
     .paren-note{ display:none!important; }
-    #fetchStatus, #submissionList{ display:none!important; }
+    #fetchStatus, #submissionList, #contactInfo{ display:none!important; }
     input[type=checkbox]{ display:none; } .sidebar{ position:static; }
     .panel{ break-inside:avoid; box-shadow:none; border-color:#DDD; }
     #panel-book, #panel-file, #panel-consult, #panel-adj-settle, #panel-adj-report, #panel-faithful, .section-tag, .svc-group-title, #panel-classify{ display:none!important; }
@@ -368,6 +375,9 @@
     .print-summary .ps-item span:first-child{ color:var(--ink-faint); }
     .print-summary .ps-item b{ color:var(--ink); font-weight:600; }
     .print-summary .ps-item.wide{ grid-column:1/3; }
+    .print-summary .ps-item.ps-admin-only{ display:none; }
+    body.print-admin-mode .print-summary .ps-item.ps-admin-only{ display:flex; }
+    body.print-admin-mode .print-summary .ps-item.ps-bizname{ grid-column:auto; }
 
     .bubble{
       background:#fff!important; border:1.5px solid var(--brown); box-shadow:none!important;
@@ -484,7 +494,7 @@
     <div id="submissionList" style="margin-top:10px;"></div>
 
     <div class="customer-hidden">
-      <div class="section-tag alt" id="tag-book"><span class="sparkle" style="color:var(--brand);">✦</span> 기장료 (매월) = 장부작성요금 + 신고요금 + 부가서비스요금</div>
+      <div class="section-tag alt" id="tag-book"><span class="sparkle" style="color:var(--brand);">✦</span> 기장료 (매월)</div>
 
       <section class="panel" id="panel-book">
         <div class="panel-head"><span class="num">1</span><h2>장부작성요금</h2></div>
@@ -501,7 +511,7 @@
         <div class="panel-body" id="rows-consult"></div>
       </section>
 
-      <div class="section-tag alt" id="tag-adj"><span class="sparkle" style="color:var(--brand);">✦</span> 조정료 (연 1회, 법인 3월 · 개인 5월)</div>
+      <div class="section-tag alt" id="tag-adj"><span class="sparkle" style="color:var(--brand);">✦</span> 조정료 (연 1회)</div>
 
       <section class="panel" id="panel-adj-settle">
         <div class="panel-head"><span class="num">1</span><h2>결산요금</h2></div>
@@ -513,7 +523,7 @@
         <div class="panel-body" id="rows-adj-report"></div>
       </section>
 
-      <div class="section-tag alt" id="tag-faithful"><span class="sparkle" style="color:var(--brand);">✦</span> 성실신고확인보수 (별도 항목, 조정료와 분리 청구)</div>
+      <div class="section-tag alt" id="tag-faithful"><span class="sparkle" style="color:var(--brand);">✦</span> 성실신고확인보수 (연 1회, 별도항목)</div>
 
       <section class="panel" id="panel-faithful">
         <div class="panel-body no-head" id="rows-faithful"></div>
@@ -535,7 +545,7 @@
       <div class="sub-line" style="font-weight:700;"><span>조정료 합계 (연 1회)</span><b id="adjTotal">0 만원</b></div>
       <div class="divider-thin"></div>
       <div class="sub-line"><span>· 결산요금</span><b id="adjSettleTotal">0 만원</b></div>
-      <div class="sub-line"><span>· 신고요금</span><b id="adjReportTotal">0 만원</b></div>
+      <div class="sub-line"><span>· 신고요금(세무조정 포함)</span><b id="adjReportTotal">0 만원</b></div>
       <div class="divider-thin"></div>
       <div class="sub-line" style="font-weight:700;"><span>성실신고확인보수 (연 1회, 별도)</span><b id="faithfulTotal">0 만원</b></div>
       <div class="divider-thin"></div>
@@ -589,6 +599,8 @@
       <button class="btn primary" id="printAdminBtn">관리자용 인쇄</button>
       <button class="btn ghost" id="printCustomerBtn">고객용 인쇄</button>
     </div>
+
+    <div id="contactInfo" class="contact-info">담당자 정보를 불러오려면 위에서 신청건을 선택하세요.</div>
   </aside>
 </main>
 
@@ -913,7 +925,7 @@ function buildFile(){
 /* ============ 3. 부가서비스요금 ============ */
 function buildConsult(){
   const c = document.getElementById('rows-consult');
-  makeRow(c,{ id:'cn1', group:'consult', name:'세무상담 · 세무서 기본대응(담당직원)', auto:true, locked:true, hideCtrl:true, note:'자동: 상단 연매출액 기준 산정',
+  makeRow(c,{ id:'cn1', group:'consult', name:'업무대응 · 상담(담당직원)', auto:true, locked:true, hideCtrl:true, note:'자동: 상단 연매출액 기준 산정',
     ctrlHtml:`<span class="auto-val" data-role="label">0억원</span>`,
     compute:()=>{ const won=numOf('revYear'); return advisoryFee(toEok(won)); } });
   makeRow(c,{ id:'cn2', group:'consult', name:'기타제요금(민원서류발급 외)', defaultIncluded:true, locked:true, hideCtrl:true, compute:()=>1 });
@@ -1164,17 +1176,18 @@ function buildPrintSummary(){
   const staff = numOf('staffCnt'), daily = numOf('dailyCnt'), freelance = numOf('freelanceCnt'), etcW = numOf('etcWithholdCnt'), corpAcct = numOf('corpAcctCnt'), card = numOf('cardCnt');
 
   const items = [
-    ['사업장명', bizName, true],
+    ['사업장명', bizName, true, false, 'ps-bizname'],
+    ['담당자/연락처', `${currentContactName || '-'} / ${currentContactPhone || '-'}`, false, true],
     ['구분', `${corpLabel} · ${taxLabel} · ${repLabel}`, true],
     ['업종', industryLabel],
     ['연매출액', `${revYear.toLocaleString('ko-KR')}원`],
-    ['직원 / 일용직', `${staff}명 / ${daily}명`],
-    ['프리랜서(3.3%) / 기타원천징수', `${freelance}명 / ${etcW}명`],
     ['법인계좌 수', corp==='corp' ? `${corpAcct}개` : '해당없음'],
     ['사업용카드 수', `${card}개`],
+    ['직원 / 일용직', `${staff}명 / ${daily}명`],
+    ['프리랜서(3.3%) / 기타원천징수', `${freelance}명 / ${etcW}명`],
   ];
-  document.getElementById('printSummary').innerHTML = items.map(([label,val,wide])=>
-    `<div class="ps-item${wide?' wide':''}"><span>${label}</span><b>${val}</b></div>`
+  document.getElementById('printSummary').innerHTML = items.map(([label,val,wide,adminOnly,extraClass])=>
+    `<div class="ps-item${wide?' wide':''}${adminOnly?' ps-admin-only':''}${extraClass?' '+extraClass:''}"><span>${label}</span><b>${val}</b></div>`
   ).join('');
 }
 
@@ -1270,7 +1283,7 @@ function recalc(){
 }
 
 /* ============ 이벤트 바인딩 ============ */
-['axCorpTax','axReport','axIndustry','axOverseas','axOnline','axHealthIns','axForeignAccount'].forEach(id=>{
+['bizName','axCorpTax','axReport','axIndustry','axOverseas','axOnline','axHealthIns','axForeignAccount'].forEach(id=>{
   document.getElementById(id).addEventListener('input', recalc);
   document.getElementById(id).addEventListener('change', recalc);
 });
@@ -1390,6 +1403,7 @@ document.getElementById('fetchBtn').addEventListener('click', async ()=>{
       statusEl.textContent = '아직 신청 내역이 없습니다.';
       return;
     }
+    lastFetchData = data; // 담당자/연락처 등 일반 질문 응답을 찾을 때 필요한 질문 스키마(questions)도 함께 보관
     currentSubmissions = submissions;
     renderSubmissionList();
   } catch(err){
@@ -1397,6 +1411,20 @@ document.getElementById('fetchBtn').addEventListener('click', async ()=>{
     console.error(err);
   }
 });
+
+let lastFetchData = null;
+let currentContactName = '';
+let currentContactPhone = '';
+// 담당자 성함/직함, 핸드폰번호처럼 일반 질문(히든필드가 아닌)으로 받은 답변은
+// questions 스키마에서 제목으로 questionId를 찾은 뒤, 그 submission의 responses에서 답을 찾아야 함
+function findAnswerByQuestionTitle(sub, titleKeyword){
+  if(!lastFetchData || !Array.isArray(lastFetchData.questions)) return null;
+  const q = lastFetchData.questions.find(q => q.title && q.title.includes(titleKeyword));
+  if(!q) return null;
+  const responses = sub.responses || [];
+  const resp = responses.find(r => r.questionId === q.id);
+  return (resp && resp.answer!==undefined) ? resp.answer : null;
+}
 
 // 탈리 응답 데이터는 구조가 중첩되어 있을 수 있어, 어디에 있든 해당 key를 찾아내는 재귀 탐색 함수
 function deepFind(obj, key, seen){
@@ -1459,6 +1487,19 @@ function fillFromSubmission(sub){
   // 건강보험공단매출은 새로 추가된 항목이라 예전 탈리 신청서에는 값이 없을 수 있음(그럴 땐 그대로 미체크)
   const healthInsVal = getVal(sub, 'hasHealthIns');
   if(healthInsVal!==null) document.getElementById('axHealthIns').checked = (healthInsVal==='예');
+
+  // 담당자 성함/직함, 핸드폰번호는 히든필드가 아니라 일반 질문이라 별도 함수로 찾음
+  const contactName = findAnswerByQuestionTitle(sub, '담당자');
+  const contactPhone = findAnswerByQuestionTitle(sub, '핸드폰');
+  currentContactName = contactName || '';
+  currentContactPhone = contactPhone || '';
+  const contactEl = document.getElementById('contactInfo');
+  if(contactName || contactPhone){
+    const phoneLink = contactPhone ? `<a href="tel:${contactPhone.replace(/[^0-9]/g,'')}">${contactPhone}</a>` : '-';
+    contactEl.innerHTML = `담당자: <b>${contactName || '-'}</b> · 연락처: <b>${phoneLink}</b>`;
+  } else {
+    contactEl.textContent = '담당자 정보를 불러오려면 위에서 신청건을 선택하세요.';
+  }
 
   recalc();
 }
