@@ -71,10 +71,10 @@
 
   .info-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px 16px; }
   @media (max-width:760px){
-    .info-grid{ grid-template-columns:1fr; }
+    .info-grid{ grid-template-columns:1fr!important; }
     .field.wide, .field.full{ grid-column:1/-1; }
     .check-inline.row3{ flex-direction:column!important; align-items:stretch!important; flex-wrap:nowrap!important; }
-    .check-inline.row3 label{ white-space:normal!important; flex:none!important; width:100%; }
+    .check-inline.row3 label{ white-space:normal!important; flex:1 0 100%!important; width:100%!important; box-sizing:border-box; }
     .wrap{ padding:0 14px; }
     .panel-body{ padding:0 14px 18px; }
     .panel-body.no-head{ padding-top:16px; }
