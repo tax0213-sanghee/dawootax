@@ -133,11 +133,11 @@
   .svc-group-title{ font-size:14px; font-weight:700; color:var(--brown); margin:16px 0 8px; padding:6px 0 0; }
   .svc-group-title:first-child{ margin-top:2px; }
 
-  .row{ display:grid; grid-template-columns:26px 1fr 220px 132px; gap:10px; align-items:center; padding:1px 10px; border-radius:13px; transition:.12s; }
+  .row{ display:grid; grid-template-columns:26px 1fr 220px 132px; gap:10px; align-items:center; padding:4px 10px; border-radius:13px; transition:.12s; }
   .row.compact{ grid-template-columns:26px 1fr 132px; }
   .row:hover{ background:#FFFCF0; }
   @media (max-width:780px){
-    .row{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 8px; padding:9px 8px; }
+    .row{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 8px; padding:7px 8px; }
     .row input[type=checkbox]{ order:1; flex-shrink:0; }
     .row .desc{ order:2; flex:1 1 90px; min-width:0; }
     .row .ctrl{ order:3; flex-shrink:0; }
@@ -425,9 +425,6 @@
 </style>
 </head>
 <body>
-<div id="debugBanner" style="background:#ff3333; color:#fff; padding:14px; font-size:14px; text-align:center; font-weight:700; position:relative; z-index:9999;">
-  진단 배너: 로딩 중...
-</div>
 
 <header class="top">
   <div class="wrap">
@@ -634,12 +631,6 @@
 </div>
 
 <script>
-document.getElementById('debugBanner').textContent = `진단: 화면폭=${window.innerWidth}px / 스크립트 시작됨`;
-window.addEventListener('error', function(e){
-  document.getElementById('debugBanner').textContent = `⚠️ 에러 발생: ${e.message} (줄 ${e.lineno})`;
-  document.getElementById('debugBanner').style.background = '#000';
-});
-
 /* ============ 공통 유틸 ============ */
 function man(m){ return (Math.round(m*10)/10).toLocaleString('ko-KR', {maximumFractionDigits:1}); }
 
@@ -1606,17 +1597,22 @@ function applyMobileLayoutFix(){
   const infoGrid = document.querySelector('.info-grid');
   if(infoGrid){
     if(isMobile){
-      infoGrid.style.display = 'block'; // 그리드를 아예 안 쓰고 block으로 전환
+      infoGrid.style.display = 'flex';
+      infoGrid.style.flexWrap = 'wrap';
+      infoGrid.style.gap = '14px 12px';
     } else {
       infoGrid.style.display = '';
+      infoGrid.style.flexWrap = '';
+      infoGrid.style.gap = '';
       infoGrid.style.gridTemplateColumns = '';
     }
   }
   document.querySelectorAll('.info-grid > .field').forEach(el=>{
     if(isMobile){
-      el.style.width = '100%';
+      const isWideOrFull = el.classList.contains('wide') || el.classList.contains('full');
+      el.style.width = isWideOrFull ? '100%' : 'calc(50% - 6px)';
       el.style.boxSizing = 'border-box';
-      el.style.marginBottom = '14px';
+      el.style.marginBottom = '0';
     } else {
       el.style.width = '';
       el.style.boxSizing = '';
@@ -1652,12 +1648,6 @@ function applyMobileLayoutFix(){
 applyMobileLayoutFix();
 window.addEventListener('resize', applyMobileLayoutFix);
 recalc();
-const igEl = document.querySelector('.info-grid');
-const igComputed = igEl ? getComputedStyle(igEl) : null;
-const firstField = document.querySelector('.info-grid > .field:nth-child(2)');
-const fieldComputed = firstField ? getComputedStyle(firstField) : null;
-document.getElementById('debugBanner').textContent = `실행됨 / 폭=${window.innerWidth}px / grid-display=${igComputed?igComputed.display:'-'} / field-display=${fieldComputed?fieldComputed.display:'-'} / field-width=${fieldComputed?fieldComputed.width:'-'}`;
-document.getElementById('debugBanner').style.background = '#2c9c4a';
 </script>
 </body>
 </html>
