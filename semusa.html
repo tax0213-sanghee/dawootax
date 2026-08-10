@@ -1634,7 +1634,9 @@ function applyMobileLayoutFix(){
 applyMobileLayoutFix();
 window.addEventListener('resize', applyMobileLayoutFix);
 recalc();
-document.getElementById('debugBanner').textContent = `✅ 정상 실행됨 / 화면폭=${window.innerWidth}px / info-grid 찾음=${!!document.querySelector('.info-grid')} / 체크박스개수=${document.querySelectorAll('.check-inline.row3 label').length}`;
+const igEl = document.querySelector('.info-grid');
+const igComputed = igEl ? getComputedStyle(igEl) : null;
+document.getElementById('debugBanner').textContent = `실행됨 / 폭=${window.innerWidth}px / display=${igComputed?igComputed.display:'-'} / columns=${igComputed?igComputed.gridTemplateColumns:'-'} / inline스타일=${igEl?igEl.style.gridTemplateColumns:'-'}`;
 document.getElementById('debugBanner').style.background = '#2c9c4a';
 </script>
 </body>
