@@ -125,11 +125,11 @@
   .svc-group-title{ font-size:14px; font-weight:700; color:var(--brown); margin:16px 0 8px; padding:6px 0 0; }
   .svc-group-title:first-child{ margin-top:2px; }
 
-  .row{ display:grid; grid-template-columns:26px 1fr 220px 112px; gap:10px; align-items:center; padding:3px 10px; border-radius:13px; transition:.12s; }
+  .row{ display:grid; grid-template-columns:26px 1fr 220px 112px; gap:10px; align-items:center; padding:4px 10px; border-radius:13px; transition:.12s; }
   .row.compact{ grid-template-columns:26px 1fr 112px; }
   .row:hover{ background:#FFFCF0; }
   @media (max-width:780px){
-    .row{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 8px; padding:9px 8px; }
+    .row{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 8px; padding:7px 8px; }
     .row input[type=checkbox]{ order:1; flex-shrink:0; }
     .row .desc{ order:2; flex:1 1 90px; min-width:0; }
     .row .ctrl{ order:3; flex-shrink:0; }
@@ -905,7 +905,30 @@ buildBook(); buildFile(); buildConsult(); buildAdj(); buildFaithful();
 function applyMobileLayoutFix(){
   const isMobile = window.innerWidth <= 760;
   const infoGrid = document.querySelector('.info-grid');
-  if(infoGrid) infoGrid.style.gridTemplateColumns = isMobile ? '1fr' : '';
+  if(infoGrid){
+    if(isMobile){
+      infoGrid.style.display = 'flex';
+      infoGrid.style.flexWrap = 'wrap';
+      infoGrid.style.gap = '14px 12px';
+    } else {
+      infoGrid.style.display = '';
+      infoGrid.style.flexWrap = '';
+      infoGrid.style.gap = '';
+      infoGrid.style.gridTemplateColumns = '';
+    }
+  }
+  document.querySelectorAll('.info-grid > .field').forEach(el=>{
+    if(isMobile){
+      const isWideOrFull = el.classList.contains('wide') || el.classList.contains('full');
+      el.style.width = isWideOrFull ? '100%' : 'calc(50% - 6px)';
+      el.style.boxSizing = 'border-box';
+      el.style.marginBottom = '0';
+    } else {
+      el.style.width = '';
+      el.style.boxSizing = '';
+      el.style.marginBottom = '';
+    }
+  });
   document.querySelectorAll('.check-inline.row3').forEach(el=>{
     el.style.flexDirection = isMobile ? 'column' : '';
   });
