@@ -305,7 +305,7 @@
     .action-row{ display:none!important; } .row.disabled{ display:none; }
     .row.zero-amount{ display:none!important; }
     .paren-note{ display:none!important; }
-    #fetchStatus, #submissionList, #contactInfo, #notifyBtn, #notifyStatus, .notify-setting{ display:none!important; }
+    #fetchStatus, #submissionList, #contactInfo, #notifyBtn, #notifyStatus, .notify-setting, #sendAlimtalkBtn, #alimtalkStatus{ display:none!important; }
     input[type=checkbox]{ display:none; } .sidebar{ position:static; }
     .panel{ break-inside:avoid; box-shadow:none; border-color:#DDD; }
     #panel-book, #panel-file, #panel-consult, #panel-adj-settle, #panel-adj-report, #panel-faithful, .section-tag, .svc-group-title, #panel-classify{ display:none!important; }
@@ -610,6 +610,8 @@
     </div>
 
     <div id="contactInfo" class="contact-info">담당자 정보를 불러오려면 위에서 신청건을 선택하세요.</div>
+    <button type="button" id="sendAlimtalkBtn" class="btn ghost" style="width:100%; margin-top:8px; padding:10px; font-size:13px; font-weight:700;">💬 고객에게 알림톡 보내기</button>
+    <div id="alimtalkStatus" style="font-size:11.5px; color:var(--ink-faint); margin-top:4px; text-align:center;"></div>
   </aside>
 </main>
 
@@ -1648,6 +1650,46 @@ function applyMobileLayoutFix(){
 applyMobileLayoutFix();
 window.addEventListener('resize', applyMobileLayoutFix);
 recalc();
+
+// ===== 고객에게 알림톡 발송 =====
+document.getElementById('sendAlimtalkBtn').addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('alimtalkStatus');
+  if(!currentContactPhone){
+    statusEl.textContent = '먼저 위에서 탈리 신청건을 불러와 담당자 연락처를 확인해주세요.';
+    return;
+  }
+  const bizName = document.getElementById('bizName').value || '고객';
+  const total = state.totals ? man(state.totals.yearlyTotal) : '0';
+
+  if(!confirm(`${currentContactName || '담당자'}님(${currentContactPhone})에게 알림톡을 보낼까요?`)) return;
+
+  statusEl.textContent = '발송 중...';
+  try {
+    const res = await fetch('/.netlify/functions/send-alimtalk', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: currentContactPhone,
+        // ↓ 카카오에 승인받은 템플릿의 치환문구(#{...})와 정확히 이름이 같아야 합니다.
+        //    승인받은 템플릿에 맞게 아래 key 이름을 조정해주세요.
+        variables: {
+          '#{사업장명}': bizName,
+          '#{총액}': total + '만원'
+        }
+      })
+    });
+    const data = await res.json();
+    if(!res.ok || data.error){
+      statusEl.textContent = '발송 실패: ' + (data.error || res.status);
+      console.error(data);
+      return;
+    }
+    statusEl.textContent = '✅ 알림톡을 보냈습니다.';
+  } catch(err){
+    statusEl.textContent = '발송 실패: ' + err.message;
+    console.error(err);
+  }
+});
 </script>
 </body>
 </html>
