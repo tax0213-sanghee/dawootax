@@ -1604,7 +1604,25 @@ buildBook(); buildFile(); buildConsult(); buildAdj(); buildFaithful();
 function applyMobileLayoutFix(){
   const isMobile = window.innerWidth <= 760;
   const infoGrid = document.querySelector('.info-grid');
-  if(infoGrid) infoGrid.style.gridTemplateColumns = isMobile ? '1fr' : '';
+  if(infoGrid){
+    if(isMobile){
+      infoGrid.style.display = 'block'; // 그리드를 아예 안 쓰고 block으로 전환
+    } else {
+      infoGrid.style.display = '';
+      infoGrid.style.gridTemplateColumns = '';
+    }
+  }
+  document.querySelectorAll('.info-grid > .field').forEach(el=>{
+    if(isMobile){
+      el.style.width = '100%';
+      el.style.boxSizing = 'border-box';
+      el.style.marginBottom = '14px';
+    } else {
+      el.style.width = '';
+      el.style.boxSizing = '';
+      el.style.marginBottom = '';
+    }
+  });
   document.querySelectorAll('.check-inline.row3').forEach(el=>{
     el.style.flexDirection = isMobile ? 'column' : '';
   });
@@ -1636,7 +1654,9 @@ window.addEventListener('resize', applyMobileLayoutFix);
 recalc();
 const igEl = document.querySelector('.info-grid');
 const igComputed = igEl ? getComputedStyle(igEl) : null;
-document.getElementById('debugBanner').textContent = `실행됨 / 폭=${window.innerWidth}px / display=${igComputed?igComputed.display:'-'} / columns=${igComputed?igComputed.gridTemplateColumns:'-'} / inline스타일=${igEl?igEl.style.gridTemplateColumns:'-'}`;
+const firstField = document.querySelector('.info-grid > .field:nth-child(2)');
+const fieldComputed = firstField ? getComputedStyle(firstField) : null;
+document.getElementById('debugBanner').textContent = `실행됨 / 폭=${window.innerWidth}px / grid-display=${igComputed?igComputed.display:'-'} / field-display=${fieldComputed?fieldComputed.display:'-'} / field-width=${fieldComputed?fieldComputed.width:'-'}`;
 document.getElementById('debugBanner').style.background = '#2c9c4a';
 </script>
 </body>
