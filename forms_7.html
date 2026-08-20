@@ -1,0 +1,2664 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>세무법인 다우 — 서식 작성</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EDEDED;
+    --card:#FFFFFF;
+    --primary:#4F53D6;
+    --primary-dark:#3F43B5;
+    --primary-soft:#EEEEFB;
+    --text:#1C1C28;
+    --muted:#8A8FA3;
+    --input-bg:#F2F2F5;
+    --border:#E7E7EC;
+    --ok:#2E9E62;
+    --ok-soft:#E7F6EE;
+    --warn-soft:#FFF7E0;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ font-family:'Noto Sans KR',sans-serif; font-size:16px; background:var(--bg); color:var(--text); line-height:1.6; }
+  /* 임금 - 추가임금 항목 추가(견적서 방식) */
+  .add-item-pill{ width:100%; max-width:300px; padding:9px; border:1.5px dashed var(--primary); border-radius:10px; background:none; color:var(--primary); font-weight:700; font-size:13px; cursor:pointer; font-family:inherit; margin-top:12px; }
+  .add-item-pill:hover{ background:var(--primary-soft); }
+  .subno{ color:var(--primary); font-weight:800; margin-right:3px; }
+  .pay-line{ margin-bottom:7px; }
+  .pay-item-row{ display:flex; align-items:center; gap:8px; margin-top:7px; }
+  .pay-item-row .blank.name{ min-width:150px; width:180px; }
+  .pay-item-del{ color:var(--muted); cursor:pointer; font-weight:700; padding:2px 8px; display:none; }
+  .pay-item-row.has-content .pay-item-del{ display:inline; }
+  .pay-item-del:hover{ color:#E0483D; }
+  .amt-wrap{ white-space:nowrap; }
+  .blank:disabled{ background:var(--input-bg); color:var(--muted); cursor:not-allowed; }
+  .brk-note{ outline:none; border-radius:4px; padding:1px 4px; }
+  .brk-note:focus{ background:var(--primary-soft); }
+  .doc-line.row-inline > .brk-line{ display:block !important; margin-top:3px; color:var(--muted); }
+  /* 제목(번호) 아래 문구는 숫자 라인 뒤로 들여쓰기 */
+  .doc-line:not(.row-inline) > .clause-body,
+  .doc-line:not(.row-inline) > div:not(.doc-sub),
+  .doc-line .brk-line{ padding-left:1.3em; }
+  .monthly-box{ background:var(--input-bg); border-radius:6px; padding:3px 10px; color:var(--primary); font-weight:800; }
+  .pay-sep{ color:var(--muted); margin:0 3px; }
+  .pay-mode{ font-size:12.5px; padding:2px 6px; margin-left:2px; }
+  .net-est{ display:block; background:var(--input-bg); border-radius:8px; padding:7px 12px; margin:6px 0 0 18px; font-size:13px; color:var(--muted); }
+  .net-est b{ color:var(--text); }
+  .pay-box{ margin-top:8px; margin-left:18px; border:1px solid var(--border); border-radius:10px; padding:12px 14px; background:var(--card); }
+  .pay-box-title{ font-size:12.5px; font-weight:800; color:var(--primary); margin-bottom:8px; display:flex; align-items:center; gap:6px; cursor:pointer; }
+  .pay-box-toggle{ margin-left:auto; color:var(--primary); font-weight:700; }
+  .pay-box.collapsed .pay-box-body{ display:none; }
+  .pay-box.collapsed .pay-box-title{ margin-bottom:0; }
+  .pay-grid2{ display:grid; grid-template-columns:1fr 1fr; gap:8px 18px; }
+  .pay-box-body{ container-type:inline-size; display:flex; flex-direction:column; gap:5px; }
+  .pay-flow{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:center; gap:5px 16px; }
+  .pay-cell{ display:flex; align-items:center; gap:5px; min-width:0; white-space:nowrap; min-height:28px; }
+  .pay-flow .pay-cell{ padding-right:13px; }   /* 추가항목 ✕ 공간과 맞춰 원단위 정렬 */
+  .pay-cell .pl{ margin-right:0; flex-shrink:0; }
+  .pay-flow .amt-wrap{ display:inline-flex; align-items:center; gap:2px; flex:1 1 auto; min-width:0; }
+  .pay-flow .amt-wrap input.amt{ flex:1 1 36px; width:auto !important; min-width:0; }
+  .pay-flow .pay-amt{ flex:1 1 auto; text-align:right; min-width:0; }
+  /* 사용자 추가 항목: 한 줄에 2개씩 (금액칸 확보 위해 ✕는 절대배치) */
+  .custom-list{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); grid-auto-rows:28px; align-items:center; gap:5px 16px; }
+  .custom-list .pay-item-row{ position:relative; display:flex; align-items:center; gap:3px; min-width:0; white-space:nowrap; padding-right:13px; }
+  .custom-list .pay-item-row .pi-ck{ flex:0 0 auto; margin:0; }
+  .custom-list .pay-item-row .name{ flex:1 1 34px; width:auto !important; min-width:0; }
+  .custom-list .pi-colon{ flex:0 0 auto; color:var(--muted); }
+  .custom-list .pay-item-row .amt-wrap{ display:inline-flex; align-items:center; gap:1px; flex:1 1 58px; min-width:0; }
+  .custom-list .pay-item-row .amt-wrap input.amt{ flex:1 1 50px; width:auto !important; min-width:0; text-align:right; }
+  .custom-list .pay-item-row .pay-item-del{ display:block; position:absolute; right:-3px; top:50%; transform:translateY(-50%); padding:2px 3px; }
+  @container (max-width:519px){ .pay-flow .pay-amt{ font-size:11.5px; } .pay-flow .pl{ font-size:11.5px; } }
+  .pay-amt{ font-weight:800; color:var(--text); }
+  .np-note{ display:block; margin-top:6px; color:#C0392B; font-size:12.5px; font-weight:600; background:var(--input-bg); border-radius:8px; padding:7px 12px; }
+  .np-note:empty{ display:none; }
+  .wage-check{ font-size:13px; color:var(--muted); margin-top:6px; margin-left:18px; padding:7px 12px; background:var(--input-bg); border-radius:8px; }
+  .wage-check:empty{ display:none; }
+  /* 숫자 증감 스텝퍼(박스 안 ▲▼) */
+  .stepper{ position:relative; display:inline-block; }
+  .stepper > input.step{ padding-left:6px; padding-right:15px; text-align:center; }
+  .stepbtns{ position:absolute; right:2px; top:2px; bottom:2px; width:13px; display:flex; flex-direction:column; visibility:hidden; }
+  .stepper:hover .stepbtns, .stepper > input.step:focus + .stepbtns{ visibility:visible; }   /* 히든 탭: 마우스오버·포커스 시에만 표시 */
+  .stepbtns button{ flex:1; border:none; background:transparent; color:var(--muted); cursor:pointer; font-size:7px; line-height:1; padding:0; display:flex; align-items:center; justify-content:center; font-family:inherit; }
+  .stepbtns button:hover, .stepbtns button:active{ color:var(--primary); }
+
+  .backbtn{ background:#fff; border:1px solid var(--border); border-radius:10px; padding:8px 14px;
+    font-family:inherit; font-size:13px; font-weight:700; color:var(--text); cursor:pointer; white-space:nowrap; display:none; }
+  .backbtn:hover{ border-color:var(--primary); color:var(--primary); }
+  body.from-office .backbtn{ display:inline-block; }
+  body.from-office .doc-picker{ display:none; }
+  body.from-office .nav-links{ display:none; }
+  @media(max-width:520px){ .backbtn{ padding:7px 11px; font-size:12.5px; } }
+  .stale-warn{ background:#FDEEEC; border:1px solid #F0C4BE; color:#8A3B2E; border-radius:12px;
+    padding:12px 15px; font-size:13.5px; line-height:1.6; margin:0 0 14px; }
+  .of-box{ background:var(--input-bg); border-radius:12px; padding:14px 16px; }
+  .of-r{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; font-size:13px; padding:3px 0; }
+  .of-r span{ color:var(--muted); }
+  .of-r b{ font-weight:700; }
+  .of-a{ margin-top:8px; padding-top:8px; border-top:1px solid var(--border); font-size:12.5px; color:var(--muted); line-height:1.5; }
+  .clause-body{ white-space:pre-line; }
+  .stdrows{ }
+  .stdrow{ font-size:14.5px; line-height:2.0; margin:2px 0; }
+  .paytbl{ border:1px solid var(--border); border-radius:10px; overflow:hidden; margin:8px 0 10px; }
+  .ptr{ display:grid; grid-template-columns:86px minmax(0,1.1fr) minmax(0,1.2fr) minmax(0,1fr);
+        gap:8px; align-items:center; padding:7px 12px; border-top:1px solid var(--border); line-height:1.6; margin:0; }
+  .ptr.pt3{ grid-template-columns:86px minmax(0,1.2fr) minmax(0,1.2fr); }
+  .paytbl > .ptr:first-child{ border-top:0; background:var(--input-bg); font-size:12.5px; font-weight:800; color:var(--muted); }
+  .ptr > span{ display:flex; align-items:center; gap:5px; white-space:nowrap; }
+  .ptr input{ width:100% !important; min-width:0; }
+  @media(max-width:640px){ .ptr{ grid-template-columns:64px minmax(0,1fr); row-gap:4px; }
+    .ptr.pt3{ grid-template-columns:64px minmax(0,1fr); } }
+  .doc-picker{ display:flex; gap:8px; overflow-x:auto; padding:4px 0 14px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  @media(min-width:900px){ .doc-picker{ flex-wrap:wrap; overflow:visible; } }
+  @media(max-width:760px){ .panel-hint{ display:none; } }
+  .doc-picker::-webkit-scrollbar{ display:none; }
+  .dp{ flex:0 0 auto; background:#fff; border:1px solid var(--border); border-radius:99px; padding:9px 16px;
+       font-family:inherit; font-size:13.5px; font-weight:700; color:var(--muted); cursor:pointer; white-space:nowrap; }
+  .dp:hover{ border-color:var(--primary); color:var(--primary); }
+  .dp.on{ background:var(--primary); border-color:var(--primary); color:#fff; }
+  .ck-list{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px 18px; margin-top:6px; }
+  .ck-list label{ display:flex; align-items:center; gap:7px; font-size:14px; }
+  .ck-list.ck-desc{ grid-template-columns:1fr; gap:9px; }
+  .ck-list.ck-desc label{ align-items:flex-start; }
+  .ck-list.ck-desc input[type=checkbox]{ margin-top:3px; }
+  .apg{ display:grid; grid-template-columns:auto minmax(0,1fr) auto minmax(0,1fr); gap:9px 10px;
+        align-items:center; margin-top:8px; }
+  .apg > label{ font-size:12.5px; font-weight:700; color:var(--muted); white-space:nowrap; }
+  .apg > input,.apg > select{ width:100% !important; min-width:0; }
+  .apg > .wide2{ grid-column:2 / -1; }
+  @media(max-width:700px){ .apg{ grid-template-columns:auto minmax(0,1fr) } .apg > .wide2{ grid-column:2 / -1 } }
+  .apof{ display:flex; flex-wrap:wrap; gap:5px 14px; font-size:13px; color:var(--muted);
+         background:var(--input-bg); border-radius:10px; padding:9px 13px; margin-top:6px; }
+  .apof b{ color:var(--text); }
+  .aprow{ margin-bottom:4px !important; border-top:0 !important; padding-top:2px !important; }
+  .ck-list .d{ display:block; font-size:12.5px; color:var(--muted); font-weight:400; margin-top:1px; }
+  @media(min-width:820px){ .ck-list.ck-desc{ grid-template-columns:1fr 1fr; gap:9px 22px; } }
+  .ck-list input[type=checkbox]{ width:16px; height:16px; accent-color:var(--primary); flex:none; }
+  @media(max-width:700px){ .ck-list{ grid-template-columns:1fr; } }
+  .wk-hd,.wk-row{ display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) 24px;
+      gap:6px; align-items:center; }
+  .wk-hd{ font-size:11.5px; font-weight:800; color:var(--muted); margin:8px 0 4px; }
+  .wk-row{ margin-bottom:5px; }
+  .wk-row input{ width:100% !important; min-width:0; }
+  .wk-del{ color:var(--muted); cursor:pointer; font-weight:700; text-align:center; }
+  .wk-del:hover{ color:#E0483D; }
+  @media(max-width:620px){
+    .wk-hd{ display:none; }
+    .wk-row{ grid-template-columns:1fr 1fr 22px; gap:5px; margin-bottom:10px;
+      padding-bottom:10px; border-bottom:1px dashed var(--border); }
+    .wk-row input:nth-child(1){ grid-column:1; }
+    .wk-row input:nth-child(2){ grid-column:2; }
+    .wk-row input:nth-child(3){ grid-column:1; }
+    .wk-row input:nth-child(4){ grid-column:2; }
+    .wk-del{ grid-column:3; grid-row:1; }
+  }
+  nav{
+    position:sticky; top:0; z-index:50;
+    background:#fff; border-bottom:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between; padding:16px 40px;
+  }
+  .brand{ display:flex; align-items:center; gap:6px; font-weight:800; font-size:19px; color:var(--text); }
+  .brand .dot{ width:8px; height:8px; background:var(--primary); border-radius:3px; }
+  .tabs{ display:flex; gap:32px; }
+  .tab-btn{ background:none; border:none; color:var(--muted); font-family:inherit; padding:8px 2px; font-size:14.5px; font-weight:600; cursor:pointer; position:relative; }
+  .tab-btn.active{ color:var(--text); }
+  .tab-btn.active::after{ content:''; position:absolute; left:0; right:0; bottom:-17px; height:2px; background:var(--primary); }
+  .credit-badge{ background:var(--primary-soft); color:var(--primary); font-size:12.5px; font-weight:700; padding:7px 14px; border-radius:20px; }
+  .nav-right{ display:flex; align-items:center; gap:22px; }
+  .nav-links{ display:flex; align-items:center; gap:18px; }
+  .nav-links a{ color:var(--text); font-size:13px; font-weight:500; text-decoration:none; cursor:pointer; }
+  .nav-links a:hover{ color:var(--primary); }
+  .nav-links a.mypage{ font-weight:700; }
+
+  .page{ display:none; max-width:1180px; margin:0 auto; padding:40px 32px 100px; }
+  .page.active{ display:block; }
+  .grid2{ display:grid; grid-template-columns:2fr 1fr; gap:20px; align-items:start; }
+  .right-col-sticky{ position:sticky; top:80px; align-self:start; }
+
+  .tool-head{ margin-bottom:22px; }
+  .tool-head h2{ font-size:24px; font-weight:800; }
+  .tool-head p{ color:var(--muted); font-size:14px; margin-top:6px; }
+
+  .panel{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:22px; box-shadow:0 1px 2px rgba(20,20,40,.03); margin-bottom:16px; }
+  .panel-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .panel-head h3{ font-size:14.5px; font-weight:700; display:flex; align-items:center; gap:8px; }
+  .panel-head h3 .dot{ width:6px; height:6px; background:var(--primary); border-radius:2px; }
+  .panel-hint{ font-size:11.5px; color:var(--muted); }
+
+  .subhead{ font-size:12px; font-weight:800; color:var(--primary); letter-spacing:.3px; margin:6px 0 10px; }
+  .subhead:first-child{ margin-top:0; }
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .row3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+  .field{ margin-bottom:12px; }
+  .field.full{ grid-column:1 / -1; }
+  .field label{ display:block; font-size:12.5px; color:var(--muted); font-weight:600; margin-bottom:5px; }
+  .field input[type=text], .field input[type=date], .field input[type=number], .field input[type=email], .field select{
+    width:100%; padding:10px 13px; border:1px solid transparent; border-radius:10px; font-size:14px;
+    font-family:inherit; background:var(--input-bg); color:var(--text);
+  }
+  .field input:focus, .field select:focus{ outline:none; border-color:var(--primary); background:#fff; }
+
+  /* 유형 선택 탭 */
+  .type-tabs{ display:grid; grid-template-columns:1fr 1fr 1fr; margin-bottom:14px; border:1px solid var(--border); border-radius:12px; overflow:hidden; background:#fff; }
+  .type-tab{ background:#fff; border:none; border-top:3px solid transparent; padding:14px 8px; cursor:pointer; font-size:13.5px; color:var(--text); font-family:inherit; display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .type-tab + .type-tab{ border-left:1px solid var(--border); }
+  .type-tab .ico{ font-size:20px; }
+  .type-tab b{ font-weight:800; font-size:14px; }
+  .type-tab small{ color:var(--muted); font-size:11px; font-weight:600; }
+  .type-tab.active{ border-top-color:var(--primary); background:var(--primary-soft); }
+  .type-tab.active b, .type-tab.active small{ color:var(--primary); }
+
+  .doc-toolbar{ display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
+  .seg{ display:flex; background:var(--input-bg); border-radius:10px; padding:3px; }
+  .seg button{ padding:9px 16px; border:none; background:none; font-size:13px; font-weight:600; cursor:pointer; color:var(--muted); border-radius:8px; font-family:inherit; }
+  .seg button.on{ background:#fff; color:var(--primary); box-shadow:0 1px 3px rgba(0,0,0,.08); }
+  .seg-label{ font-size:12px; color:var(--muted); font-weight:600; }
+
+  /* 계약서 미리보기 */
+  .doc-preview{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:26px 28px; font-size:14.5px; line-height:1.65; position:relative; box-shadow:0 1px 2px rgba(20,20,40,.03); }
+  .doc-preview h4{ text-align:center; font-size:19px; font-weight:800; margin-bottom:6px; }
+  .doc-preview h4.title-box{ display:table; border:1.5px solid var(--text); border-radius:8px; padding:7px 20px; margin:0 auto 10px; }
+  .title-box .tb-name{ display:inline; font-size:18px; font-weight:800; }
+  .title-box .tb-term{ display:inline; font-size:13px; font-weight:600; color:var(--muted); margin-left:6px; }
+  .doc-intro{ font-size:14px; color:var(--muted); text-align:left; margin-top:20px; margin-bottom:22px; }
+  .stamped{ position:absolute; top:20px; right:24px; display:inline-flex; align-items:center; gap:6px; background:var(--ok-soft); color:var(--ok); font-size:12px; font-weight:700; padding:7px 14px; border-radius:20px; opacity:0; transition:opacity .3s; }
+  .stamped::before{ content:'✓'; font-weight:900; }
+  .stamped.show{ opacity:1; }
+
+  .doc-line{ margin-bottom:11px; border-top:1px solid var(--border); padding-top:11px; }
+  .doc-preview > .doc-line:first-of-type{ border-top:none; padding-top:0; }
+  .no-screen{ display:none; }   /* 화면에서만 숨김(인쇄는 별도 영역에서 생성) */
+  .pay-extras .inline-check{ margin-right:2px; }
+  .doc-line .ln{ font-size:15px; color:var(--primary); font-weight:800; display:inline-block; margin-bottom:6px; }
+  /* 제목과 답변을 한 줄에 */
+  .doc-line.row-inline > .ln{ display:inline; margin-bottom:0; margin-right:8px; }
+  .doc-line.row-inline > div:not(.doc-sub){ display:inline; }
+  .mbr{ display:none; }   /* 모바일 줄바꿈용(데스크톱 숨김) */
+  /* 일반 폰: 제목 다음 줄로 내려 줄바뀜 방지 */
+  @media (max-width:600px){
+    .mbr{ display:block; }
+    .doc-preview .doc-line.row-inline > .ln{ display:block; margin-right:0; margin-bottom:3px; }
+    .doc-preview .doc-line.row-inline > div:not(.doc-sub){ display:block; }
+    /* 기본임금 세부내역: 폰에서는 한 줄에 하나씩 */
+    .pay-flow{ grid-template-columns:1fr; }
+    .custom-list{ grid-template-columns:1fr; grid-auto-rows:auto; }
+    /* 상여금·기타급여 입력칸: 줄 꽉차게, 길면 아래로 */
+    input.blank.xwide{ width:100%; min-width:0; box-sizing:border-box; }
+    /* 사회보험: 국민연금+건강보험 / 고용보험+산재보험 각각 한 줄 */
+    .ins-cells{ display:grid !important; grid-template-columns:1fr 1fr; gap:4px 8px; }
+    .ins-cells .inline-check{ margin-left:0 !important; margin-right:0; }
+    .ins-cells .np-note{ grid-column:1 / -1; }
+  }
+  .clause-wrap{ position:relative; }
+  .doc-line .reset-link{ position:absolute; top:5px; right:7px; font-size:16px; line-height:1; color:var(--muted); cursor:pointer; font-weight:700; z-index:1; }
+  .doc-line .reset-link:hover{ color:var(--primary); }
+  .doc-line .del-line{ float:right; font-size:15px; line-height:1; color:var(--muted); cursor:pointer; font-weight:700; margin-left:8px; padding:0 4px; }
+  .doc-line .del-line:hover{ color:#E0483D; }
+  /* 사용자 추가 항목(항목 추가) */
+  [data-ph]:empty:before{ content:attr(data-ph); color:#b8b8c0; font-weight:400; }
+  .custom-clause .ln-num{ color:var(--primary); font-weight:800; }
+  .custom-clause .ln-label{ color:var(--primary); font-weight:800; outline:none; border-bottom:1px dashed var(--border); min-width:64px; padding:0 2px; cursor:text; }
+  .custom-clause .clause-body{ outline:none; cursor:text; border-radius:6px; }
+  .custom-clause .ln-label:hover{ background:#eeeffb; border-bottom-color:var(--primary); }
+  .custom-clause .clause-body:hover{ background:#f4f4fb; }
+  .custom-clause .ln-label:focus, .custom-clause .clause-body:focus{ background:#eeeffb; }
+  /* 입력 가능한 칸임을 마우스오버로 표시 */
+  .pay-item-row .name, .pay-item-row .amt, .pay-flow .amt input.amt{ cursor:text; }
+  .pay-item-row .name:hover, .pay-item-row .amt:hover{ background:#e7e7f4; }
+  .move-ctrl{ display:inline-flex; gap:2px; margin-left:8px; vertical-align:middle; }
+  .move-ctrl .mv{ cursor:pointer; color:var(--muted); font-size:11px; line-height:1; padding:2px 4px; border:1px solid var(--border); border-radius:5px; background:#fff; }
+  .move-ctrl .mv:hover{ color:var(--primary); border-color:var(--primary); }
+  .add-clause-row{ margin-top:14px; }
+  .add-clause-row .add-item-pill{ max-width:none; width:100%; }
+  .doc-line.removed{ margin-bottom:10px; }
+  .doc-line.removed > *:not(.restore-bar){ display:none !important; }
+  .restore-bar{ display:flex; justify-content:space-between; align-items:center; background:var(--input-bg); border:1px dashed var(--border); border-radius:8px; padding:8px 12px; font-size:12.5px; color:var(--muted); }
+  .restore-bar b{ color:var(--text); font-weight:600; }
+  .restore-bar .restore-link{ color:var(--primary); font-weight:700; cursor:pointer; white-space:nowrap; margin-left:12px; font-size:18px; line-height:1; padding:2px 6px; border-radius:6px; }
+  .restore-bar .restore-link:hover{ background:var(--primary-soft); }
+  .doc-sub{ font-size:13px; color:var(--muted); margin:2px 0 6px 0; }
+
+  .blank{ border:1px solid transparent; border-radius:6px; background:var(--input-bg); font-family:inherit; font-size:14.5px; padding:3px 8px; color:var(--text); min-width:64px; }
+  .blank:focus{ outline:none; border-color:var(--primary); background:#fff; }
+  .blank.wide{ min-width:160px; }
+  .blank.xwide{ min-width:220px; width:55%; }
+  .blank.num{ min-width:52px; text-align:right; }
+  select.blank{ background:var(--input-bg); }
+
+  .clause-body{ padding:5px 26px 5px 7px; border-radius:6px; outline:none; border:1px solid transparent; }
+  .clause-body:focus{ background:var(--input-bg); border-color:var(--muted); }
+  .clause-body.edited{ background:var(--input-bg); }
+
+  .inline-check{ display:inline-flex; align-items:center; gap:4px; margin-right:14px; font-size:14px; }
+  .inline-check input[type=checkbox]{ accent-color:var(--primary); width:15px; height:15px; }
+
+  .wage-out{ color:var(--primary); font-weight:800; }
+
+  .sig-grid{ display:grid; grid-template-columns:1fr; gap:20px; margin-top:8px; }
+  .seal-box{ display:inline-flex; align-items:center; vertical-align:middle; margin-left:6px; }
+  .seal-img{ height:48px; width:auto; mix-blend-mode:multiply; }
+  /* 서명·날인 통합 섹션(사업주 칸 / 근로자 칸) */
+  .signseal{ margin-top:14px; padding:0; overflow:hidden; }
+  .ss-head{ display:flex; align-items:center; justify-content:space-between; padding:14px 16px; cursor:pointer; font-weight:700; font-size:14px; color:var(--text); }
+  .signseal:not(.collapsed) .ss-head{ border-bottom:1px solid var(--border); }
+  .ss-toggle{ color:var(--primary); font-weight:700; }
+  .signseal.collapsed .ss-body{ display:none; }
+  .ss-body{ padding:4px 14px 14px; }
+  .ss-person{ padding:12px 0; }
+  .ss-person + .ss-person{ border-top:1px solid var(--border); }
+  .ss-person-title{ font-size:12.5px; font-weight:800; color:var(--primary); margin-bottom:8px; }
+  .ss-methods{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .ss-row{ display:flex; flex-direction:column; align-items:stretch; gap:6px; }
+  .ss-label{ font-size:12.5px; font-weight:700; color:var(--text); text-align:center; }
+  .ss-prev{ display:flex; align-items:center; justify-content:center; height:66px; border-radius:10px; background:var(--input-bg); box-shadow:inset 0 0 0 1px var(--border); overflow:hidden; }
+  .ss-prev.on{ box-shadow:inset 0 0 0 2px var(--primary); background:#eeeffb; }
+  .ss-prev img{ height:56px; width:auto; }
+  .ss-btn{ font-size:12.5px; font-weight:700; color:var(--primary); background:var(--primary-soft); border:none; border-radius:8px; padding:9px 10px; cursor:pointer; font-family:inherit; white-space:nowrap; }
+  .ss-btn:hover{ filter:brightness(.96); }
+  .ss-ck{ display:inline-flex; align-items:center; justify-content:center; gap:5px; font-size:12.5px; font-weight:600; color:var(--primary); cursor:pointer; white-space:nowrap; background:var(--primary-soft); padding:9px 10px; border-radius:8px; }
+  .ss-ck input{ accent-color:var(--primary); width:15px; height:15px; margin:0; }
+  /* 서명 패드 모달 */
+  .sign-modal{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:3000; align-items:center; justify-content:center; padding:18px; }
+  .sign-box{ background:#fff; border-radius:16px; padding:18px; width:100%; max-width:460px; box-shadow:0 12px 40px rgba(0,0,0,.3); }
+  .sign-box-title{ font-weight:800; font-size:15px; color:var(--text); margin-bottom:10px; }
+  .sign-box-title .sign-sub{ display:block; font-weight:400; font-size:12px; color:var(--muted); margin-top:3px; }
+  .sign-canvas{ width:100%; height:200px; border:1.5px dashed var(--border); border-radius:12px; background:#fff; touch-action:none; cursor:crosshair; }
+  .sign-box-actions{ display:flex; gap:8px; margin-top:12px; }
+  .sign-box-actions .btn{ flex:1; }
+  .seal-thumb{ height:42px; width:auto; mix-blend-mode:multiply; }
+  .seal-empty{ font-size:11px; color:var(--muted); }
+  .sig-grid .party{ font-size:11.5px; color:var(--primary); font-weight:700; margin-bottom:6px; }
+  .sig-row{ display:flex; gap:6px; align-items:baseline; margin-bottom:6px; font-size:14px; }
+  .sig-row span.l{ color:var(--muted); min-width:52px; }
+
+  /* 액션 바 */
+  .action-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .action-grid .btn{ width:100%; }
+  .btn{ padding:14px 12px; background:var(--primary); color:#fff; border:none; border-radius:12px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; display:flex; align-items:center; justify-content:center; gap:6px; }
+  .btn:hover{ background:var(--primary-dark); }
+  .btn.ghost{ background:#fff; border:1.5px solid var(--primary); color:var(--primary); box-shadow:0 1px 2px rgba(20,20,40,.04); }
+  .btn.ghost:hover{ background:var(--primary-soft); }
+  .btn.kakao{ background:#FEE500; color:#391B1B; }
+  .btn.kakao:hover{ background:#f5dc00; }
+  .issue-note{ font-size:11.5px; color:var(--muted); margin-top:10px; text-align:center; }
+
+  /* 토스트 */
+  .toast{ position:fixed; left:50%; bottom:90px; transform:translateX(-50%) translateY(20px); background:var(--text); color:#fff; font-size:13.5px; font-weight:600; padding:12px 20px; border-radius:12px; opacity:0; pointer-events:none; transition:.25s; z-index:2000; box-shadow:0 6px 20px rgba(0,0,0,.25); max-width:90vw; text-align:center; }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  footer{ text-align:center; padding:28px; color:var(--muted); font-size:12px; border-top:1px solid var(--border); background:#fff; }
+
+  /* 카카오 상담 FAB */
+  .kakao-fab{ position:fixed; right:24px; bottom:96px; width:52px; height:52px; border-radius:50%; background:#FEE500; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 14px rgba(0,0,0,.18); text-decoration:none; z-index:999; transition:transform .15s ease; }
+  .kakao-fab:hover{ transform:scale(1.08); }
+
+  /* 인쇄 */
+  #printArea{ display:none; }
+  @media print{
+    body > *:not(#printArea){ display:none !important; }
+    /* 한글파일 기준: 제목 16pt · 본문 12pt */
+    #printArea{ display:block !important; padding:24px 30px 84px; color:#111; font-family:'Noto Sans KR',sans-serif; font-size:12pt; line-height:1.5; }
+    #printArea h1{ text-align:center; font-size:16pt; font-weight:800; margin-bottom:6px; }
+    #printArea .p-title-box{ display:table; border:1.5px solid #111; border-radius:8px; padding:6px 18px; margin:0 auto 10px; }
+    #printArea .p-title-box .p-tb-name{ display:inline; font-size:16pt; font-weight:800; }
+    #printArea .p-title-box .p-tb-term{ display:inline; font-size:12pt; font-weight:600; color:#555; margin-left:6px; }
+    #printArea .p-intro{ font-size:12pt; color:#333; margin:14px 0 20px; }
+    #printArea .p-line{ margin-bottom:7px; font-size:12pt; }
+    #printArea .p-line .p-ln{ font-size:12pt; color:#4F53D6; font-weight:700; display:block; margin-bottom:2px; }
+    #printArea .p-line .p-lni{ font-size:12pt; color:#4F53D6; font-weight:700; display:inline; margin-right:6px; }
+    #printArea .p-sub{ font-size:12pt; margin:0 0 6px 16px; }
+    #printArea .p-body{ font-size:12pt; padding-left:16px; margin-bottom:7px; }
+    #printArea .p-sig{ display:grid; grid-template-columns:1fr; gap:22px; margin-top:26px; border-top:1px solid #ccc; padding-top:18px; }
+    #printArea .p-sig .p-party{ font-size:12pt; color:#4F53D6; font-weight:700; margin-bottom:10px; }
+    #printArea .p-sig .p-srow{ font-size:12pt; line-height:1; margin:0 0 16px; }
+    #printArea .p-sig .p-srow:last-child{ margin-bottom:0; }
+    #printArea .p-closing-msg{ margin-top:44px; text-align:center; font-size:12pt; color:#333; line-height:1.7; }
+    #printArea .p-office-footer{ margin-top:64px; padding-top:14px; border-top:1px solid #ccc; font-size:12pt; color:#444; text-align:center; line-height:1.6; }
+    #printArea .p-foot{ margin-top:14px; font-size:9pt; color:#aaa; text-align:center; }
+    #printArea .p-consent{ page-break-before:always; }
+  }
+
+  @media (max-width:900px){
+    .grid2{ grid-template-columns:1fr; gap:14px; }
+    .right-col-sticky{ position:static; top:auto; }
+  }
+  @media (max-width:720px){
+    nav{ padding:14px 18px; }
+    .hide-mobile{ display:none !important; }
+    .tabs{ gap:18px; }
+    .page{ padding:24px 14px 120px; }
+    .panel{ padding:16px; }
+    .grid2{ grid-template-columns:1fr; gap:14px; }
+    .right-col-sticky{ position:static; top:auto; }
+    .row2, .row3{ grid-template-columns:1fr; }
+    .doc-preview{ padding:20px 16px; }
+    .type-tab{ padding:12px 4px; }
+    .type-tab small{ display:none; }
+    .sig-grid{ grid-template-columns:1fr; }
+    .action-bar{ flex-wrap:wrap; }
+    .btn{ font-size:14px; padding:13px 8px; }
+    .field input, .field select{ font-size:15px; }
+    .blank{ font-size:14.5px; }
+    .clause-body{ font-size:14px; }
+    /* 모바일에서 정보 입력을 접을 수 있게 */
+    .collapsible.collapsed .panel-body{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="brand"><span class="dot"></span><span id="brandName">세무법인 다우</span></div>
+  <div class="nav-right">
+    <button type="button" class="backbtn" onclick="backToOffice()">‹ 서식자료실로 돌아가기</button>
+    <div class="nav-links">
+      <a id="navTel" href="tel:064-900-7170">064-900-7170</a>
+      <a href="http://pf.kakao.com/_TZegG/chat" target="_blank" rel="noopener">카톡 문의</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page active" id="page-labor">
+  <div class="doc-picker" id="docPicker"></div>
+  <div class="tool-head">
+    <h2 id="docHeadT">고용계약서</h2>
+    <p id="docHeadP">정보를 입력하면 서식이 바로 채워집니다. 각 항목은 눌러서 고칠 수 있습니다.</p>
+  </div>
+
+  <div class="grid2">
+    <!-- 좌측: 근로자 정보 + 유형 + 계약서 -->
+    <div>
+      <div class="panel" id="leftPanel"></div>
+
+      <!-- 유형 선택 -->
+      <div class="type-tabs" id="typeTabs">
+        <button class="type-tab active" data-type="standard" onclick="selectType('standard')">
+          <span class="ico">📄</span><b>근로계약서</b><small>4대보험 상시근로자</small>
+        </button>
+        <button class="type-tab" data-type="daily" onclick="selectType('daily')">
+          <span class="ico">🧾</span><b>일용직</b><small>시급 × 시간 자동계산</small>
+        </button>
+        <button class="type-tab" data-type="freelance" onclick="selectType('freelance')">
+          <span class="ico">🤝</span><b>프리랜서</b><small>3.3% 원천징수</small>
+        </button>
+      </div>
+
+      <!-- 표준: 15시간 이상/미만 토글 -->
+      <div class="doc-toolbar" id="stdToolbar">
+        <div class="seg" id="stdSubType">
+          <button class="on" data-v="이상" onclick="setSub('이상')">주15시간 이상 근무</button>
+          <button data-v="미만" onclick="setSub('미만')">주15시간 미만 근무</button>
+        </div>
+      </div>
+
+      <!-- 계약서 -->
+      <div class="doc-preview" id="contractDoc"><div class="stamped" id="docStamp">발급완료</div></div>
+    </div>
+
+    <!-- 우측 상단: 사업주 정보 + 액션 -->
+    <div class="right-col-sticky">
+      <div class="panel" id="rightPanel"></div>
+
+      <div class="panel signseal collapsed" id="signSealSection">
+        <div class="ss-head" onclick="toggleSignSeal()">
+          <span>✍️ 서명 · 날인 (인쇄에 포함)</span>
+          <span class="ss-toggle" id="ssToggle">▸</span>
+        </div>
+        <div class="ss-body">
+          <div class="ss-person">
+            <div class="ss-person-title" id="ssTitleBiz">사업주(사용자)</div>
+            <div class="ss-methods">
+              <div class="ss-row">
+                <span id="sealPrev_biz" class="ss-prev"></span>
+                <label class="ss-ck"><input type="checkbox" id="sealOn_biz" onchange="toggleSeal('biz', this.checked)"> 인쇄</label>
+              </div>
+              <div class="ss-row">
+                <span id="signPrev_biz" class="ss-prev"><span class="seal-empty">서명 없음</span></span>
+                <button type="button" class="ss-btn" onclick="openSignPad('biz')">서명하기</button>
+              </div>
+            </div>
+          </div>
+          <div class="ss-person">
+            <div class="ss-person-title" id="ssTitleWorker">근로자</div>
+            <div class="ss-row">
+              <span id="signPrev_worker" class="ss-prev"><span class="seal-empty">서명 없음</span></span>
+              <button type="button" class="ss-btn" onclick="openSignPad('worker')">서명하기</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-grid">
+        <button class="btn ghost" onclick="printContract()">🖨 인쇄 / PDF 저장</button>
+        <button class="btn" onclick="copyLink()">🔗 링크 복사</button>
+        <button class="btn ghost" onclick="shareKakao()">💬 카톡공유</button>
+        <button class="btn ghost" onclick="shareEmail()">✉ 이메일전송</button>
+      </div>
+      <p class="issue-note" id="issueNote" style="margin-top:12px;"></p>
+    </div>
+  </div>
+</div>
+
+<!-- 근로자 서명 패드 -->
+<div id="signModal" class="sign-modal">
+  <div class="sign-box">
+    <div class="sign-box-title"><span id="signModalTitle">근로자 서명</span><span class="sign-sub">손가락 또는 마우스로 서명해 주세요</span></div>
+    <canvas id="signCanvas" class="sign-canvas"></canvas>
+    <div class="sign-box-actions">
+      <button type="button" class="btn ghost" onclick="clearSign()">지우기</button>
+      <button type="button" class="btn ghost" onclick="closeSignPad()">닫기</button>
+      <button type="button" class="btn" onclick="saveSign()">서명 완료</button>
+    </div>
+  </div>
+</div>
+
+<footer id="pageFooter">세무법인 다우 · 제주특별자치도 서귀포시 대정읍 동일하모로149번길 4 2층 · 064-900-7170</footer>
+
+<a href="http://pf.kakao.com/_TZegG/chat" target="_blank" rel="noopener" class="kakao-fab" title="카카오톡 상담">
+  <svg width="28" height="28" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+    <path d="M16 5C8.82 5 3 9.64 3 15.36c0 3.68 2.42 6.92 6.06 8.77-.27.98-1.72 5.94-1.77 6.32 0 0-.03.29.16.4.19.11.42.02.42.02.55-.08 6.36-4.22 7.36-4.93.9.13 1.82.2 2.77.2 7.18 0 13-4.64 13-10.78S23.18 5 16 5z" fill="#391B1B"/>
+  </svg>
+</a>
+
+<div class="toast" id="toast"></div>
+<div id="printArea"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+/* ============================================================
+   세무사스토어 · 고용계약서 모듈
+   설계 개요
+   - S: 모든 입력값의 단일 소스(state). [data-k]로 양방향 바인딩.
+   - 유형(standard/daily/freelance) 선택 → renderContract()가 S 기준으로 조항을 세팅.
+   - 조항 문구(.clause-body)는 CLAUSE_DEFAULTS에 기본값 보관 → 개별 수정/리셋 가능.
+   - 출력/카톡/이메일: 계약서를 텍스트로 직렬화하여 인쇄·PDF·메일 본문 생성.
+   ============================================================ */
+
+const S = {};                 // 공통 상태 (data-k → 값)
+let curType = 'standard';     // 현재 유형
+let curSub  = '이상';          // 표준: 주15시간 이상/미만
+let credit  = 3;
+
+/* ---------- 유틸 ---------- */
+const won = n => (n||0).toLocaleString('ko-KR') + '원';
+const numVal = s => +(String(s==null?'':s).replace(/[^\d]/g,'')) || 0;   // 콤마 등 제거 후 숫자
+function formatAmtEl(el){
+  const d = el.value.replace(/[^\d]/g,'');
+  el.value = d ? Number(d).toLocaleString('ko-KR') : '';
+}
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function fmtDate(iso){
+  if(!iso) return '';
+  const [y,m,d] = iso.split('-'); if(!d) return iso;
+  return `${y}년 ${m}월 ${d}일`;
+}
+
+/* ---------- 상태 바인딩(양방향) ---------- */
+function formatDateEl(el){
+  const d = el.value.replace(/[^\d]/g,'').slice(0,8);
+  let out = d.slice(0,4);
+  if(d.length > 4) out += '-' + d.slice(4,6);
+  if(d.length > 6) out += '-' + d.slice(6,8);
+  el.value = out;
+}
+function formatPhoneEl(el){
+  const d = el.value.replace(/[^\d]/g,'').slice(0,11);
+  let out;
+  if(d.startsWith('02')){          // 서울 지역번호
+    if(d.length < 3) out = d;
+    else if(d.length < 6) out = d.slice(0,2)+'-'+d.slice(2);
+    else if(d.length < 10) out = d.slice(0,2)+'-'+d.slice(2,5)+'-'+d.slice(5);
+    else out = d.slice(0,2)+'-'+d.slice(2,6)+'-'+d.slice(6);
+  } else {
+    if(d.length < 4) out = d;
+    else if(d.length < 7) out = d.slice(0,3)+'-'+d.slice(3);
+    else if(d.length < 11) out = d.slice(0,3)+'-'+d.slice(3,6)+'-'+d.slice(6);
+    else out = d.slice(0,3)+'-'+d.slice(3,7)+'-'+d.slice(7);
+  }
+  el.value = out;
+}
+function formatBizNoEl(el){           // 사업자등록번호 000-00-00000
+  const d = el.value.replace(/[^\d]/g,'').slice(0,10);
+  let out = d.slice(0,3);
+  if(d.length > 3) out += '-' + d.slice(3,5);
+  if(d.length > 5) out += '-' + d.slice(5);
+  el.value = out;
+}
+document.addEventListener('input', e=>{
+  const amtEl = e.target.closest('.amt');
+  if(amtEl) formatAmtEl(amtEl);          // 금액칸 천단위 콤마
+  const dateEl = e.target.closest('.dateauto');
+  if(dateEl) formatDateEl(dateEl);       // 날짜칸 자동 하이픈(YYYY-MM-DD)
+  const phoneEl = e.target.closest('.phoneauto');
+  if(phoneEl) formatPhoneEl(phoneEl);    // 연락처 자동 하이픈
+  const biznoEl = e.target.closest('.biznoauto');
+  if(biznoEl) formatBizNoEl(biznoEl);    // 사업자등록번호 자동 하이픈
+  const el = e.target.closest('[data-k]');
+  if(!el) return;
+  const k = el.dataset.k;
+  S[k] = el.value;
+  // 같은 key를 가진 다른 입력들(패널↔계약서) 동기화
+  document.querySelectorAll(`[data-k="${k}"]`).forEach(o=>{ if(o!==el && o.value!==el.value) o.value = el.value; });
+  // 파생 표시(급여 합계, 서명란 미러 등) 갱신
+  onFieldChange(k);
+});
+
+function applyState(root){
+  root.querySelectorAll('[data-k]').forEach(el=>{
+    const v = S[el.dataset.k];
+    if(v==null) return;
+    if(el.type==='checkbox'){ if(!el.disabled) el.checked = (v==='true' || v===true); }
+    else el.value = v;
+  });
+}
+/* 국민연금: 만 60세 이상은 사업장 가입 의무대상이 아니므로 체크 해제 */
+function ageFromBirth(b){
+  if(!b) return null;
+  const m = String(b).match(/(\d{4})-(\d{1,2})-(\d{1,2})/); if(!m) return null;
+  const by=+m[1], bm=+m[2], bd=+m[3];
+  if(by<1900) return null;
+  const now = new Date();
+  let age = now.getFullYear() - by;
+  if((now.getMonth()+1) < bm || ((now.getMonth()+1)===bm && now.getDate() < bd)) age--;
+  return age;
+}
+function checkPensionEligibility(){
+  const box = document.getElementById('contractDoc'); if(!box) return;
+  const cell = box.querySelector('#npCell'); if(!cell) return;
+  const np = cell.querySelector('input[type=checkbox]');
+  const note = box.querySelector('#npNote');
+  const age = ageFromBirth(S.wBirth);
+  if(age!=null && age>=60){
+    np.checked = false; np.disabled = true;
+    if(note) note.textContent = '※ 만 60세 이상 · 국민연금 의무가입 대상 아님';
+  } else {
+    // 기본 상태 복원(표준 15h 이상 → 체크 고정, 그 외 → 편집 가능)
+    if(curType==='standard' && curSub==='이상'){ np.checked = true; np.disabled = true; }
+    else { np.disabled = false; }
+    if(note) note.textContent = '';
+  }
+}
+function onFieldChange(k){
+  if(k==='d_wage' || k==='d_hours') updateWage('d');
+  if(k==='fl_wage' || k==='fl_hours') updateWage('fl');
+  if(k==='wBirth') checkPensionEligibility();
+  if(k==='bizName' || k==='bizRep') renderSeal('biz');
+  if(k==='wName') renderSeal('worker');
+  if(k==='s_term') updateTermLabel();
+  if(['s_pay','s_payType','s_severInc','s_taxBasis','s_meal','s_car','s_bonus','s_mealMode','s_carMode','s_bonusMode'].includes(k)) updatePay();
+  if(['s_h1','s_m1','s_h2','s_m2','s_bh1','s_bh2','s_days'].includes(k)) calcHourly();
+}
+/* 계약서 폼 값 읽기 헬퍼(라이브 DOM 기준) */
+function pEl(k){ const b=document.getElementById('contractDoc'); return b? b.querySelector(`[data-k="${k}"]`) : null; }
+function pval(k){ const e=pEl(k); return e? e.value : ''; }
+function pnum(k){ const e=pEl(k); return e? numVal(e.value) : 0; }
+function pck(k){ const e=pEl(k); return e? !!e.checked : false; }
+
+/* 구성내역: 금액은 항상 입력 가능, 금액을 적으면 체크박스 자동 반영 */
+function toggleAmt(key){
+  const inp = pEl(key); if(inp) inp.placeholder = '0';
+}
+function onAllowInput(key){
+  const inp = pEl(key), cb = pEl(key+'Ck');
+  if(inp) formatAmtEl(inp);
+  if(cb){ cb.checked = !!(inp && inp.value.trim()); S[key+'Ck'] = cb.checked ? 'true' : ''; }
+  updatePay();
+}
+/* 구성내역: 사용자 지정 항목 */
+function addPayItem(){ if(!Array.isArray(S.payItems)) S.payItems=[]; S.payItems.push({name:'',amt:'',on:false}); renderPayItems(); updatePay(); }
+function editPayItem(i, field, val){ if(S.payItems && S.payItems[i]){ S.payItems[i][field]=val; if(field==='on') renderPayItems(); else updateItemRowState(i); updatePay(); } }
+function payItemAmt(i, el){ formatAmtEl(el); if(S.payItems && S.payItems[i]){ S.payItems[i].amt=el.value; if(el.value.trim()){ S.payItems[i].on=true; const cb=el.closest('.pay-item-row')?.querySelector('input[type=checkbox]'); if(cb) cb.checked=true; } } updateItemRowState(i); updatePay(); }
+function updateItemRowState(i){ const row=document.querySelectorAll('#s_customList .pay-item-row')[i]; if(row && S.payItems[i]) row.classList.toggle('has-content', !!((S.payItems[i].name||'').trim() || (S.payItems[i].amt||'').trim())); }
+function removePayItem(i){ if(S.payItems){ S.payItems.splice(i,1); renderPayItems(); updatePay(); } }
+function renderPayItems(){
+  const list = document.getElementById('s_customList'); if(!list) return;
+  const items = Array.isArray(S.payItems) ? S.payItems : [];
+  list.innerHTML = items.map((it,i)=>`<div class="pay-cell pay-item-row${((it.name||'').trim()||(it.amt||'').trim())?' has-content':''}">
+      <input type="checkbox" class="pi-ck" ${it.on!==false?'checked':''} onchange="editPayItem(${i},'on',this.checked)">
+      <input class="blank name" placeholder="항목명" value="${esc(it.name)}" oninput="editPayItem(${i},'name',this.value)">
+      <span class="pi-colon">:</span>
+      <span class="amt-wrap"><input class="blank num amt" inputmode="numeric" placeholder="0" value="${esc(it.amt)}" oninput="payItemAmt(${i},this)"> 원</span>
+      <span class="pay-item-del" title="이 항목 삭제" onclick="removePayItem(${i})">✕</span>
+    </div>`).join('');
+}
+function togglePayBox(){
+  const box = document.querySelector('.pay-box'); if(!box) return;
+  box.classList.toggle('collapsed');
+  const t = document.getElementById('payBoxToggle');
+  if(t) t.textContent = box.classList.contains('collapsed') ? '▸' : '▾';
+}
+
+const EMP_DEDUCT_RATE = 0.094;   // 4대보험 근로자부담 대략(세후→세전 추정용)
+/* 월 총액(세전 기준). 세후 입력이면 4대보험 환산해 세전 추정 */
+function monthlyTotalGross(){
+  const type = pval('s_payType')||'월급';
+  const raw = pnum('s_pay');
+  const sever = pval('s_severInc')||'미포함';
+  let m = type==='연봉' ? (sever==='포함' ? raw/13 : raw/12) : raw;
+  if((pval('s_taxBasis')||'세전')==='세후') m = m/(1-EMP_DEDUCT_RATE);
+  return Math.round(m);
+}
+/* 구성내역 수당 합(모두 총액에 포함) */
+function allowanceSums(){
+  let incl=0;
+  ['s_meal','s_car'].forEach(a=>{ if(pck(a+'Ck')) incl += pnum(a); });
+  (S.payItems||[]).forEach(it=>{ if(it.on!==false) incl += numVal(it.amt); });
+  return {incl, extra:0};
+}
+/* 급여 구성: 연봉 월환산·세후 추정·기본급 자동·최저임금 체크 */
+function updatePay(){
+  const box = document.getElementById('contractDoc'); if(!box) return;
+  const type = pval('s_payType')||'월급';
+  const isNet = (pval('s_taxBasis')||'세전')==='세후';
+  const opt = document.getElementById('s_annualOpt');
+  if(opt) opt.style.display = (type==='연봉') ? 'inline' : 'none';
+  if(type==='연봉'){
+    const raw=pnum('s_pay'); const sever=pval('s_severInc')||'미포함';
+    const m = Math.round(sever==='포함'? raw/13 : raw/12);
+    const el=document.getElementById('s_monthly'); if(el) el.textContent=won(m);
+  }
+  const gross = monthlyTotalGross();
+  const netEst = document.getElementById('s_netEst');
+  if(netEst) netEst.innerHTML = (isNet && gross>0)
+    ? ` <span class="net-est">(참고) 세전 약 <b>${won(gross)}</b> · 4대보험 약 9.4% 반영(소득세 미반영)</span>` : '';
+  const {incl, extra} = allowanceSums();
+  const base = Math.max(0, gross - incl);                 // 총액 − 포함수당
+  // 기본급을 소정근로분·주휴수당분으로 분리
+  const fvp = k => { const i=pEl(k); if(!i) return 0; return numVal(i.value!=='' ? i.value : i.placeholder); };
+  const dailyNet = Math.max(0, (fvp('s_h2')+fvp('s_m2')/60) - (fvp('s_h1')+fvp('s_m1')/60) - (fvp('s_bh2')-fvp('s_bh1')));
+  const weekly = dailyNet * fvp('s_days');
+  const juhue = weekly>=15 ? Math.min(weekly,40)/40*8 : 0;
+  const mWork = weekly*(365/12/7), mJuhue = juhue*(365/12/7);
+  let juhuePay = 0, basicPay = base;
+  if((mWork+mJuhue) > 0 && base > 0){ const hr = base/(mWork+mJuhue); juhuePay = Math.round(hr*mJuhue); basicPay = base - juhuePay; }
+  const baseEl = document.getElementById('s_baseAuto');   if(baseEl) baseEl.textContent = won(basicPay);
+  const juhEl  = document.getElementById('s_juhueAmt');   if(juhEl)  juhEl.textContent  = won(juhuePay);
+  calcHourly(gross + extra);   // 최저임금은 월 실지급(세전) 기준
+}
+
+/* 연도별 최저시급(원) */
+const MIN_WAGE = { 2024:9860, 2025:10030, 2026:10320 };
+function currentMinWage(){
+  let y = 2026; try{ y = new Date().getFullYear(); }catch(e){}
+  if(MIN_WAGE[y]) return { year:y, wage:MIN_WAGE[y] };
+  const years = Object.keys(MIN_WAGE).map(Number).sort((a,b)=>b-a);
+  const latest = years[0];
+  return { year:latest, wage:MIN_WAGE[latest] };
+}
+/* 월급여·소정근로시간·휴게·근무일·주휴를 반영해 시급 환산 후 최저시급과 비교 */
+function calcHourly(monthlyGrossPay){
+  const el = document.getElementById('s_wageCheck');
+  if(!el) return;
+  const box = document.getElementById('contractDoc'); if(!box) return;
+  // 비어 있는 시간·근무일 칸은 기본값(placeholder)으로 대체해 계산
+  const fv = k => { const i = box.querySelector(`[data-k="${k}"]`); if(!i) return 0; return numVal(i.value!=='' ? i.value : i.placeholder); };
+  const monthly = (monthlyGrossPay!=null) ? monthlyGrossPay : (monthlyTotalGross() + allowanceSums().extra);
+  const gross = (fv('s_h2')+fv('s_m2')/60) - (fv('s_h1')+fv('s_m1')/60);
+  const brk = fv('s_bh2') - fv('s_bh1');
+  const dailyNet = Math.max(0, gross - brk);
+  const weekly = dailyNet * fv('s_days');
+  if(monthly <= 0 || weekly <= 0){ el.innerHTML=''; return; }
+  const juhue = weekly >= 15 ? Math.min(weekly,40)/40*8 : 0;      // 주휴시간(주15h 이상)
+  const monthlyHours = Math.round((weekly + juhue) * (365/12/7)); // 월 유급 소정근로시간(주휴 포함, 표준 209시간)
+  if(monthlyHours <= 0){ el.innerHTML=''; return; }
+  const hourly = Math.floor(monthly / monthlyHours);             // 내림(최저선 아래는 미달로)
+  const mw = currentMinWage();
+  const ok = hourly >= mw.wage;
+  el.innerHTML = `(참고) 환산 시급 약 <b style="color:var(--text);">${won(hourly)}</b>`
+    + ` <span style="color:#9a9aa8;">(월 소정근로 ${Math.round(monthlyHours)}h 기준)</span>`
+    + ` · ${mw.year} 최저시급 ${won(mw.wage)} 대비 `
+    + `<b style="color:${ok?'var(--ok)':'#E0483D'};">${ok?'충족 (O)':'미달 (X)'}</b>`;
+}
+function updateWage(pfx){
+  const w = numVal(S[pfx+'_wage']);
+  let h = numVal(S[pfx+'_hours']);
+  if(!h) h = 1;   // 시간·횟수를 비워두면 1로 처리(건별 등) → 금액만 입력해도 계산됨
+  const out = document.getElementById(pfx+'_total');
+  if(out) out.textContent = won(w*h);
+}
+
+/* ---------- 조항 기본문구 & 개별 수정 ---------- */
+const CLAUSE_DEFAULTS = {};
+function clause(id, text){
+  CLAUSE_DEFAULTS[id] = text;
+  return `<div class="doc-line">
+    <span class="ln">${escLabelFromId(id)}</span>
+    <div class="clause-wrap">
+      <div class="clause-body" id="cl_${id}" contenteditable="true"
+           oninput="markEdited('${id}')">${esc(text)}</div>
+      <span class="reset-link" onclick="resetClause('${id}')" title="기본문구로 되돌리기" style="display:none;">↺</span>
+    </div>
+  </div>`;
+}
+const CLAUSE_LABELS = {};
+function labeledClause(id, label, text){ CLAUSE_LABELS[id]=label; return clause(id, text); }
+function escLabelFromId(id){ return CLAUSE_LABELS[id] || ''; }
+function markEdited(id){
+  const el = document.getElementById('cl_'+id);
+  const edited = el.textContent.trim() !== (CLAUSE_DEFAULTS[id]||'').trim();
+  el.classList.toggle('edited', edited);
+  const rl = el.closest('.doc-line')?.querySelector('.reset-link');  // 되돌리기 화살표는 수정됐을 때만 표시
+  if(rl) rl.style.display = edited ? '' : 'none';
+}
+function resetClause(id){
+  const el = document.getElementById('cl_'+id);
+  el.textContent = CLAUSE_DEFAULTS[id]||''; el.classList.remove('edited');
+  const rl = el.closest('.doc-line')?.querySelector('.reset-link');
+  if(rl) rl.style.display = 'none';
+}
+
+/* ---------- 서명란(공통) ---------- */
+/* 이름(상호·성명)으로 도장 이미지를 자동 생성
+   - 근로자(worker): 이름을 세로로(2~3글자 1열, 그 이상 2열)
+   - 사업장(biz): 상호를 원 둘레(상단 호)에, 가운데 '대표이사' */
+function makeSeal(text, type){
+  text = (text||'').trim(); if(!text) return '';
+  const RED='#e11414';
+  const chars=[...text];
+  if(type==='biz'){
+    // 사업장: 이중 원 + 상호 둘레 + 가운데 代表理事
+    const size=300, cx=150, cy=150, R=140;
+    const c=document.createElement('canvas'); c.width=size; c.height=size;
+    const x=c.getContext('2d');
+    x.strokeStyle=RED; x.fillStyle=RED; x.textAlign='center'; x.textBaseline='middle';
+    x.lineWidth=10; x.beginPath(); x.arc(cx,cy,R,0,Math.PI*2); x.stroke();
+    const innerR=Math.round(R*0.56);
+    x.lineWidth=6; x.beginPath(); x.arc(cx,cy,innerR,0,Math.PI*2); x.stroke();
+    const ringMid=(R+innerR)/2;
+    const band=R-innerR;                                 // 링 두께
+    x.beginPath(); x.arc(cx, cy-ringMid, band*0.16, 0, Math.PI*2); x.fill();   // 상단 점(사이 구분)
+    const n=chars.length;
+    const gap=Math.max(0.34, 3.6/(n+4));                 // 상단 점 자리(작게 → 상호를 쭉 연결)
+    const step=n>1 ? (2*Math.PI-gap)/n : 0;
+    const startA=-Math.PI/2 + gap/2 + step/2;
+    const arcPer=step*ringMid;                            // 글자당 호 길이
+    // 링 두께에 맞춰 글자 크기 자동 조정(어느 길이든 균일하게 채움)
+    const afs=Math.max(26, Math.min(Math.round(band*0.74), Math.round(arcPer*0.74)));
+    x.font=`bold ${afs}px "Noto Sans KR", sans-serif`;
+    chars.forEach((ch,i)=>{ const a=startA+i*step; x.save(); x.translate(cx+ringMid*Math.cos(a), cy+ringMid*Math.sin(a)); x.rotate(a+Math.PI/2); x.fillText(ch,0,0); x.restore(); });
+    const cfs=Math.floor(innerR*0.86);
+    x.font=`bold ${cfs}px "Noto Serif KR", serif`;
+    const off=innerR*0.44;
+    [['代','表'],['理','事']].forEach((row,ri)=> row.forEach((chn,ci)=> x.fillText(chn, cx+(ci?off:-off), cy+(ri?off:-off))));
+    return c.toDataURL('image/png');
+  } else {
+    // 근로자: 세로 타원 + 이름 세로 1열
+    const n=chars.length;
+    const w=224, h=Math.max(300, 96*n+70), cx=w/2, cy=h/2;
+    const rx=96, ry=Math.round(h/2-14);
+    const c=document.createElement('canvas'); c.width=w; c.height=h;
+    const x=c.getContext('2d');
+    x.strokeStyle=RED; x.fillStyle=RED; x.textAlign='center'; x.textBaseline='middle';
+    x.lineWidth=9; x.beginPath(); x.ellipse(cx,cy,rx,ry,0,0,Math.PI*2); x.stroke();
+    const fs=Math.max(60, Math.min(110, Math.floor((ry*1.7)/n)));
+    x.font=`bold ${fs}px "Noto Sans KR", sans-serif`;
+    const lh=Math.min(fs*1.08, (ry*1.75)/n);
+    const y0=cy-(n-1)*lh/2;
+    chars.forEach((ch,i)=> x.fillText(ch, cx, y0+i*lh));
+    return c.toDataURL('image/png');
+  }
+}
+function sealText(who){ return who==='biz' ? (S.bizName || S.bizRep || '') : (S.wName || ''); }
+/* 이름 기반의 살짝 기울어진 각도(-7~+7도) — 손으로 찍은 느낌 */
+function sealTilt(text){ let h=0; for(const ch of (text||'')) h=(h*31+ch.charCodeAt(0))>>>0; return (h%15)-7; }
+function toggleSeal(who, on){ const key=who==='biz'?'sealBizOn':'sealWorkerOn'; S[key] = (on!==undefined ? on : S[key]!=='true') ? 'true' : ''; renderSeal(who); }
+function toggleSignSeal(){ const s=document.getElementById('signSealSection'); if(!s) return; s.classList.toggle('collapsed'); const t=document.getElementById('ssToggle'); if(t) t.textContent = s.classList.contains('collapsed') ? '▸' : '▾'; }
+/* ---------- 서명 패드(그리기) — 사업주/근로자 공용, 선(좌표) 데이터로 저장 ---------- */
+const SIGN_REF_W=460, SIGN_REF_H=200;
+let _sigWho='worker', _sigStrokes=[], _sigCur=null, _sigDrawing=false, _sigCtx=null, _sigCv=null, _sigScaleX=1, _sigScaleY=1, _sigLastCss=null;
+function sigKeyPath(who){ return who==='biz' ? 'bizSignPath' : 'wSignPath'; }
+function _sigCss(e){ const r=_sigCv.getBoundingClientRect(); const t=(e.touches&&e.touches[0])||e; return {x:t.clientX-r.left, y:t.clientY-r.top}; }
+function _sigPush(p){ const rx=Math.round(p.x*_sigScaleX), ry=Math.round(p.y*_sigScaleY); const cur=_sigCur; const n=cur.length; if(n>=2){ const dx=rx-cur[n-2], dy=ry-cur[n-1]; if(dx*dx+dy*dy<4) return; } cur.push(rx,ry); }
+function openSignPad(who){
+  _sigWho=who; _sigStrokes=[];
+  const t=document.getElementById('signModalTitle'); if(t) t.textContent=(who==='biz'?'사업주':'근로자')+' 서명';
+  document.getElementById('signModal').style.display='flex';
+  const cv=document.getElementById('signCanvas'); _sigCv=cv;
+  const r=cv.getBoundingClientRect();
+  cv.width=Math.round(r.width*2); cv.height=Math.round(r.height*2);
+  _sigCtx=cv.getContext('2d'); _sigCtx.scale(2,2);
+  _sigCtx.lineWidth=2.5; _sigCtx.lineCap='round'; _sigCtx.lineJoin='round'; _sigCtx.strokeStyle='#12123a';
+  _sigScaleX=SIGN_REF_W/r.width; _sigScaleY=SIGN_REF_H/r.height;
+  cv.onpointerdown=e=>{ _sigDrawing=true; _sigCur=[]; _sigStrokes.push(_sigCur); _sigLastCss=_sigCss(e); _sigPush(_sigLastCss); e.preventDefault(); };
+  cv.onpointermove=e=>{ if(!_sigDrawing) return; const p=_sigCss(e); _sigCtx.beginPath(); _sigCtx.moveTo(_sigLastCss.x,_sigLastCss.y); _sigCtx.lineTo(p.x,p.y); _sigCtx.stroke(); _sigLastCss=p; _sigPush(p); e.preventDefault(); };
+  cv.onpointerup=cv.onpointerleave=()=>{ _sigDrawing=false; };
+}
+function clearSign(){ const cv=document.getElementById('signCanvas'); if(_sigCtx) _sigCtx.clearRect(0,0,cv.width,cv.height); _sigStrokes=[]; }
+function closeSignPad(){ document.getElementById('signModal').style.display='none'; }
+function saveSign(){
+  if(!_sigStrokes.some(s=>s.length>=2)){ toast('서명을 먼저 그려주세요.'); return; }
+  S[sigKeyPath(_sigWho)] = { w:SIGN_REF_W, h:SIGN_REF_H, s:_sigStrokes };
+  renderSignPreviews();
+  closeSignPad();
+  toast('서명이 저장됐어요.');
+}
+/* 선 데이터 → 이미지(경계에 맞춰 잘라 렌더) */
+function signPathToDataUrl(sig){
+  if(!sig || !sig.s || !sig.s.length) return '';
+  let minX=1e9,minY=1e9,maxX=-1e9,maxY=-1e9;
+  sig.s.forEach(st=>{ for(let i=0;i<st.length;i+=2){ minX=Math.min(minX,st[i]); maxX=Math.max(maxX,st[i]); minY=Math.min(minY,st[i+1]); maxY=Math.max(maxY,st[i+1]); } });
+  if(maxX<minX) return '';
+  const pad=10, w=(maxX-minX)+pad*2, h=(maxY-minY)+pad*2, k=2;
+  const cv=document.createElement('canvas'); cv.width=Math.max(2,Math.round(w*k)); cv.height=Math.max(2,Math.round(h*k));
+  const x=cv.getContext('2d'); x.scale(k,k); x.translate(-minX+pad, -minY+pad);
+  x.lineWidth=2.6; x.lineCap='round'; x.lineJoin='round'; x.strokeStyle='#12123a';
+  sig.s.forEach(st=>{ if(st.length<2) return; x.beginPath(); x.moveTo(st[0],st[1]); for(let i=2;i<st.length;i+=2) x.lineTo(st[i],st[i+1]); if(st.length===2) x.lineTo(st[0]+0.1,st[1]+0.1); x.stroke(); });
+  return cv.toDataURL('image/png');
+}
+function renderSignPreviews(){
+  [['biz','signPrev_biz'],['worker','signPrev_worker']].forEach(([who,id])=>{
+    const el=document.getElementById(id); if(!el) return;
+    const url=signPathToDataUrl(S[sigKeyPath(who)]);
+    el.innerHTML = url ? `<img src="${url}">` : '<span class="seal-empty">서명 없음</span>';
+  });
+}
+function renderSeal(who){
+  const on = S[who==='biz'?'sealBizOn':'sealWorkerOn']==='true';
+  const img = makeSeal(sealText(who), who);
+  // 미리보기(항상 표시)
+  const prev = document.getElementById(who==='biz'?'sealPrev_biz':'sealPrev_worker');
+  if(prev){ prev.innerHTML = img ? `<img src="${img}" class="seal-thumb">` : `<span class="seal-empty">이름 입력 시</span>`; prev.classList.toggle('on', on); }
+  // 체크박스 상태 반영
+  const ck = document.getElementById(who==='biz'?'sealOn_biz':'sealOn_worker');
+  if(ck) ck.checked = on;
+  // 인쇄용 서명란: 체크됐고 이미지가 있을 때만
+  const box = document.getElementById(who==='biz'?'seal_biz':'seal_worker');
+  if(box) box.innerHTML = (on && img) ? `<img src="${img}" class="seal-img">` : '';
+}
+function signatureBlock(isFreelance){
+  const A = isFreelance ? '위탁자(사용자)' : '사업주(사용자)';
+  const B = isFreelance ? '수탁자' : '근로자';
+  return `<div class="doc-line sig-line no-screen" style="margin-top:22px; padding-top:18px;">
+    <div class="sig-grid">
+      <div>
+        <div class="party">${A}</div>
+        <div class="sig-row"><span class="l">상호 :</span><input class="blank wide" data-k="bizName"></div>
+        <div class="sig-row"><span class="l">대표자 :</span><input class="blank" data-k="bizRep"> (연락처: <input class="blank phoneauto" data-k="bizPhone">) (서명/인) <span class="seal-box" id="seal_biz"></span></div>
+        <div class="sig-row"><span class="l">사업자번호 :</span><input class="blank biznoauto" data-k="bizNo"></div>
+        <div class="sig-row"><span class="l">주소 :</span><input class="blank wide" data-k="bizAddr"></div>
+      </div>
+      <div>
+        <div class="party">${B}</div>
+        <div class="sig-row"><span class="l">성명 :</span><input class="blank" data-k="wName"> (연락처: <input class="blank phoneauto" data-k="wPhone">) (서명/인) <span class="seal-box" id="seal_worker"></span></div>
+        <div class="sig-row"><span class="l">생년월일 :</span><input class="blank dateauto" data-k="wBirth"></div>
+        <div class="sig-row"><span class="l">주소 :</span><input class="blank wide" data-k="wAddr"></div>
+      </div>
+    </div>
+    <p class="doc-sub" style="margin-top:12px;">본 계약서 2부를 작성하여 ${A}와(과) ${B}가 각각 서명 또는 날인 후 1부씩 보관한다.</p>
+  </div>`;
+}
+
+/* ============================================================
+   유형별 계약서 템플릿
+   ============================================================ */
+
+/* 1) 표준 / 단시간 근로계약서 */
+function tplStandard(sub){
+  const title = sub==='이상' ? '근로계약서' : '단시간근로자 근로계약서';
+
+  const schedule = (sub==='미만')
+    ? `<div class="doc-line"><span class="ln">근로일 및 근로일별 근로시간</span>
+        <div class="doc-sub">근로일마다 근로시간이 다른 단시간근로자는 요일별 근로시간을 아래에 직접 기재합니다.</div>
+        ${clause('sch_part','월( 시 ~ 시) 화( 시 ~ 시) 수( 시 ~ 시) 목( 시 ~ 시) 금( 시 ~ 시) 토( 시 ~ 시) 일( 시 ~ 시)  ·  휴게시간 각 분')}
+       </div>`
+    : `<div class="doc-line row-inline"><span class="ln">소정근로시간:</span>
+        <div><input class="blank num step" style="width:46px;min-width:0;" data-k="s_h1" placeholder="09">시 <input class="blank num step" style="width:46px;min-width:0;" data-k="s_m1" placeholder="00">분부터 <input class="blank num step" style="width:46px;min-width:0;" data-k="s_h2" placeholder="18">시 <input class="blank num step" style="width:46px;min-width:0;" data-k="s_m2" placeholder="00">분까지</div>
+       </div>
+       <div class="doc-line row-inline"><span class="ln">휴게시간:</span>
+        <div><input class="blank num step" style="width:46px;min-width:0;" data-k="s_bh1" placeholder="12">시 ~ <input class="blank num step" style="width:46px;min-width:0;" data-k="s_bh2" placeholder="13">시</div>
+        <div class="brk-line">(<span class="brk-note" contenteditable="true">휴게시간은 회사의 구속을 받지 아니하며, 근로자가 사업장 내외에서 자유롭게 이용할 수 있다.</span>)</div>
+       </div>
+       <div class="doc-line row-inline"><span class="ln">근무일 / 휴일:</span>
+        <div>매주 <input class="blank num step" style="width:46px;min-width:0;" data-k="s_days" placeholder="5">일 근무 · 주휴일 매주 <select class="blank" style="min-width:0;" data-k="s_holiday"><option>월</option><option>화</option><option>수</option><option>목</option><option>금</option><option>토</option><option selected>일</option></select> 요일</div>
+       </div>`;
+
+  return `
+    <h4 class="title-box"><span class="tb-name">${title}</span><span class="tb-term" id="tbTerm">(기간의 정함이 없는 경우)</span></h4>
+    <p class="doc-intro"><b data-mirror="bizName">사업장</b>(이하 "사업주")과(와) <b data-mirror="wName">근로자</b>(이하 "근로자")은(는) 다음과 같이 근로계약을 체결한다.</p>
+
+    <div class="doc-line row-inline"><span class="ln">근로개시일:</span>
+      <div><input class="blank dateauto" style="width:104px;min-width:0;" data-k="startDate2" placeholder="2026-09-01"> 부터
+        <select class="blank" data-k="s_term" onchange="updateTermLabel()">
+          <option value="정함없음">기간의 정함 없음</option>
+          <option value="정함있음">기간의 정함 있음</option>
+        </select><span id="endDateWrap" style="display:none;">(종료일: <input class="blank dateauto" style="width:104px;min-width:0;" data-k="s_end" placeholder="2027-08-31">)</span></div>
+    </div>
+    <div class="doc-line row-inline"><span class="ln">근무장소:</span><div><input class="blank xwide" data-k="s_place" placeholder="예: 본사 사무실"></div></div>
+    <div class="doc-line row-inline"><span class="ln">업무내용:</span><div><input class="blank xwide" data-k="s_job" placeholder="예: 경리 및 세무 보조"></div></div>
+
+    ${schedule}
+
+    <div class="doc-line"><span class="ln">임금:</span>
+      <div style="margin-top:4px;"><span class="subno">①</span> 기본임금 :<br class="mbr"> <select class="blank" data-k="s_taxBasis" onchange="updatePay()" title="세전 권장"><option value="세전">세전</option><option value="세후">세후</option></select> <select class="blank" data-k="s_payType" onchange="updatePay()"><option value="월급">월급</option><option value="연봉">연봉</option></select>
+        <input class="blank num amt" style="width:118px;min-width:0;" data-k="s_pay" placeholder="0"> 원<span id="s_annualOpt" style="display:none;"> (퇴직금 <select class="blank" data-k="s_severInc" onchange="updatePay()" style="margin-right:0;"><option value="미포함">별도</option><option value="포함">포함</option></select>) / 월 환산 <b id="s_monthly" class="monthly-box">0원</b></span><span id="s_netEst" class="net-est-wrap"></span></div>
+      <div class="pay-box">
+        <div class="pay-box-title" onclick="togglePayBox()">기본임금의 세부내역(월급 기준)<span class="pay-box-toggle" id="payBoxToggle">▾</span></div>
+        <div class="pay-box-body" id="payBoxBody">
+          <div class="pay-flow">
+            <div class="pay-cell"><label class="pl inline-check"><input type="checkbox" data-k="s_baseCk" checked disabled> 기본급 :</label> <b id="s_baseAuto" class="pay-amt">0원</b></div>
+            <div class="pay-cell"><label class="pl inline-check"><input type="checkbox" data-k="s_juhueCk" checked disabled> 주휴수당 :</label> <b id="s_juhueAmt" class="pay-amt">0원</b></div>
+            <div class="pay-cell"><label class="pl inline-check"><input type="checkbox" data-k="s_mealCk" onchange="toggleAmt('s_meal'); updatePay()"> 식대 :</label><span class="amt-wrap" id="wrap_s_meal"><input class="blank num amt" inputmode="numeric" style="width:88px;min-width:0;" data-k="s_meal" placeholder="0" oninput="onAllowInput('s_meal')"> 원</span></div>
+            <div class="pay-cell"><label class="pl inline-check"><input type="checkbox" data-k="s_carCk" onchange="toggleAmt('s_car'); updatePay()"> 차량유지비 :</label><span class="amt-wrap" id="wrap_s_car"><input class="blank num amt" inputmode="numeric" style="width:88px;min-width:0;" data-k="s_car" placeholder="0" oninput="onAllowInput('s_car')"> 원</span></div>
+          </div>
+          <div id="s_customList" class="custom-list"></div>
+          <button type="button" class="add-item-pill" onclick="addPayItem()">+ 항목 추가</button>
+        </div>
+      </div>
+      <div class="wage-check" id="s_wageCheck"></div>
+      <div style="margin-top:14px;"><span class="subno">②</span> 상여금 :<br class="mbr"> <input class="blank xwide" data-k="s_bonus" placeholder="예: 설·추석 명절에 각각 20만원 지급 / 없음"></div>
+      <div style="margin-top:8px;"><span class="subno">③</span> 기타급여(제수당 등) :<br class="mbr"> <input class="blank xwide" data-k="s_etcPay" placeholder="예: 연장·야간·휴일근로수당은 근로기준법에 따라 지급"></div>
+      <div style="margin-top:8px;"><span class="subno">④</span> 임금지급일 :<br class="mbr"> <select class="blank" data-k="s_payCycle"><option>매월</option><option>매주</option><option>매일</option></select> <input class="blank num step" style="width:56px;min-width:0;" data-k="s_payDay" placeholder="25"> 일 지급(휴일이면 전일 지급)</div>
+      <div style="margin-top:8px;"><span class="subno">⑤</span> 지급방법 : <select class="blank" data-k="s_payMethod" style="min-width:196px;"><option value="계좌입금">근로자 명의 통장 입금</option><option value="직접지급">직접 지급</option></select></div>
+    </div>
+
+    ${labeledClause('s_annual','연차유급휴가', sub==='미만'
+        ? '통상근로자의 근로시간에 비례하여 연차유급휴가를 부여한다.'
+        : '「근로기준법」에서 정하는 바에 따라 연차유급휴가를 부여한다.')}
+
+    <div class="doc-line row-inline"><span class="ln">사회보험 적용:</span>
+      <div class="ins-cells">
+        <label class="inline-check" id="npCell"><input type="checkbox" ${sub==='이상'?'checked disabled':''}> 국민연금</label>
+        <label class="inline-check" style="margin-left:14px;"><input type="checkbox" ${sub==='이상'?'checked disabled':''}> 건강보험</label>
+        <label class="inline-check" style="margin-left:14px;"><input type="checkbox" checked ${sub==='이상'?'disabled':''}> 고용보험</label>
+        <label class="inline-check" style="margin-left:14px;"><input type="checkbox" checked ${sub==='이상'?'disabled':''}> 산재보험</label>
+        <span id="npNote" class="np-note"></span>
+      </div>
+    </div>
+
+    ${labeledClause('s_severance','퇴직금','계속근로기간 1년 이상 시 「근로자퇴직급여 보장법」에 따라 퇴직금을 지급한다.')}
+    ${labeledClause('s_notice','사전통보의무','퇴사 시 최소 14일 전에 사직서를 제출하고 업무 인수인계를 완료하여야 한다. 만일 무단 퇴사 및 인수인계 불이행으로 인해 회사에 직접적인 손해가 발생한 경우 민사상 손해배상을 청구할 수 있다.')}
+    ${labeledClause('s_faithful','성실이행의무','사업주와 근로자는 각자가 근로계약, 취업규칙, 단체협약을 지키고 성실하게 이행하여야 한다.')}
+    ${labeledClause('s_copy','근로계약서 교부','사용자는 근로계약 체결과 동시에 본 계약서 사본을 근로자의 교부요구와 관계없이 근로자에게 교부한다. (「근로기준법」제17조 이행)')}
+    ${labeledClause('s_etc','기타','이 계약에 정함이 없는 사항은「근로기준법」에 의한다.')}
+
+    <div id="addClauseRow" class="add-clause-row"><button type="button" class="add-item-pill" onclick="addCustomClause()">+ 항목 추가</button></div>
+
+    ${signatureBlock(false)}
+  `;
+}
+
+/* 2) 일용근로자 근로계약서 */
+function tplDaily(){
+  return `
+    <h4 class="title-box"><span class="tb-name">일용근로자 근로계약서</span></h4>
+    <p class="doc-intro"><b data-mirror="bizName">사업장</b>(이하 "사업주")과(와) <b data-mirror="wName">근로자</b>(이하 "근로자")은(는) 다음과 같이 근로계약을 체결한다.</p>
+
+    <div class="doc-line"><span class="ln">근로일</span>
+      <div><input class="blank dateauto" style="width:104px;min-width:0;" data-k="startDate2" placeholder="2026-09-01"> (일용근로 특성상 해당 근로일 단위로 체결)</div>
+    </div>
+    <div class="doc-line row-inline"><span class="ln">근무장소</span><div><input class="blank xwide" data-k="d_place" placeholder="예: ○○현장"></div></div>
+    <div class="doc-line row-inline"><span class="ln">업무의 내용</span><div><input class="blank xwide" data-k="d_job" placeholder="예: 현장 보조"></div></div>
+    <div class="doc-line"><span class="ln">근로시간</span>
+      <div><input class="blank num step" style="width:52px;min-width:0;" data-k="d_h1" placeholder="08"> 시부터 <input class="blank num step" style="width:52px;min-width:0;" data-k="d_h2" placeholder="17"> 시까지 (휴게 <input class="blank num step" style="width:56px;min-width:0;" data-k="d_break" placeholder="60"> 분)</div>
+    </div>
+
+    <div class="doc-line"><span class="ln">급여</span>
+      <div>시급 <input class="blank num amt" data-k="d_wage" placeholder="0"> 원 × <input class="blank num step" style="width:56px;min-width:0;" data-k="d_hours" placeholder="8"> 시간 =
+        <span class="wage-out" id="d_total">0원</span> (1일 기준)</div>
+    </div>
+
+    ${labeledClause('d_pay','지급 방식','고용보험료(근로자부담분) 및 원천징수세액 차감 후 지급한다. (산재보험료는 사업주가 전액 부담)')}
+
+    <div class="doc-line row-inline"><span class="ln">사회보험 적용:</span>
+      <div class="ins-cells">
+        <label class="inline-check" id="npCell"><input type="checkbox"> 국민연금</label>
+        <label class="inline-check" style="margin-left:14px;"><input type="checkbox"> 건강보험</label>
+        <label class="inline-check" style="margin-left:14px;"><input type="checkbox" checked> 고용보험</label>
+        <label class="inline-check" style="margin-left:14px;"><input type="checkbox" checked> 산재보험</label>
+        <span id="npNote" class="np-note"></span>
+      </div>
+    </div>
+
+    ${labeledClause('d_severance','퇴직금','1개월 이상 근로하고 4주 평균 주 15시간 이상 근무한 경우 「근로자퇴직급여 보장법」에 따라 퇴직금 지급대상이 될 수 있다.')}
+    ${labeledClause('d_copy','근로계약서 교부','사용자는 근로계약 체결과 동시에 본 계약서 사본을 근로자에게 교부한다. (「근로기준법」제17조 이행)')}
+    ${labeledClause('d_etc','기타','이 계약에 정함이 없는 사항은「근로기준법」에 의한다.')}
+
+    <div id="addClauseRow" class="add-clause-row"><button type="button" class="add-item-pill" onclick="addCustomClause()">+ 항목 추가</button></div>
+
+    ${signatureBlock(false)}
+  `;
+}
+
+/* 3) 프리랜서 용역계약서 */
+function tplFreelance(){
+  return `
+    <h4 class="title-box"><span class="tb-name">프리랜서 용역계약서</span></h4>
+    <p class="doc-intro"><b data-mirror="bizName">위탁자</b>(이하 "위탁자")과(와) <b data-mirror="wName">수탁자</b>(이하 "수탁자")은(는) 다음과 같이 용역계약을 체결한다.</p>
+
+    <div class="doc-line"><span class="ln">용역기간 / 개시일</span>
+      <div><input class="blank dateauto" style="width:104px;min-width:0;" data-k="startDate2" placeholder="2026-09-01"> 부터
+        (종료일: <input class="blank dateauto" style="width:104px;min-width:0;" data-k="fl_end" placeholder="2026-12-31">)</div>
+    </div>
+    <div class="doc-line row-inline"><span class="ln">업무 수행 장소</span><div><input class="blank xwide" data-k="fl_place" placeholder="예: 장소 제한 없음(수탁자 재량)"></div></div>
+    <div class="doc-line row-inline"><span class="ln">용역의 내용</span><div><input class="blank xwide" data-k="fl_job" placeholder="예: 회계자료 정리 용역"></div></div>
+
+    <div class="doc-line"><span class="ln">용역대가</span>
+      <div><select class="blank" data-k="fl_payType"><option value="건별">건별</option><option value="시급">시급</option><option value="월">월</option></select> :
+        <input class="blank num amt" data-k="fl_wage" placeholder="0"> 원 × <input class="blank num step" style="width:56px;min-width:0;" data-k="fl_hours" placeholder="1"> =
+        <span class="wage-out" id="fl_total">0원</span></div>
+    </div>
+
+    ${labeledClause('fl_pay','지급 방식','사업소득 원천징수세액(3.3%) 차감 후 지급한다.')}
+    ${labeledClause('fl_indep','업무 독립성','수탁자는 업무 수행의 방법·시간·장소에 대하여 위탁자로부터 구체적·개별적인 지휘·감독을 받지 아니하며, 독립적으로 업무를 수행한다.')}
+
+    ${labeledClause('fl_social','사회보험 적용','본 계약은 위탁(용역)계약으로 4대보험(국민연금·건강보험·고용보험·산재보험)이 적용되지 않는다.')}
+
+    ${labeledClause('fl_severance','퇴직금','「근로자퇴직급여 보장법」상 퇴직금 지급대상에 해당하지 않는다.')}
+    ${labeledClause('fl_copy','계약서 교부','위탁자와 수탁자는 본 계약서 사본을 각 1부씩 상호 교부하여 보관한다.')}
+    ${labeledClause('fl_etc','기타','이 계약에 정함이 없는 사항은 상호 협의하여 정한다.')}
+
+    <div id="addClauseRow" class="add-clause-row"><button type="button" class="add-item-pill" onclick="addCustomClause()">+ 항목 추가</button></div>
+
+    ${signatureBlock(true)}
+  `;
+}
+
+/* ============================================================
+   렌더 / 상호작용
+   ============================================================ */
+function renderContract(){
+  // 근로개시일은 공통 startDate → 계약서 startDate2로 승계
+  if(S.startDate && !S.startDate2) S.startDate2 = S.startDate;
+
+  const box = document.getElementById('contractDoc');
+  let inner = '';
+  if(curDoc!=='employ'){
+    inner = (TPLS[curDoc] || tplPoa)();
+  }
+  else if(curType==='standard') inner = tplStandard(curSub);
+  else if(curType==='daily') inner = tplDaily();
+  else inner = tplFreelance();
+
+  box.innerHTML = `<div class="stamped" id="docStamp">발급완료</div>` + inner;
+  box.classList.toggle('jo-num', !!DOCS[curDoc].jo);   // 표준계약서는 '제n조' 로 번호를 매긴다
+
+  applyState(box);       // 저장된 값 채우기(자동 세팅)
+  refreshMirrors();      // 서두 당사자명 표시
+  if(curDoc!=='employ'){
+    decorateLines(box); decorateSteppers(box);
+    if(curDoc==='payroll'){ wkItems = Array.isArray(S.wkItems)? S.wkItems : []; if(!wkItems.length) wkItems=[{n:'',j:'',p:'',t:''}]; renderWorkers(); }
+    renderSeal('biz'); renderSeal('worker');
+    return;
+  }
+  updateWage('d'); updateWage('fl');
+  // 체크박스 상태 반영
+  ['s_mealCk','s_carCk'].forEach(k=>{
+    const el = box.querySelector(`[data-k="${k}"]`); if(el && S[k]==='true') el.checked = true;
+  });
+  decorateLines(box);    // 항목 번호 + 삭제 버튼
+  updateTermLabel();     // 표준: 기간 정함 라벨
+  updatePay();           // 표준: 기본임금 월/연봉 환산
+  ['s_meal','s_car'].forEach(toggleAmt);  // 추가임금 금액칸 표시(상여금은 자유입력)
+  if(!Array.isArray(S.payItems)) S.payItems=[];  // 기본 항목 없음('+ 항목 추가'로만 생성)
+  renderPayItems();      // 추가임금 사용자 지정 항목
+  decorateSteppers(box); // 날짜·시간 숫자칸 ▲▼ 스텝퍼
+  checkPensionEligibility(); // 만 60세 이상 → 국민연금 해제
+  renderSeal('biz'); renderSeal('worker'); // 서명란 도장
+}
+
+/* 날짜·시간 숫자칸(.step)에 박스 안 ▲▼ 증감 버튼을 붙인다 */
+function stepVal(inp, d){
+  const min = inp.dataset.min!=null ? +inp.dataset.min : 0;
+  const max = inp.dataset.max!=null ? +inp.dataset.max : Infinity;
+  let v;
+  if(inp.value.trim() === ''){ v = numVal(inp.placeholder); }   // 빈 칸이면 기본값(placeholder)부터
+  else { v = numVal(inp.value) + d; }
+  if(v < min) v = min;
+  if(v > max) v = max;
+  inp.value = v;
+  inp.dispatchEvent(new Event('input', {bubbles:true}));
+}
+function decorateSteppers(box){
+  box.querySelectorAll('input.step').forEach(inp=>{
+    if(inp.parentElement && inp.parentElement.classList.contains('stepper')) return;
+    const wrap = document.createElement('span'); wrap.className = 'stepper';
+    inp.parentNode.insertBefore(wrap, inp); wrap.appendChild(inp);
+    const btns = document.createElement('span'); btns.className = 'stepbtns';
+    const up = document.createElement('button'); up.type='button'; up.tabIndex=-1; up.textContent='▲';
+    const dn = document.createElement('button'); dn.type='button'; dn.tabIndex=-1; dn.textContent='▼';
+    up.addEventListener('click', ()=>stepVal(inp, 1));
+    dn.addEventListener('click', ()=>stepVal(inp, -1));
+    btns.appendChild(up); btns.appendChild(dn); wrap.appendChild(btns);
+  });
+}
+
+/* 항목 번호 매김 — 삭제(removed)된 항목은 번호에서 제외 */
+function bareLabel(t){
+  return String(t||'').replace(/^\s*제\s*\d+\s*조\s*/, '').replace(/^\s*\d+\.\s*/, '')
+    .replace(/^\s*\[/, '').replace(/\]\s*$/, '').replace(/[:：]\s*$/, '').trim();
+}
+function renumber(box){
+  let n = 0;
+  const jo = box.classList.contains('jo-num');
+  box.querySelectorAll(':scope > .doc-line').forEach(dl=>{
+    const ln = dl.querySelector('.ln');
+    if(!ln || dl.classList.contains('removed') || dl.classList.contains('nonum')) return;
+    n++;
+    const numEl = ln.querySelector('.ln-num');
+    if(numEl){ numEl.textContent = jo ? ('제'+n+'조 ') : (n + '. '); return; }   // 사용자 추가 항목
+    if(ln.dataset.label == null) ln.dataset.label = bareLabel(ln.textContent);
+    ln.textContent = jo ? ('제'+n+'조 ['+ln.dataset.label+']') : (n + '. ' + ln.dataset.label);
+  });
+}
+/* 삭제 = 완전 제거가 아니라 그 자리에서 접고 '↩ 복구' 바를 노출 → 언제든 되돌릴 수 있음 */
+function removeLine(dl){
+  const ln = dl.querySelector('.ln');
+  const labelEl = ln.querySelector('.ln-label');
+  const label = labelEl ? (labelEl.textContent.trim() || '추가 항목')
+    : ((ln.dataset.label != null) ? ln.dataset.label : ln.textContent.replace(/^\s*\d+\.\s*/, ''));
+  if(!labelEl) ln.dataset.label = label;
+  dl.classList.add('removed');
+  if(!dl.querySelector('.restore-bar')){
+    const bar = document.createElement('div');
+    bar.className = 'restore-bar';
+    bar.innerHTML = `<span>삭제된 항목 · <b>${label}</b></span><span class="restore-link" title="되돌리기" aria-label="되돌리기">↺</span>`;
+    bar.querySelector('.restore-link').addEventListener('click', ()=>restoreLine(dl));
+    dl.appendChild(bar);
+  }
+  renumber(dl.closest('.doc-preview'));
+}
+function restoreLine(dl){
+  dl.classList.remove('removed');
+  const bar = dl.querySelector('.restore-bar'); if(bar) bar.remove();
+  renumber(dl.closest('.doc-preview'));
+}
+/* 추가 항목을 위/아래 조항과 자리 바꿔 위치 이동 */
+function moveLine(dl, dir){
+  const box = dl.parentNode; if(!box) return;
+  const movable = el => el && el.classList.contains('doc-line') && !el.querySelector('.sig-grid');
+  if(dir < 0){
+    let prev = dl.previousElementSibling;
+    while(prev && !movable(prev)) prev = prev.previousElementSibling;
+    if(movable(prev)) box.insertBefore(dl, prev);
+  } else {
+    let next = dl.nextElementSibling;
+    while(next && !movable(next)) next = next.nextElementSibling;
+    if(movable(next)) box.insertBefore(next, dl);
+  }
+  renumber(box);
+}
+/* 근로기준법상 필수 기재사항 — ✕(삭제) 버튼을 붙이지 않음 */
+const REQUIRED_LABELS = new Set([
+  // 표준 근로계약서 필수항목
+  '근로개시일','근무장소','업무내용','소정근로시간','휴게시간','근무일 / 휴일','임금','연차유급휴가',
+  // 일용근로자 계약서 필수항목
+  '근로일','업무의 내용','근로시간','급여',
+  // 프리랜서 용역계약서 필수항목
+  '용역기간 / 개시일','업무 수행 장소','용역의 내용','용역대가',
+  // 세무 서식에서 지우면 안 되는 항목
+  '위임 사항','위임 기간','동의 여부','구분','적용일','작성일','동의일자',
+  '과세기간','지급일','귀속 월','급여 내역','확인 사항','필요한 증명서','받으실 방법','제출 자료',
+  '귀속 월','급여 내역','확인 사항','필요한 증명서','받으실 방법','사업장명','요청인','제출 자료',
+  // 표준계약서에서 지우면 안 되는 조항
+  '업무 범위','보수','용역 보수','용역의 목적','목적','용역의 범위','특약조항'
+]);
+function decorateLines(box){
+  box.querySelectorAll(':scope > .doc-line').forEach(dl=>{
+    const ln = dl.querySelector('.ln');
+    if(!ln || dl.querySelector('.del-line') || dl.classList.contains('nonum')) return;
+    const label = bareLabel(ln.textContent);
+    if(REQUIRED_LABELS.has(label)) return;   // 필수 항목은 삭제 버튼 없음
+    const del = document.createElement('span');
+    del.className = 'del-line';
+    del.textContent = '✕';
+    del.title = '이 항목 접기 (복구 가능)';
+    del.addEventListener('click', ()=>removeLine(dl));
+    ln.insertAdjacentElement('afterend', del);
+  });
+  renumber(box);
+}
+/* 하단 '항목 추가' — 새 조항(제목+내용)을 직접 추가 */
+function addCustomClause(){
+  const box = document.getElementById('contractDoc'); if(!box) return;
+  const anchor = box.querySelector('#addClauseRow');
+  const dl = document.createElement('div');
+  dl.className = 'doc-line custom-clause';
+  dl.innerHTML = `<span class="ln"><span class="ln-num"></span><span class="ln-label" contenteditable="true" data-ph="항목명"></span></span><span class="move-ctrl"><span class="mv" title="위로 이동" onclick="moveLine(this.closest('.doc-line'),-1)">▲</span><span class="mv" title="아래로 이동" onclick="moveLine(this.closest('.doc-line'),1)">▼</span></span>
+    <div class="clause-wrap"><div class="clause-body" contenteditable="true" data-ph="내용을 입력하세요."></div></div>`;
+  if(anchor) box.insertBefore(dl, anchor); else box.appendChild(dl);
+  decorateLines(box);
+  dl.querySelector('.ln-label')?.focus();
+}
+
+/* 서두의 당사자명(사업장/근로자)을 실시간 표시 */
+function refreshMirrors(){
+  document.querySelectorAll('[data-mirror]').forEach(el=>{
+    const k = el.dataset.mirror;
+    const fallback = el.textContent;
+    if(S[k]) el.textContent = S[k];
+    else if(curDoc!=='employ') el.textContent = (k==='bizName') ? DOCS[curDoc].A : DOCS[curDoc].B;
+    else el.textContent = (k==='bizName') ? (curType==='freelance'?'위탁자':'사업장') : (curType==='freelance'?'수탁자':'근로자');
+  });
+}
+// 미러 대상 필드는 input 이벤트에서도 갱신
+document.addEventListener('input', e=>{ if(e.target.closest('[data-k]')) refreshMirrors(); });
+
+function selectType(t){
+  curType = t;
+  document.querySelectorAll('.type-tab').forEach(b=>b.classList.toggle('active', b.dataset.type===t));
+  document.getElementById('stdToolbar').style.display = (t==='standard') ? 'flex' : 'none';
+  renderContract();
+}
+function setSub(v){
+  curSub = v;
+  document.querySelectorAll('#stdSubType button').forEach(b=>b.classList.toggle('on', b.dataset.v===v));
+  renderContract();
+}
+// 체크박스도 상태에 저장 + 기간 정함 라벨 갱신
+document.addEventListener('change', e=>{
+  const el = e.target.closest('[data-k]');
+  if(!el) return;
+  if(el.type==='checkbox'){ S[el.dataset.k] = el.checked ? 'true' : ''; }
+});
+
+/* 표준근로계약서: 기간 정함 드롭다운에 따라 종료일칸 표시 + 제목 괄호 전환 */
+function updateTermLabel(){
+  const term = document.getElementById('tbTerm');
+  const sel  = document.querySelector('#contractDoc select[data-k="s_term"]');
+  const wrap = document.getElementById('endDateWrap');
+  if(!sel) return;
+  const val = sel.value || '정함없음';
+  S.s_term = val;
+  const has = (val === '정함있음');
+  if(wrap) wrap.style.display = has ? 'inline' : 'none';
+  if(term) term.textContent = has ? '(기간의 정함이 있는 경우)' : '(기간의 정함이 없는 경우)';
+}
+
+function toggleInfo(){
+  document.getElementById('infoPanel').classList.toggle('collapsed');
+}
+
+/* ============================================================
+   직렬화 · 출력 · 공유
+   ============================================================ */
+function serializeContract(){
+  // 계약서 DOM을 인쇄/PDF/메일용 정적 텍스트로 변환
+  const live = document.getElementById('contractDoc');
+  const src = live.cloneNode(true);
+  // cloneNode가 select 선택 등 현재 상태를 보존하지 않으므로 라이브 값을 클론에 반영
+  const lc = live.querySelectorAll('input, select, textarea');
+  const cc = src.querySelectorAll('input, select, textarea');
+  lc.forEach((lv,i)=>{ const cl=cc[i]; if(!cl) return;
+    if(lv.tagName==='SELECT') cl.selectedIndex = lv.selectedIndex;
+    else if(lv.type==='checkbox' || lv.type==='radio') cl.checked = lv.checked;
+    else cl.value = lv.value;
+    cl.disabled = lv.disabled;
+  });
+  src.querySelectorAll('.doc-line.removed').forEach(n=>n.remove());   // 삭제된 항목은 인쇄·공유에서 제외
+  src.querySelectorAll('[style]').forEach(el=>{ if(/display:\s*none/.test(el.getAttribute('style')||'')) el.remove(); });  // 숨김 옵션(종료일·연봉옵션 등) 제외
+  ['s_meal','s_car'].forEach(key=>{   // 추가임금: 체크박스(☑/☐) 유지, 미체크 → '해당없음', 체크 → 금액
+    const cb = src.querySelector(`[data-k="${key}Ck"]`);
+    const checked = cb ? cb.checked : false;
+    const amtInput = src.querySelector(`[data-k="${key}"]`);
+    const wrap = amtInput ? amtInput.closest('.amt-wrap') : null;
+    if(wrap && !checked) wrap.textContent = ' 해당없음';
+    const modeSel = src.querySelector(`[data-k="${key}Mode"]`);
+    if(modeSel && !checked) modeSel.remove();   // 미체크 항목은 포함/별도 표기 제외
+  });
+  src.querySelectorAll('.pay-item-row').forEach(r=>{ const nm=r.querySelector('.name'); const amt=r.querySelector('.amt'); if((!nm||!nm.value.trim()) && (!amt||!amt.value.trim())) r.remove(); });  // 내용 없는 추가항목은 인쇄 제외
+  src.querySelectorAll('.wk-hd').forEach(n=>n.remove());
+  src.querySelectorAll('.wk-row').forEach(r=>{
+    const v = r.querySelectorAll('input');
+    const nm=((v[0]&&v[0].value)||'').trim(), jn=((v[1]&&v[1].value)||'').trim();
+    const pay=((v[2]&&v[2].value)||'').trim(), tax=((v[3]&&v[3].value)||'').trim();
+    if(!nm && !jn && !pay){ r.remove(); return; }
+    const d=document.createElement('div'); d.className='p-sub';
+    d.textContent = [nm, jn, pay? '지급액 '+pay+'원':'', tax? '비과세 '+tax+'원':'']
+      .filter(Boolean).join(' · ');
+    r.replaceWith(d);
+  });
+  { const term = src.querySelector('select[data-k="s_term"]'); if(term){ const t=term.options[term.selectedIndex]?.text||''; const sp=document.createElement('span'); sp.textContent='('+t+')'; term.replaceWith(sp); } }  // 기간의 정함 → 괄호
+  src.querySelectorAll('.reset-link, .stamped, .del-line, .restore-bar, .add-item-pill, .move-ctrl, .stepbtns, .pay-item-del, .wk-del, .wage-check, .net-est-wrap, .pay-hint, .pay-box-toggle, .seal-add').forEach(n=>n.remove());
+  // 입력값을 텍스트로 치환
+  src.querySelectorAll('input, select').forEach(inp=>{
+    let v = '';
+    if(inp.type==='checkbox'){ v = inp.checked ? '☑' : '☐'; }
+    else if(inp.tagName==='SELECT'){ v = inp.options[inp.selectedIndex]?.text || ''; }
+    else { v = inp.value || '____'; }
+    const span = document.createElement('span');
+    span.textContent = (inp.type==='checkbox') ? v : ' '+v+' ';
+    span.style.fontWeight = '600';
+    inp.replaceWith(span);
+  });
+  return src;
+}
+
+function titleParts(node){
+  const nm = node.querySelector('.tb-name');
+  if(nm){
+    const tm = node.querySelector('.tb-term');
+    return { name: nm.textContent.trim(), term: tm ? tm.textContent.trim() : '' };
+  }
+  return { name: (node.querySelector('h4')?.textContent || '고용계약서').trim(), term: '' };
+}
+
+function buildContractText(){
+  const node = serializeContract();
+  const tp = titleParts(node);
+  const title = tp.name + (tp.term ? ' ' + tp.term : '');
+  let lines = [title, ''];
+  node.querySelectorAll(':scope > .doc-line').forEach(dl=>{
+    const ln = dl.querySelector('.ln')?.textContent?.trim();
+    const clone = dl.cloneNode(true);
+    clone.querySelector('.ln')?.remove();
+    const body = clone.textContent.replace(/\s+/g,' ').trim();
+    if(ln) lines.push(`■ ${ln}`);
+    if(body) lines.push(`   ${body}`);
+  });
+  return lines.join('\n');
+}
+
+function consentHtml(){
+  const name = S.wName || '____';
+  const wSeal = (S.sealWorkerOn==='true' && (S.wName||'').trim()) ? makeSeal(S.wName, 'worker') : '';
+  const wTilt = sealTilt(S.wName);
+  const wSignUrl = signPathToDataUrl(S.wSignPath);
+  const signBase = wSignUrl ? `<img src="${wSignUrl}" style="height:40px;width:auto;vertical-align:middle;">` : `(서명/인)`;
+  const signHtml = wSeal
+    ? `<span style="position:relative;">${signBase}<img src="${wSeal}" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-60%) rotate(${wTilt}deg);height:59px;width:auto;mix-blend-mode:multiply;pointer-events:none;"></span>`
+    : signBase;
+  return `<div class="p-consent">
+    <div style="height:24px;"></div>
+    <div class="p-title-box"><span class="p-tb-name">개인정보 수집·이용 동의서</span></div>
+    <div style="height:18px;"></div>
+    <p class="p-intro">「개인정보 보호법」 제15조·제24조에 따라 아래와 같이 개인정보 수집·이용에 동의합니다.</p>
+    <div class="p-line"><span class="p-ln">수집 항목</span>성명, 연락처, 주소, (필요 시) 주민등록번호·계좌번호</div>
+    <div class="p-line"><span class="p-ln">수집 목적</span>근로/용역계약 체결·이행, 급여 지급, 4대보험 및 원천세 신고</div>
+    <div class="p-line"><span class="p-ln">보유 기간</span>계약 종료 후 관련 법령에서 정한 기간(원칙적으로 3년)</div>
+    <div class="p-line"><span class="p-ln">동의 거부 권리</span>동의를 거부할 수 있으나, 거부 시 계약 체결이 제한될 수 있습니다.</div>
+    <div style="margin-top:40px; border-top:1px solid #ccc; padding-top:18px;">
+      <div style="text-align:right; font-size:12pt; margin-bottom:16px;">동의일자 : ${fmtDate(new Date().toISOString().slice(0,10))}</div>
+      <div style="text-align:right; font-size:12pt;">본인(정보주체) : ${esc(name)} ${signHtml}</div>
+    </div>
+  </div>`;
+}
+
+/* 제목+내용이 인쇄 한 줄에 들어가는지 판단(캔버스 실측) */
+function fitsOneLine(label, content){
+  try{
+    const c=document.createElement('canvas'); const x=c.getContext('2d');
+    x.font='bold 16px "Noto Sans KR", sans-serif';
+    const w1=x.measureText((label||'')+' : ').width;
+    x.font='16px "Noto Sans KR", sans-serif';
+    const w2=x.measureText(content||'').width;
+    return (w1+w2) <= 700;   // 인쇄 본문 한 줄 폭(보수적)
+  }catch(e){ return (((label||'').length)+((content||'').length)) <= 32; }
+}
+function buildPrintHtml(withConsent){
+  const node = serializeContract();
+  const tp = titleParts(node);
+  const intro = node.querySelector('.doc-intro')?.textContent || '';
+  const titleHtml = tp.term
+    ? `<div class="p-title-box"><span class="p-tb-name">${esc(tp.name)}</span> <span class="p-tb-term">${esc(tp.term)}</span></div>`
+    : `<h1>${esc(tp.name)}</h1>`;
+  let body = `${titleHtml}<div style="height:18px;"></div><p class="p-intro">${esc(intro)}</p>`;
+  node.querySelectorAll(':scope > .doc-line').forEach(dl=>{
+    // 서명란은 별도 처리
+    if(dl.querySelector('.sig-grid')){
+      const parties = dl.querySelectorAll('.sig-grid > div');
+      let sig = '<div class="p-sig">';
+      parties.forEach(p=>{
+        sig += '<div>';
+        const party = p.querySelector('.party')?.textContent||'';
+        sig += `<div class="p-party">${esc(party)}</div>`;
+        p.querySelectorAll('.sig-row').forEach(r=>{
+          const sealBoxId = r.querySelector('.seal-box')?.id;
+          const sealImg = r.querySelector('.seal-img');
+          const isBiz = sealBoxId==='seal_biz';
+          const isWorker = sealBoxId==='seal_worker';
+          const c = r.cloneNode(true); c.querySelector('.seal-box')?.remove();
+          const txt = c.textContent.replace(/\s+/g,' ').replace(/\(\s+/g,'(').replace(/\s+\)/g,')').trim();
+          let rowHtml = esc(txt);
+          // 직접 그린 서명이 있으면 (서명/인)을 서명 이미지로 대체(도장 겹칠 anchor 유지)
+          let signedAnchor = false;
+          const signUrl = isBiz ? signPathToDataUrl(S.bizSignPath) : (isWorker ? signPathToDataUrl(S.wSignPath) : '');
+          if(signUrl){
+            rowHtml = rowHtml.replace('(서명/인)', `<span class="sigimg-anchor" style="position:relative;display:inline-block;"><img src="${signUrl}" style="height:42px;width:auto;vertical-align:middle;"></span>`);
+            signedAnchor = true;
+          }
+          if(sealImg){
+            const src = sealImg.getAttribute('src');
+            const sh = isBiz ? 66 : 59;   // 사업주(약 -20%)·근로자(약 -10%) 축소
+            const tilt = sealTilt(isBiz ? (S.bizName||S.bizRep) : S.wName);
+            const sealTag = `<img src="${src}" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-60%) rotate(${tilt}deg);height:${sh}px;width:auto;mix-blend-mode:multiply;pointer-events:none;">`;
+            if(signedAnchor){
+              rowHtml = rowHtml.replace('<span class="sigimg-anchor" style="position:relative;display:inline-block;">', `<span class="sigimg-anchor" style="position:relative;display:inline-block;">${sealTag}`);
+            } else {
+              rowHtml = rowHtml.replace('(서명/인)', `<span style="position:relative;">(서명/인)${sealTag}</span>`);
+            }
+          }
+          sig += `<div class="p-srow">${rowHtml}</div>`;
+        });
+        sig += '</div>';
+      });
+      sig += '</div>';
+      body += sig;
+      return;
+    }
+    const ln = dl.querySelector('.ln')?.textContent?.trim();
+    const inline = dl.classList.contains('row-inline');
+    const lnColon = ln ? (ln + (/[:：]\s*$/.test(ln) ? '' : ' :')) : '';   // 제목 뒤 콜론
+    const lnBlock  = ln ? `<span class="p-ln">${esc(ln)}</span>` : '';
+    const lnInline = ln ? `<span class="p-lni">${esc(lnColon)}</span> ` : '';
+
+    // 임금: ①②③④를 각각 한 줄로
+    if(dl.querySelector('.subno')){
+      body += `<div class="p-line">${lnBlock}</div>`;
+      const emitSub = ch=>{
+        if(ch.classList.contains('ln')) return;
+        if(ch.classList.contains('pay-box')){
+          if(ch.classList.contains('collapsed')) return;   // 세부내역을 접은 상태면 인쇄에서 제외
+          // 화면과 동일하게 세부내역을 박스로 렌더링(3개씩)
+          const title = (ch.querySelector('.pay-box-title')?.textContent||'').replace(/[▾▸]/g,'').trim();
+          const cellHtml = cell=>{ const t=cell.textContent.replace(/\s+/g,' ').trim(); return t? `<div style="font-size:11.5pt;">${esc(t)}</div>`:''; };
+          let inner=''; ch.querySelectorAll('.pay-flow .pay-cell, .custom-list .pay-item-row').forEach(c=>{ inner += cellHtml(c); });
+          if(inner){
+            body += `<div style="border:1px solid #ccc;border-radius:8px;padding:10px 14px;margin:6px 0 10px 16px;">`
+                  + `<div style="font-weight:700;color:#4F53D6;font-size:11.5pt;margin-bottom:8px;">${esc(title)}</div>`
+                  + `<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 14px;">${inner}</div>`
+                  + `</div>`;
+          }
+          return;
+        }
+        if(ch.id==='s_customList' || ch.classList.contains('pay-extras') || ch.classList.contains('pay-grid2') || ch.classList.contains('pay-flow') || ch.classList.contains('pay-flow-custom')){
+          [...ch.children].forEach(emitSub);
+        } else if(ch.classList.contains('pay-box-body') || ch.classList.contains('pay-subdetail')){
+          [...ch.children].forEach(emitSub);
+        } else {
+          const t = ch.textContent.replace(/\s+/g,' ').replace(/\(\s+/g,'(').replace(/\s+\)/g,')').trim();
+          if(t) body += `<div class="p-sub">${esc(t)}</div>`;
+        }
+      };
+      [...dl.children].forEach(emitSub);
+      return;
+    }
+    // 사회보험: 체크된 항목만
+    if(dl.querySelector('.inline-check') && /국민연금|고용보험/.test(dl.textContent)){
+      const on = [...dl.querySelectorAll('.inline-check')].filter(l=>/☑/.test(l.textContent)).map(l=>'☑ '+l.textContent.replace(/[☑☐]/g,'').trim());
+      body += `<div class="p-line">${lnInline}${esc(on.join('   ') || '해당 없음')}</div>`;
+      return;
+    }
+    // 휴게시간: 문구는 다음 줄 괄호로
+    const brk = dl.querySelector('.brk-note');
+    if(brk){
+      const note = brk.textContent.trim();
+      const c = dl.cloneNode(true); c.querySelector('.ln')?.remove(); (c.querySelector('.brk-line') || c.querySelector('.brk-note'))?.remove();
+      const main = c.textContent.replace(/\s+/g,' ').trim();
+      body += `<div class="p-line">${lnInline}${esc(main)}</div>`;
+      body += `<div class="p-body">(${esc(note)})</div>`;
+      return;
+    }
+    // 체크 목록: 한 줄씩 내려쓴다
+    const ckl = dl.querySelector('.ck-list');
+    if(ckl){
+      const lead = dl.querySelector('.doc-sub');
+      let out = `<div class="p-line">${lnBlock}`;
+      if(lead){ const t = lead.textContent.replace(/\s+/g,' ').trim(); if(t) out += `<div class="p-body">${esc(t)}</div>`; }
+      ckl.querySelectorAll(':scope > label').forEach(lb=>{
+        const mark = /☑/.test(lb.textContent) ? '☑' : '☐';
+        const d = lb.querySelector('.d');
+        let name;
+        if(d){
+          const c = lb.cloneNode(true); c.querySelector('.d')?.remove();
+          name = c.textContent.replace(/[☑☐]/g,'').replace(/\s+/g,' ').trim()
+               + ' — ' + d.textContent.replace(/\s+/g,' ').trim();
+        } else {
+          name = lb.textContent.replace(/[☑☐]/g,'').replace(/\s+/g,' ').trim();
+        }
+        out += `<div class="p-sub">${mark} ${esc(name)}</div>`;
+      });
+      // 체크 목록 뒤에 붙은 자유 입력칸
+      dl.querySelectorAll(':scope > div > input, :scope > div > span').forEach(()=>{});
+      const tail = [...dl.children].filter(c=>c!==ckl && !c.classList.contains('ln')
+        && c!==lead && !c.classList.contains('del-line') && !c.classList.contains('move-ctrl'));
+      tail.forEach(c=>{ const t=c.textContent.replace(/\s+/g,' ').trim(); if(t) out += `<div class="p-sub">${esc(t)}</div>`; });
+      body += out + `</div>`;
+      return;
+    }
+    // 표준계약서: 문단 목록(지급표 포함)
+    const rows = dl.querySelector('.stdrows');
+    if(rows){
+      let out = `<div class="p-line">${lnBlock}`;
+      const cb = dl.querySelector('.clause-body');
+      if(cb) cb.textContent.split('\n').map(t=>t.replace(/\s+/g,' ').trim()).filter(Boolean)
+        .forEach(t=> out += `<div class="p-body">${esc(t)}</div>`);
+      const emit = el=>{ const t = el.textContent.replace(/\s+/g,' ').replace(/\(\s+/g,'(').replace(/\s+\)/g,')').trim();
+        if(t) out += `<div class="p-body">${esc(t)}</div>`; };
+      [...rows.children].forEach(ch=>{
+        if(ch.classList.contains('paytbl')) [...ch.children].forEach(emit); else emit(ch);
+      });
+      body += out + `</div>`;
+      return;
+    }
+    // 여러 문단으로 된 조항은 줄바꿈을 살린다
+    const cbOnly = dl.querySelector('.clause-body');
+    if(cbOnly && /\n/.test(cbOnly.textContent)){
+      let out = `<div class="p-line">${lnBlock}`;
+      cbOnly.textContent.split('\n').map(t=>t.replace(/\s+/g,' ').trim()).filter(Boolean)
+        .forEach(t=> out += `<div class="p-body">${esc(t)}</div>`);
+      body += out + `</div>`;
+      return;
+    }
+    // 기본
+    const clone = dl.cloneNode(true);
+    clone.querySelector('.ln')?.remove();
+    const txt = clone.textContent.replace(/\s+/g,' ').trim();
+    // 한 줄에 들어가면 '제목 : 내용' 한 줄, 넘치면 제목만(콜론 없이) + 내용 줄바꿈
+    if(inline || fitsOneLine(ln, txt)){
+      body += `<div class="p-line">${lnInline}${esc(txt)}</div>`;
+    } else {
+      body += `<div class="p-line">${lnBlock}<div class="p-body">${esc(txt)}</div></div>`;
+    }
+  });
+  body += buildClosingHtml();
+  body += buildOfficeFooterHtml();
+  if(withConsent) body += consentHtml();
+  return body;
+}
+
+function closingText(){
+  const v = S.offClosing || '';
+  return v==='__custom__' ? (S.offClosingCustom||'') : v;
+}
+function buildClosingHtml(){
+  const t = closingText();
+  return t ? `<div class="p-closing-msg">${esc(t)}</div>` : '';
+}
+function buildOfficeFooterHtml(){
+  const parts = [
+    S.offBizNo && `사업자등록번호 ${esc(S.offBizNo)}`,
+    S.offAddr && esc(S.offAddr),
+    S.offPhone && `Tel. ${esc(S.offPhone)}`
+  ].filter(Boolean);
+  if(!S.offName && !parts.length) return '';
+  return `<div class="p-office-footer">
+    ${S.offName ? `<div><b>${esc(S.offName)}</b></div>` : ''}
+    ${parts.length ? `<div>${parts.join(' · ')}</div>` : ''}
+  </div>`;
+}
+function onClosingChange(sel){
+  const custom = document.getElementById('offClosingCustom');
+  const isCustom = sel.value==='__custom__';
+  custom.style.display = isCustom ? 'block' : 'none';
+  S.offClosing = sel.value;
+}
+
+async function printContract(){
+  const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if(isMobile){ await savePdf(); return; }   // 폰: 인쇄 대신 PDF 저장/공유(모바일 인쇄 불안정)
+  document.getElementById('printArea').innerHTML = buildPrintHtml(!!DOCS[curDoc].consent);
+  window.print();
+}
+async function savePdf(){
+  toast('PDF를 만들고 있어요…');
+  try{
+    const blob = await buildPdfBlob();
+    const fname = `${(S.wName||'고객')}_${docTitle()}.pdf`;
+    const file = new File([blob], fname, {type:'application/pdf'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file], title:docTitle()});   // 공유시트 → 저장/전송
+    }else{
+      downloadBlob(blob, fname);
+      toast('PDF를 저장했어요.');
+    }
+  }catch(e){ if(e && e.name==='AbortError') return; toast('PDF 저장 중 문제가 발생했어요. 다시 시도해 주세요.'); }
+}
+
+/* 링크 복사 — 근로자가 폰에서 직접 작성할 수 있는 작성 링크(프로토타입: 데모 URL)를 클립보드에 복사 */
+/* 입력값을 링크(URL)에 담아 공유 — 백엔드 없이 링크만으로 계약서 전달 */
+function encodeState(){
+  const payload = { S, doc: curDoc, type: curType, sub: curSub };   // 서명(선 데이터)도 함께 담아 양쪽에서 확인
+  return btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+}
+function applyStateFromUrl(){
+  const m = (location.hash||'').match(/[#&]d=([^&]+)/);
+  if(!m) return false;
+  try{
+    const payload = JSON.parse(decodeURIComponent(escape(atob(m[1]))));
+    Object.keys(S).forEach(k=>delete S[k]);
+    Object.assign(S, payload.S||{});
+    if(payload.doc && DOCS[payload.doc]) curDoc = payload.doc;
+    if(payload.type) curType = payload.type;
+    if(payload.sub)  curSub  = payload.sub;
+    if(Array.isArray(S.wkItems)) wkItems = S.wkItems;
+    return true;
+  }catch(e){ return false; }
+}
+function makeShareUrl(){
+  const base = location.href.split('#')[0].split('?')[0];
+  return base + '?doc=' + curDoc + '#d=' + encodeState();
+}
+/* 빈 서식 링크 — 값 없이 서식만 열어 주는 주소 */
+function makeBlankUrl(k){
+  return location.href.split('#')[0].split('?')[0] + '?doc=' + (k||curDoc);
+}
+async function copyLink(){
+  const url = makeShareUrl();
+  try{
+    await navigator.clipboard.writeText(url);
+    toast('작성 링크를 복사했어요. 고객에게 붙여넣어 보내세요.');
+  }catch(e){
+    window.prompt('아래 작성 링크를 복사하세요 (전체 선택 후 복사)', url);
+  }
+}
+
+async function buildPdfBlob(){
+  const { jsPDF } = window.jspdf;
+  // 인쇄용 정적 HTML을 오프스크린에 렌더 후 캡처
+  const holder = document.createElement('div');
+  holder.style.cssText = 'position:fixed; left:-99999px; top:0; width:794px; background:#fff; padding:40px; font-family:\'Noto Sans KR\',sans-serif; color:#111; font-size:12pt; line-height:1.7;';
+  holder.innerHTML = buildPrintHtml(!!DOCS[curDoc].consent)
+     .replace(/class="p-tb-name"/g,'style="display:inline;font-size:16pt;font-weight:800;"')
+     .replace(/class="p-tb-term"/g,'style="display:inline;font-size:12pt;font-weight:600;color:#555;margin-left:6px;"')
+     .replace(/class="p-title-box"/g,'style="display:table;border:1.5px solid #111;border-radius:8px;padding:6px 18px;margin:0 auto 10px;"')
+     .replace(/class="p-ln"/g,'style="color:#4F53D6;font-weight:700;display:block;font-size:12pt;"')
+     .replace(/class="p-lni"/g,'style="color:#4F53D6;font-weight:700;display:inline;margin-right:6px;font-size:12pt;"')
+     .replace(/class="p-intro"/g,'style="text-align:left;color:#333;font-size:12pt;margin:14px 0 20px;"')
+     .replace(/class="p-sub"/g,'style="margin:0 0 6px 16px;font-size:12pt;"')
+     .replace(/class="p-body"/g,'style="padding-left:16px;margin-bottom:10px;font-size:12pt;"')
+     .replace(/class="p-line"/g,'style="margin-bottom:10px;font-size:12pt;"')
+     .replace(/class="p-sig"/g,'style="display:grid;grid-template-columns:1fr;gap:22px;margin-top:24px;border-top:1px solid #ccc;padding-top:16px;"')
+     .replace(/class="p-party"/g,'style="color:#4F53D6;font-weight:700;font-size:12pt;margin-bottom:6px;"')
+     .replace(/class="p-srow"/g,'style="font-size:12pt;margin-bottom:6px;"')
+     .replace(/class="p-closing-msg"/g,'style="margin-top:40px;text-align:center;font-size:12pt;color:#333;line-height:1.7;"')
+     .replace(/class="p-office-footer"/g,'style="margin-top:56px;padding-top:14px;border-top:1px solid #ccc;font-size:12pt;color:#444;text-align:center;line-height:1.6;"')
+     .replace(/class="p-foot"/g,'style="margin-top:14px;font-size:9pt;color:#aaa;text-align:center;"')
+     .replace(/class="p-consent"/g,'style="margin-top:40px;border-top:2px dashed #ccc;padding-top:24px;"')
+     .replace(/<h1>/g,'<h1 style="text-align:center;font-size:16pt;font-weight:800;margin-bottom:6px;">');
+  document.body.appendChild(holder);
+  const canvas = await html2canvas(holder, {scale:2, backgroundColor:'#ffffff'});
+  document.body.removeChild(holder);
+
+  const pdf = new jsPDF('p','mm','a4');
+  const pw = 210, ph = 297;
+  const imgH = canvas.height * pw / canvas.width;
+  let left = imgH, pos = 0;
+  const img = canvas.toDataURL('image/jpeg', 0.95);
+  pdf.addImage(img, 'JPEG', 0, pos, pw, imgH);
+  left -= ph;
+  while(left > 0){ pos = left - imgH; pdf.addPage(); pdf.addImage(img,'JPEG',0,pos,pw,imgH); left -= ph; }
+  return pdf.output('blob');
+}
+
+async function shareKakao(){
+  toast('계약서 PDF를 준비하고 있어요…');
+  try{
+    const blob = await buildPdfBlob();
+    const fname = `${(S.wName||'고객')}_${docTitle()}.pdf`;
+    const file = new File([blob], fname, {type:'application/pdf'});
+    // 모바일: 시스템 공유시트(카카오톡 선택) → 데스크톱: 파일 저장 후 안내
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file], title:docTitle(), text:`${OFFICE.상호}에서 보내드리는 서식입니다.`});
+      logKakao();
+    }else{
+      downloadBlob(blob, fname);
+      window.open('http://pf.kakao.com/_TZegG/chat','_blank');
+      toast('PDF를 저장했어요. 카카오톡 대화창에 첨부해 보내주세요.');
+      logKakao();
+    }
+  }catch(err){
+    if(err && err.name==='AbortError') return; // 사용자가 공유 취소
+    toast('공유 준비 중 문제가 발생했어요. 출력(인쇄)으로 저장해 주세요.');
+  }
+}
+function logKakao(){ toast('카카오톡 공유가 시작됐어요.'); }
+
+async function shareEmail(){
+  toast('PDF를 준비하고 있어요…');
+  try{
+    const blob = await buildPdfBlob();
+    const fname = `${(S.wName||'고객')}_${docTitle()}.pdf`;
+    const file = new File([blob], fname, {type:'application/pdf'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      // 모바일: 공유시트에서 메일 선택 → PDF가 첨부됨(본문에 계약 내용 없음)
+      await navigator.share({files:[file], title:docTitle(), text:`${docTitle()}를 보내드립니다.`});
+    }else{
+      // 데스크톱: PDF 저장 후 메일 앱 열기(본문엔 계약 내용 없이 첨부 안내만)
+      downloadBlob(blob, fname);
+      const subject = encodeURIComponent(`[${OFFICE.상호}] ${docTitle()}`);
+      const body = encodeURIComponent(`안녕하세요.\n${docTitle()}를 보내드립니다.\n방금 저장된 PDF 파일(${fname})을 이 메일에 첨부해 주세요.\n\n— ${OFFICE.상호}`);
+      location.href = `mailto:?subject=${subject}&body=${body}`;
+      toast('PDF를 저장했어요. 메일에 첨부해 보내주세요.');
+    }
+  }catch(err){ if(err && err.name==='AbortError') return; toast('메일 준비 중 문제가 발생했어요. 다시 시도해 주세요.'); }
+}
+
+function downloadBlob(blob, name){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+}
+function docTitle(){
+  const h = document.querySelector('#contractDoc h4 .tb-name');
+  return (h? h.textContent : '') || DOCS[curDoc].t;
+}
+
+function issueContract(){
+  if(credit<=0){ toast('무료체험 3건을 모두 사용했어요.'); return; }
+  credit--; document.getElementById('creditDisplay').textContent = credit;
+  document.getElementById('docStamp').classList.add('show');
+  toast(`${docTitle()} + 개인정보동의서 발급 완료 (남은 무료 ${credit}건)`);
+}
+
+
+/* ============================================================
+   서식 모음 — 세무법인 다우
+   고객이 링크로 열어 빈칸을 채우고 서명한 뒤 PDF로 저장한다.
+   ============================================================ */
+const OFFICE = {
+  상호:'세무법인 다우', 대표자:'선종문', 사업자등록번호:'274-85-01403',
+  전화:'064-900-7170', 홈페이지:'dawootax.kr', 담당:'한상희 세무사', 세무사등록번호:'32115',
+  주소:'[63507] 제주특별자치도 서귀포시 대정읍 동일하모로149번길 4 2층 세무법인 다우',
+};
+
+const FORMS_VER = 'v0.100';   // 빌드할 때 채워진다
+
+const DOCS = {
+  employ : {t:'고용계약서',            n:'근로 · 일용 · 프리랜서',
+            p:'유형을 고르면 계약서가 채워집니다. 각 항목은 눌러서 고칠 수 있습니다.',
+            types:true, A:'사업주(사용자)', B:'근로자', consent:true},
+  poa    : {t:'세무대리 위임장',        n:'홈택스 수임 동의',
+            p:'위임인 정보를 채우고 서명하시면 세무대리 위임장이 완성됩니다.',
+            A:'수임인(세무대리인)', B:'위임인'},
+  privacy: {t:'개인정보 수집·이용 동의서', n:'상담 · 수임 단계',
+            p:'내용을 확인하시고 동의 여부를 표시한 뒤 서명해 주세요.',
+            A:'개인정보 처리자', B:'정보주체(본인)'},
+  notice : {t:'수임 · 해지 확인서',      n:'세무대리 관계',
+            p:'세무대리 관계의 시작 또는 종료를 확인하는 서식입니다.',
+            A:'세무대리인', B:'고객'},
+  request: {t:'기장 자료 요청서',        n:'매월 제출 자료',
+            p:'보내주신 자료에 표시하시면 그대로 접수됩니다. 매월 10일까지 부탁드립니다.',
+            A:'세무대리인', B:'고객'},
+  payroll: {t:'급여대장',               n:'원천세 신고용',
+            p:'귀속 월과 지급일을 적고 근로자를 한 줄씩 추가해 주세요.',
+            A:'세무대리인', B:'사업주'},
+  vat    : {t:'부가가치세 신고 확인서',  n:'신고 전 확인',
+            p:'신고 전에 확인해야 할 사항입니다. 확인하신 뒤 서명해 주세요.',
+            A:'세무대리인', B:'사업주'},
+  apply  : {t:'세무서비스 신규 신청서', n:'기장 수임 신청',
+            p:'기장 수임을 신청하시는 서식입니다. 채우고 서명하시면 그대로 접수됩니다.',
+            A:'세무대리인', B:'신청인'},
+  cert   : {t:'증명서 발급 요청서',      n:'세무 관련 증명',
+            p:'필요하신 증명서를 고르고 받으실 방법을 적어 주세요.',
+            A:'세무대리인', B:'요청인'},
+};
+let curDoc = 'employ';
+
+/* ---------- 서식 고르기 ---------- */
+function renderDocPicker(){
+  const box = document.getElementById('docPicker');
+  box.innerHTML = Object.entries(DOCS).map(([k,d])=>
+    `<button class="dp ${k===curDoc?'on':''}" onclick="selectDoc('${k}')">${d.t}</button>`).join('');
+  const on = box.querySelector('.dp.on');
+  if(on && on.scrollIntoView) on.scrollIntoView({block:'nearest', inline:'center'});
+  const d = DOCS[curDoc];
+  document.getElementById('docHeadT').textContent = d.t;
+  document.getElementById('docHeadP').textContent = d.p;
+  document.getElementById('typeTabs').style.display  = d.types? 'grid':'none';
+  document.getElementById('stdToolbar').style.display = (d.types && curType==='standard')? 'flex':'none';
+  document.getElementById('ssTitleBiz').textContent    = d.A;
+  document.getElementById('ssTitleWorker').textContent = d.B;
+  document.getElementById('issueNote').innerHTML = d.consent
+    ? '인쇄 / PDF 저장 시 <b>개인정보 수집·이용 동의서</b>가 함께 포함됩니다.'
+    : '작성하신 내용은 서버에 저장되지 않습니다. <b>PDF로 저장</b>하신 뒤 보내 주세요.';
+  document.getElementById('pageFooter').textContent =
+    `${OFFICE.상호} · ${OFFICE.주소} · ${OFFICE.전화} · 서식 ${FORMS_VER}`;
+}
+function selectDoc(k){
+  if(!DOCS[k]) return;
+  curDoc = k;
+  renderDocPicker(); renderPanels(); renderContract();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ---------- 좌·우 정보 패널 ---------- */
+const F = (label, k, cls, ph) =>
+  `<div class="field"><label>${label}</label><input type="text" ${cls?`class="${cls}"`:''} data-k="${k}" placeholder="${ph||''}"></div>`;
+
+function renderPanels(){
+  const L = document.getElementById('leftPanel');
+  const R = document.getElementById('rightPanel');
+  const head = (t,h) => `<div class="panel-head"><h3><span class="dot"></span>${t}</h3>
+    ${h?`<span class="panel-hint">${h}</span>`:''}</div>`;
+
+  if(curDoc==='employ'){
+    L.innerHTML = head('근로자 정보','입력 즉시 계약서에 자동 반영됩니다') +
+      `<div class="row3">
+        ${F('성명','wName','','예: 김근로')}
+        ${F('연락처','wPhone','phoneauto','010-0000-0000')}
+        ${F('생년월일','wBirth','dateauto','예: 1990-01-01')}
+      </div>` +
+      `<div class="field" style="margin-bottom:0;"><label>주소</label>
+        <input type="text" data-k="wAddr" placeholder="예: 서울시 …"></div>`;
+    R.innerHTML = head('사업주(사용자) 정보') +
+      F('사업장명 / 상호','bizName','','예: 정직한상사') +
+      F('대표자 성명','bizRep','','예: 홍길동') +
+      F('사업자등록번호','bizNo','biznoauto','000-00-00000') +
+      F('사업주 연락처','bizPhone','phoneauto','010-0000-0000') +
+      `<div class="field" style="margin-bottom:0;"><label>사업장 주소</label>
+        <input type="text" data-k="bizAddr" placeholder="예: 서울시 강남구 …"></div>`;
+  } else {
+    const 법인 = ['payroll','vat'].includes(curDoc);
+    L.innerHTML = head(DOCS[curDoc].B + ' 정보','입력 즉시 서식에 자동 반영됩니다') +
+      `<div class="row3">
+        ${F(법인? '상호 / 사업장명':'상호 / 성명','wName','', 법인? '예: (주)정직한상사':'예: 홍길동')}
+        ${F('연락처','wPhone','phoneauto','010-0000-0000')}
+        ${F(법인? '사업자등록번호':'사업자등록번호 / 생년월일','wBirth','', 법인? '000-00-00000':'000-00-00000 또는 1990-01-01')}
+      </div>` +
+      `<div class="row2">
+        ${F('대표자 성명','bizRep','','예: 홍길동')}
+        ${F('이메일','wMail','','name@example.com')}
+      </div>` +
+      `<div class="field" style="margin-bottom:0;"><label>주소</label>
+        <input type="text" data-k="wAddr" placeholder="예: 제주특별자치도 …"></div>`;
+    R.innerHTML = head('세무대리인','저희 사무실 정보입니다') +
+      `<div class="of-box">
+        <div class="of-r"><span>상호</span><b>${OFFICE.상호}</b></div>
+        <div class="of-r"><span>대표자</span><b>${OFFICE.대표자}</b></div>
+        <div class="of-r"><span>사업자등록번호</span><b>${OFFICE.사업자등록번호}</b></div>
+        <div class="of-r"><span>연락처</span><b>${OFFICE.전화}</b></div>
+        <div class="of-r"><span>담당</span><b>${OFFICE.담당}</b></div>
+        <div class="of-a">${OFFICE.주소}</div>
+      </div>`;
+  }
+  applyState(document.getElementById('page-labor'));
+}
+
+/* ---------- 세무 서식 공통 서명란 ---------- */
+function taxSign(opt){
+  const o = opt || {};
+  const B = DOCS[curDoc].B;
+  return `<div class="doc-line sig-line no-screen" style="margin-top:22px; padding-top:18px;">
+    <div class="sig-grid">
+      <div>
+        <div class="party">${B}</div>
+        <div class="sig-row"><span class="l">${o.corp? '상 호':'성 명'} :</span><input class="blank wide" data-k="wName"> (서명/인) <span class="seal-box" id="seal_worker"></span></div>
+        ${o.corp? `<div class="sig-row"><span class="l">대표자 :</span><input class="blank" data-k="bizRep"></div>`:''}
+        <div class="sig-row"><span class="l">${o.corp? '사업자등록번호':'등록번호 / 생년월일'} :</span><input class="blank" data-k="wBirth"></div>
+        <div class="sig-row"><span class="l">연 락 처 :</span><input class="blank phoneauto" data-k="wPhone"></div>
+        <div class="sig-row"><span class="l">주 소 :</span><input class="blank wide" data-k="wAddr"></div>
+      </div>
+      <div>
+        <div class="party">${DOCS[curDoc].A}</div>
+        <div class="sig-row"><span class="l">상 호 :</span><input class="blank wide" data-k="ofName"></div>
+        <div class="sig-row"><span class="l">대표자 :</span><input class="blank" data-k="ofRep"> (서명/인) <span class="seal-box" id="seal_biz"></span></div>
+        <div class="sig-row"><span class="l">사업자번호 :</span><input class="blank biznoauto" data-k="ofNo"></div>
+        <div class="sig-row"><span class="l">연 락 처 :</span><input class="blank phoneauto" data-k="ofPhone"></div>
+      </div>
+    </div>
+    <p class="doc-sub" style="margin-top:12px;">${o.note || '작성하신 내용에 틀림이 없음을 확인합니다.'}</p>
+  </div>`;
+}
+function dateLine(label, k){
+  return `<div class="doc-line row-inline"><span class="ln">${label}:</span>
+    <div><input class="blank dateauto" style="width:118px;min-width:0;" data-k="${k}" placeholder="2026-08-19"></div></div>`;
+}
+function ckList(k, items, cols){
+  return `<div class="ck-list" ${cols===1?'style="grid-template-columns:1fr"':''}>${items.map((x,i)=>
+    `<label><input type="checkbox" data-k="${k}${i}"> ${x}</label>`).join('')}</div>`;
+}
+
+/* ---------- 1. 세무대리 위임장 ---------- */
+function tplPoa(){
+  return `
+  <h4 class="title-box"><span class="tb-name">위 임 장</span><span class="tb-term">(세무대리 · 신고 대리)</span></h4>
+  <p class="doc-intro"><b data-mirror="wName">위임인</b>은 <b>${OFFICE.상호}</b>(대표 ${OFFICE.대표자})를 세무대리인으로 정하고,
+    다음 사항의 처리를 위임합니다.</p>
+
+  <div class="doc-line"><span class="ln">위임 사항</span>
+    <div class="doc-sub">해당하는 항목에 표시해 주세요. 표시하지 않아도 세무 신고에 필요한 범위는 포함됩니다.</div>
+    ${ckList('poa_s', ['국세·지방세의 신고와 납부 대리','국세청 홈택스 수임 동의 및 자료 조회',
+      '경정청구·이의신청 등 불복 절차 대리','세금계산서·증빙 자료의 확인과 관리',
+      '4대보험 취득·상실 및 보수총액 신고','위 각 호에 딸린 부수 업무'])}</div>
+
+  ${labeledClause('poa_term','위임 기간','수임 개시일부터 위임 해지의 의사표시가 있을 때까지로 한다.')}
+  ${labeledClause('poa_duty','자료 제공','위임인은 세무대리에 필요한 자료를 기한 내에 제공한다. 자료를 늦게 제공하거나 사실과 다르게 제공하여 발생한 가산세는 위임인이 부담한다.')}
+  ${labeledClause('poa_secret','비밀 유지','수임인은 업무상 알게 된 위임인의 정보를 위임 종료 후에도 외부에 누설하지 아니한다.')}
+
+  <div id="addClauseRow" class="add-clause-row"><button type="button" class="add-item-pill" onclick="addCustomClause()">+ 항목 추가</button></div>
+  ${dateLine('작성일','doc_date')}
+  ${taxSign({note:'위와 같이 세무대리를 위임합니다.'})}`;
+}
+
+/* ---------- 2. 개인정보 수집·이용 동의서 ---------- */
+function tplPrivacy(){
+  return `
+  <h4 class="title-box"><span class="tb-name">개인정보 수집·이용 동의서</span><span class="tb-term">(「개인정보 보호법」 제15조·제24조)</span></h4>
+  <p class="doc-intro"><b>${OFFICE.상호}</b>는 세무 상담과 세무대리 업무를 위하여 아래와 같이 개인정보를 수집·이용합니다.
+    내용을 확인하신 뒤 동의 여부를 표시해 주시기 바랍니다.</p>
+
+  ${labeledClause('pv_purpose','수집 목적','세무 상담, 세무대리(기장·신고), 계약의 체결과 이행, 보수의 청구와 정산')}
+  ${labeledClause('pv_item','수집 항목','성명, 생년월일, 연락처, 이메일, 주소, 사업자등록번호, 가족관계 및 재산 관련 정보(상속·증여 업무에 한합니다)')}
+  ${labeledClause('pv_keep','보유 기간','수임 종료일부터 5년. 「국세기본법」이 정하는 장부·증빙 보존 기간에 따릅니다.')}
+  ${labeledClause('pv_3rd','제3자 제공','제공하지 않습니다. 다만 법령에 따라 과세관청 등이 요구하는 경우는 예외로 합니다.')}
+  ${labeledClause('pv_uid','고유식별정보','세무 신고를 위하여 주민등록번호 등 고유식별정보를 처리합니다. 「개인정보 보호법」 제24조의2에 따른 법령상 처리입니다.')}
+  ${labeledClause('pv_right','동의를 거부할 권리','동의를 거부하실 수 있습니다. 다만 필수 항목에 동의하지 않으시면 세무대리 업무를 수행할 수 없습니다.')}
+
+  <div class="doc-line"><span class="ln">동의 여부</span>
+    ${ckList('pv_ck', ['개인정보 수집·이용에 동의합니다 (필수)',
+      '고유식별정보 처리에 동의합니다 (필수)',
+      '업무 안내 문자·메일 수신에 동의합니다 (선택)'], 1)}</div>
+
+  ${dateLine('동의일자','doc_date')}
+  ${taxSign({note:'위 내용을 확인하였으며, 표시한 바와 같이 동의합니다.'})}`;
+}
+
+/* ---------- 3. 수임 · 해지 확인서 ---------- */
+function tplNotice(){
+  return `
+  <h4 class="title-box"><span class="tb-name">수임 · 해지 확인서</span><span class="tb-term">(세무대리 관계)</span></h4>
+  <p class="doc-intro"><b data-mirror="wName">고객</b>과(와) <b>${OFFICE.상호}</b>는 세무대리 관계의 시작 또는 종료를 다음과 같이 확인합니다.</p>
+
+  <div class="doc-line row-inline"><span class="ln">구분:</span>
+    <div><select class="blank" data-k="nt_kind" style="min-width:150px;">
+      <option>수임 (세무대리 개시)</option><option>해지 (세무대리 종료)</option></select></div></div>
+  ${dateLine('적용일','nt_date')}
+  <div class="doc-line row-inline"><span class="ln">대상 사업장:</span>
+    <div><input class="blank xwide" data-k="nt_biz" placeholder="상호 / 사업자등록번호"></div></div>
+  <div class="doc-line row-inline"><span class="ln">사유:</span>
+    <div><input class="blank xwide" data-k="nt_why" placeholder="예: 담당 세무사 변경 / 폐업 / 계약 만료"></div></div>
+
+  ${labeledClause('nt_hometax','홈택스 처리','수임의 경우 홈택스 수임 동의를 함께 처리한다. 해지의 경우 수임 해지 처리를 완료한다.')}
+  ${labeledClause('nt_hand','자료 인계','해지 시 인계가 필요한 장부와 증빙은 적용일로부터 14일 이내에 인계한다.')}
+  ${labeledClause('nt_fee','보수 정산','적용일까지 발생한 보수는 정산 후 청구한다.')}
+
+  <div id="addClauseRow" class="add-clause-row"><button type="button" class="add-item-pill" onclick="addCustomClause()">+ 항목 추가</button></div>
+  ${dateLine('작성일','doc_date')}
+  ${taxSign({note:'위 내용을 확인하였습니다.'})}`;
+}
+
+/* ---------- 4. 기장 자료 요청서 ---------- */
+function ckDesc(k, rows){
+  return `<div class="ck-list ck-desc">${rows.map(([name,desc],i)=>
+    `<label><input type="checkbox" data-k="${k}${i}"><span><b>${name}</b><span class="d">${desc}</span></span></label>`).join('')}</div>`;
+}
+function tplRequest(){
+  return `
+  <h4 class="title-box"><span class="tb-name">기장 자료 요청서</span><span class="tb-term">(매월 제출 자료)</span></h4>
+  <p class="doc-intro">아래 자료를 <b>매월 10일까지</b> 보내 주시면 기한 내 신고를 도와드릴 수 있습니다.
+    <b data-mirror="wName">사업장</b>이 보내신 자료에 표시해 주세요. 자료가 늦어지면 가산세가 발생할 수 있습니다.</p>
+
+  <div class="doc-line row-inline"><span class="ln">귀속 월:</span>
+    <div><input class="blank" style="width:110px;min-width:0;" data-k="rq_month" placeholder="2026-07"></div></div>
+
+  <div class="doc-line"><span class="ln">제출 자료</span>
+    <div class="doc-sub">보내신 자료에 표시해 주세요.</div>
+    ${ckDesc('rq_', [
+      ['매출 자료','전자세금계산서, 신용카드 매출, 현금영수증, 그 밖의 매출 내역'],
+      ['매입 자료','전자세금계산서, 사업용 신용카드 사용 내역, 지출증빙 현금영수증'],
+      ['급여 자료','급여대장, 신규 입사·퇴사자 명단, 일용직 지급 내역'],
+      ['통장 거래 내역','사업용 계좌 입출금 내역 (엑셀 또는 PDF)'],
+      ['카드 명세서','법인·사업용 카드 이용 대금 명세서'],
+      ['차입금 · 이자','대출 약정서, 이자 납입 내역'],
+      ['고정자산','취득한 차량·기계·비품의 계약서와 세금계산서'],
+      ['재고 자료','기말 재고 수량과 금액 (해당 업종에 한합니다)'],
+    ])}</div>
+
+  <div class="doc-line row-inline"><span class="ln">그 밖의 자료:</span>
+    <div><input class="blank xwide" data-k="rq_etc" placeholder="함께 보내신 자료가 있으면 적어 주세요"></div></div>
+  <div class="doc-line row-inline"><span class="ln">전해 주실 말씀:</span>
+    <div><input class="blank xwide" data-k="rq_memo" placeholder="예: 8월에 직원 1명 입사했습니다"></div></div>
+
+  ${labeledClause('rq_send','보내실 곳', `이메일 또는 담당자 카카오톡으로 보내 주시면 됩니다. 문의 ${OFFICE.전화} (${OFFICE.담당})`)}
+  ${dateLine('작성일','doc_date')}
+  ${taxSign({corp:true, note:'위 자료를 제출합니다.'})}`;
+}
+
+/* ---------- 5. 급여대장 ---------- */
+function tplPayroll(){
+  return `
+  <h4 class="title-box"><span class="tb-name">급 여 대 장</span><span class="tb-term">(원천세 신고용)</span></h4>
+  <p class="doc-intro"><b data-mirror="wName">사업장</b>의 급여 내역입니다. 귀속 월과 지급일을 적고 근로자를 한 줄씩 추가해 주세요.
+    적어 주신 내용으로 원천세와 4대보험 신고에 반영합니다.</p>
+
+  <div class="doc-line row-inline"><span class="ln">귀속 월:</span>
+    <div><input class="blank" style="width:110px;min-width:0;" data-k="pr_month" placeholder="2026-07"></div></div>
+  ${dateLine('지급일','pr_pay')}
+
+  <div class="doc-line"><span class="ln">급여 내역</span>
+    <div class="doc-sub">비과세는 식대(월 20만원 한도)·자가운전보조금(월 20만원 한도) 등을 말합니다.</div>
+    <div class="wk-hd"><div>성명</div><div>주민등록번호</div><div>지급액</div><div>비과세</div><div></div></div>
+    <div id="wkList"></div>
+    <button type="button" class="add-item-pill" onclick="addWorker()">+ 근로자 추가</button>
+  </div>
+
+  <div class="doc-line"><span class="ln">이번 달 변동</span>
+    ${ckList('pr_ch', ['입사자가 있습니다','퇴사자가 있습니다','일용직 지급이 있습니다','변동 없습니다'])}
+    <div style="margin-top:8px;"><input class="blank xwide" data-k="pr_memo" placeholder="입사·퇴사자 성명과 날짜를 적어 주세요"></div></div>
+
+  ${labeledClause('pr_day','일용직','일용직은 성명·주민등록번호·근무일수·일당을 위 표에 함께 적어 주시기 바랍니다.')}
+  ${dateLine('작성일','doc_date')}
+  ${taxSign({corp:true, note:'위 급여 내역에 틀림이 없음을 확인합니다.'})}`;
+}
+
+let wkItems = [];
+function addWorker(){ wkItems.push({n:'',j:'',p:'',t:''}); renderWorkers(); }
+function delWorker(i){ wkItems.splice(i,1); renderWorkers(); }
+function setWorker(i,k,el){
+  if(k==='p'||k==='t') formatAmtEl(el);
+  if(wkItems[i]) wkItems[i][k] = el.value;
+}
+function renderWorkers(){
+  const box = document.getElementById('wkList'); if(!box) return;
+  S.wkItems = wkItems;
+  box.innerHTML = wkItems.map((w,i)=>`<div class="wk-row">
+    <input class="blank" value="${esc(w.n)}" placeholder="성명" oninput="setWorker(${i},'n',this)">
+    <input class="blank" value="${esc(w.j)}" placeholder="000000-0000000" oninput="setWorker(${i},'j',this)">
+    <input class="blank num amt" value="${esc(w.p)}" placeholder="지급액" inputmode="numeric" oninput="setWorker(${i},'p',this)">
+    <input class="blank num amt" value="${esc(w.t)}" placeholder="비과세" inputmode="numeric" oninput="setWorker(${i},'t',this)">
+    <span class="wk-del" onclick="delWorker(${i})">✕</span></div>`).join('')
+    || '<div class="doc-sub" style="margin:4px 0 0">아래 버튼으로 근로자를 추가해 주세요.</div>';
+}
+
+/* ---------- 6. 부가가치세 신고 확인서 ---------- */
+function tplVat(){
+  return `
+  <h4 class="title-box"><span class="tb-name">부가가치세 신고 확인서</span><span class="tb-term">(신고 전 확인)</span></h4>
+  <p class="doc-intro"><b data-mirror="wName">사업장</b>의 부가가치세 신고 전에 확인해야 할 사항입니다.
+    확인하신 뒤 표시하고 서명해 주시면 그대로 신고에 반영합니다.</p>
+
+  <div class="doc-line row-inline"><span class="ln">과세기간:</span>
+    <div><select class="blank" data-k="vt_term" style="min-width:170px;">
+      <option>1기 예정 (1월~3월)</option><option>1기 확정 (1월~6월)</option>
+      <option>2기 예정 (7월~9월)</option><option>2기 확정 (7월~12월)</option>
+      <option>간이과세 (1월~12월)</option></select></div></div>
+
+  <div class="doc-line"><span class="ln">확인 사항</span>
+    ${ckList('vt_ck', ['전자세금계산서 외의 매출(현금·간이영수증)을 빠짐없이 알렸습니다',
+      '사업용 신용카드를 모두 홈택스에 등록했습니다',
+      '수출 실적이 있으면 수출신고필증을 보냈습니다',
+      '부동산 임대가 있으면 임대차 계약서를 보냈습니다',
+      '폐업·휴업·업종 변경 사항이 없습니다',
+      '대표자·사업장 주소 변경 사항이 없습니다'], 1)}</div>
+
+  ${labeledClause('vt_note1','공제되지 않는 매입세액','접대비와 비영업용 승용차 관련 매입세액은 공제되지 않습니다.')}
+  ${labeledClause('vt_note2','세금계산서 수취','세금계산서를 기한 내에 받지 못하면 매입세액 공제를 받을 수 없습니다.')}
+  ${labeledClause('vt_note3','납부','납부할 세액이 큰 경우 분납 또는 납부기한 연장을 신청할 수 있습니다.')}
+
+  <div class="doc-line row-inline"><span class="ln">전해 주실 말씀:</span>
+    <div><input class="blank xwide" data-k="vt_memo" placeholder="예: 이번 분기에 기계장치를 구입했습니다"></div></div>
+
+  ${dateLine('작성일','doc_date')}
+  ${taxSign({corp:true, note:'위 내용을 확인하였으며, 제출한 자료에 누락이 없음을 확인합니다.'})}`;
+}
+
+/* ---------- 7. 증명서 발급 요청서 ---------- */
+function tplCert(){
+  return `
+  <h4 class="title-box"><span class="tb-name">증명서 발급 요청서</span><span class="tb-term">(세무 관련 증명)</span></h4>
+  <p class="doc-intro"><b data-mirror="wName">요청인</b>이 아래 증명서의 발급을 요청합니다.
+    발급된 증명서는 요청하신 방법으로 보내 드립니다.</p>
+
+  <div class="doc-line"><span class="ln">필요한 증명서</span>
+    ${ckList('ct_ck', ['사업자등록증명','납세증명서 (국세완납증명)','소득금액증명',
+      '부가가치세 과세표준증명','표준재무제표증명','폐업사실증명','원천징수영수증','그 밖의 증명'])}
+    <div style="margin-top:8px;"><input class="blank xwide" data-k="ct_etc" placeholder="그 밖의 증명이 필요하시면 적어 주세요"></div></div>
+
+  <div class="doc-line row-inline"><span class="ln">귀속 연도 / 과세기간:</span>
+    <div><input class="blank" style="width:150px;min-width:0;" data-k="ct_year" placeholder="예: 2025년 귀속"></div></div>
+  <div class="doc-line row-inline"><span class="ln">사용 용도:</span>
+    <div><input class="blank xwide" data-k="ct_use" placeholder="예: 은행 대출 / 입찰 / 관공서 제출"></div></div>
+  <div class="doc-line row-inline"><span class="ln">필요하신 날짜:</span>
+    <div><input class="blank dateauto" style="width:118px;min-width:0;" data-k="ct_due" placeholder="2026-08-25"></div></div>
+
+  <div class="doc-line"><span class="ln">받으실 방법</span>
+    ${ckList('ct_way', ['이메일','카카오톡','방문 수령','우편'])}
+    <div style="margin-top:8px;"><input class="blank xwide" data-k="ct_dest" placeholder="이메일 주소 또는 받으실 주소"></div></div>
+
+  ${dateLine('작성일','doc_date')}
+  ${taxSign({note:'위와 같이 증명서 발급을 요청합니다.'})}`;
+}
+
+/* ---------- 8. 세무서비스 신규 신청서 ---------- */
+const AP_BASIC = [
+  ['장부작성','회계장부의 작성 및 결산'],
+  ['세무조정','결산조정 및 신고조정'],
+  ['세무신고','원천세신고, 부가가치세신고, 종합소득세신고'],
+  ['자료제출','(간이)지급명세서 제출, 근로내역확인서 제출'],
+  ['서류발급','세무관련서류(홈택스 증명서) 발급 및 관련기관 제출'],
+  ['4대보험','취득상실신고, 피부양자등록, 소득변경신고, 보수총액신고'],
+  ['세무상담','카톡채널을 통한 업무관련 기본상담'],
+];
+const AP_EXTRA = [
+  ['통장관리','통장입력을 통한 세부검토(비용누락검토 등)'],
+  ['세무자문','서면자문, 기본상담 외 개별상담 등'],
+  ['세무서대응','서면대응, 세무서방문, 자료제출, 조사대응 등'],
+  ['중간보고서','중간결산을 통한 예상세액 확인 등'],
+  ['기타',''],
+];
+function apRow(list, pfx){
+  return list.map(([n,d],i)=>`<div class="doc-line row-inline aprow">
+    <span class="ln"><label class="inline-check"><input type="checkbox" data-k="${pfx}${i}"> ${n}</label></span>
+    <div class="doc-sub" style="margin:0">${d}</div></div>`).join('');
+}
+function tplApply(){
+  return `
+  <h4 class="title-box"><span class="tb-name">세무서비스 신규 신청서</span></h4>
+  <p class="doc-intro">신청인 <b data-mirror="wName">고객</b>은 <b>${OFFICE.상호}</b>에 아래와 같이 세무 서비스를 신청하며,
+    안내 및 유의사항에 대해 설명을 듣고 이에 동의합니다.</p>
+
+  <div class="doc-line"><span class="ln">고객 기본정보</span>
+    <div class="doc-sub">＊ 표시는 꼭 적어 주셔야 하는 항목입니다.</div>
+    <div class="apg">
+      <label>＊상호(법인명)</label><input class="blank" data-k="wName" placeholder="상호 또는 성함">
+      <label>＊대표자명</label><input class="blank" data-k="bizRep" placeholder="대표자 성함">
+      <label>＊사업자 유형</label><select class="blank" data-k="ap_type">
+        <option>개인사업자</option><option>법인사업자</option><option>비사업자</option></select>
+      <label>＊과세 유형</label><select class="blank" data-k="ap_tax">
+        <option>일반과세자</option><option>간이과세자</option><option>면세사업자</option><option>해당없음</option></select>
+      <label>＊업태</label><input class="blank" data-k="ap_up" placeholder="예: 교육서비스업">
+      <label>＊종목</label><input class="blank" data-k="ap_jong" placeholder="예: 외국어학원">
+      <label>＊사업자등록번호</label><input class="blank" data-k="ap_bno" placeholder="000-00-00000">
+      <label>＊주민(법인)등록번호</label><input class="blank" data-k="ap_jumin" placeholder="000000-0000000">
+      <label>＊핸드폰 번호</label><input class="blank phoneauto" data-k="wPhone" placeholder="010-0000-0000">
+      <label>＊e-mail</label><input class="blank" type="email" data-k="wMail" placeholder="name@example.com">
+      <label>＊사업장 소재지</label><input class="blank wide2" data-k="wAddr" placeholder="사업장 주소">
+    </div></div>
+
+  <div class="doc-line"><span class="ln">세무대리인</span>
+    <div class="apof">
+      <span><b>${OFFICE.상호}</b></span><span>대표 ${OFFICE.대표자}</span>
+      <span>세무사 등록번호 ${OFFICE.세무사등록번호}</span>
+      <span>${OFFICE.사업자등록번호}</span><span>${OFFICE.전화}</span>
+    </div>
+    <div class="doc-sub">＊ 홈택스에 공동인증서로 로그인하여 세무대리인 수임동의에 확인을 해주셔야 합니다.
+      본인은 당해 사업장의 장부작성, 세무신고, 과세자료제출, 4대보험신고 등 세무업무 진행과 관련된 권한 일체를
+      세무대리인에게 위임합니다.</div></div>
+
+  <div class="doc-line"><span class="ln">기본 서비스</span>${apRow(AP_BASIC,'ap_b')}</div>
+  <div class="doc-line"><span class="ln">추가 서비스</span>
+    <div class="doc-sub">별도 요금이 부과됩니다.</div>${apRow(AP_EXTRA,'ap_e')}</div>
+
+  <div class="doc-line row-inline"><span class="ln">총 결제요금:</span>
+    <div>매월 부과요금 <input class="blank num amt" style="width:118px;min-width:0" data-k="ap_fee" placeholder="0"> 원
+      &nbsp;·&nbsp; 1회 부과요금 <input class="blank" style="width:170px;min-width:0" data-k="ap_once" placeholder="업무량으로 결정"></div>
+    <div class="doc-sub" style="color:#8A3B2E">＊ 서비스요금에 대한 부가가치세(VAT)는 별도입니다.<br>
+      ★ 월 수수료는 매월, 조정료는 연 1회 지정한 날짜에 CMS(계좌자동이체)로 출금되는 것을 기본으로 하며,
+      3개월 이상 미납인 경우 신용카드로 출금이 진행되거나 수임해지·업무중지가 될 수 있습니다.<br>
+      ★ 해당 서비스요금은 추후 직원수 및 매출액의 변동, 매년 인건비·물가상승 등 여러 요인에 따라 조정될 수 있습니다.</div></div>
+
+  ${labeledClause('ap_n1','세무대리인 변경 및 업무진행 안내',
+    '계약일 이후 기존 세무대리인과의 계약관계는 자동해지되고, 「'+OFFICE.상호+'」(이하 "당사")의 담당세무사가 귀사의 세무대리인으로서 업무를 진행하게 됩니다. '
+    +'계약이 성립됨과 동시에 귀사는 홈택스 사이트에서 「'+OFFICE.상호+'」을 세무대리인으로 등록확인 해주셔야 합니다. '
+    +'기존자료의 수취를 위하여 기존 세무대리인 정보(성명, 법인명, 전화번호 등)를 제공함에 동의합니다. '
+    +'기존자료 수취와 관련하여 비용이 발생하는 경우 그 비용은 귀사의 부담으로 발생월의 수수료에 추가하여 청구됩니다.')}
+  ${labeledClause('ap_n2','계약해지 및 요금정산 안내',
+    '귀사가 계약해지를 요구하는 경우 서면으로 통지하여야 하며, 당사는 통지일이 속하는 달의 말일까지 세무서비스를 제공합니다. '
+    +'수수료의 납부는 선불을 기본으로 하며, 서비스요금은 매월 자동 이체일에 납부합니다. '
+    +'요금이 3개월 이상 연체되는 경우 당사는 별도 협의 없이 계약을 해지할 수 있으며, 해지 이후 야기되는 세무처리에 대한 책임은 귀사에게 있습니다.')}
+  ${labeledClause('ap_n3','업무협조 안내 및 유의사항',
+    '귀사는 계약업무 수행에 필요한 증빙자료 및 제반서류를 신속·정확하게 세무대리인에게 제공해야 합니다. '
+    +'당사는 귀사가 제공한 자료를 신뢰하여 업무를 처리하므로, 자료의 허위·미비·지연제출 등으로 발생하는 모든 문제에 대한 책임은 귀사에게 있습니다. '
+    +'당사의 배상 책임은 명백히 입증되는 고의 또는 중과실로 인한 손해에 한하며, 해당 서비스요금을 한도로 합니다.')}
+  ${labeledClause('ap_n4','기타 유의사항',
+    '계약 해석에 이견이 있을 경우 관계법령 및 상관례에 따르며, 분쟁이 발생한 경우 당사 소재지 법원을 관할법원으로 합니다. '
+    +'본 신청서는 상호 및 사업자등록번호 등이 변경되더라도 '+OFFICE.대표자+'(등록번호: '+OFFICE.세무사등록번호+')이 세무대리인으로 등록된 경우 그 효력이 유효합니다.')}
+
+  <div class="doc-line"><span class="ln">동의 확인</span>
+    ${ckList('ap_ok', ['위 신청서 내용과 안내 및 유의사항에 대해 설명을 듣고 이에 동의합니다.',
+      '개인정보 취급방침 및 이용약관에 따라 위와 같이 신규 계약을 체결합니다.'], 1)}</div>
+
+  ${dateLine('작성일','doc_date')}
+  ${taxSign({corp:true, note:'위 내용을 확인하였으며, 세무서비스를 신청합니다.'})}`;
+}
+
+
+/* ============================================================
+   표준계약서 8종 — 세무대리 5종 · 용역 3종
+   조항 번호는 화면에서 자동으로 '제n조 [제목]' 으로 매겨진다.
+   ============================================================ */
+
+const STD_DOCS = {
+  taxAdj:     {t:'세무대리 계약서 (세무조정)',       n:'표준계약서', jo:true,
+               p:'세무조정 업무를 위임하는 표준계약서입니다. 빈칸을 채우고 서명해 주세요.',
+               A:'수임인 을 (세무사)', B:'의뢰인'},
+  taxSincere: {t:'세무대리 계약서 (성실신고확인)',   n:'표준계약서', jo:true,
+               p:'성실신고확인 업무를 위임하는 표준계약서입니다. 빈칸을 채우고 서명해 주세요.',
+               A:'수임인 을 (세무사)', B:'의뢰인'},
+  taxCgt:     {t:'세무대리 계약서 (양도소득세)',     n:'표준계약서', jo:true,
+               p:'양도소득세 신고 업무를 위임하는 표준계약서입니다. 양도 물건과 보수를 적어 주세요.',
+               A:'수임인 을 (세무사)', B:'의뢰인'},
+  taxInh:     {t:'세무대리 계약서 (상속세)',         n:'표준계약서', jo:true,
+               p:'상속세 신고 업무를 위임하는 표준계약서입니다. 상속인 대표께서 작성해 주세요.',
+               A:'수임자 을 (세무사)', B:'위임자'},
+  taxGift:    {t:'세무대리 계약서 (증여세)',         n:'표준계약서', jo:true,
+               p:'증여세 신고 업무를 위임하는 표준계약서입니다. 증여 물건과 보수를 적어 주세요.',
+               A:'수임인 을 (세무사)', B:'의뢰인'},
+  svcDiag:    {t:'용역계약서 (기업진단)',            n:'표준계약서', jo:true,
+               p:'기업진단 및 자문 용역의 표준계약서입니다. 용역 기간과 보수를 적어 주세요.',
+               A:'을 (세무사)', B:'의뢰인'},
+  svcCons:    {t:'용역계약서 (건설업 컨설팅)',       n:'표준계약서', jo:true,
+               p:'건설업 컨설팅 용역의 표준계약서입니다. 용역 기간과 보수를 적어 주세요.',
+               A:'을 (세무사)', B:'의뢰인'},
+  svcDd:      {t:'용역계약서 (기업실사)',            n:'표준계약서', jo:true,
+               p:'기업실사 컨설팅 용역의 표준계약서입니다. 용역 범위와 보수를 적어 주세요.',
+               A:'을 (세무사)', B:'의뢰인'},
+};
+Object.assign(DOCS, STD_DOCS);
+
+/* ---------- 공통 조각 ---------- */
+const SB = (k, ph, w, cls) =>
+  `<input class="blank ${cls||''}" data-k="${k}" placeholder="${ph||''}"${w?` style="width:${w};min-width:0"`:''}>`;
+
+/* 입력칸이 들어가는 조항 — 문단을 한 줄씩 */
+const stdWrap = paras => paras.map(p=>
+  /^\s*<div class="paytbl"/.test(p) ? p : `<div class="stdrow">${p}</div>`).join('');
+function stdClause(label, paras){
+  return `<div class="doc-line"><span class="ln">${label}</span>
+    <div class="stdrows">${stdWrap(paras)}</div></div>`;
+}
+/* 번호를 매기지 않는 줄(머리 정보 · 확인 문구 · 붙임서류) */
+function stdPlain(label, paras){
+  return `<div class="doc-line nonum">${label?`<span class="ln">${label}</span>`:''}
+    <div class="stdrows">${stdWrap(paras)}</div></div>`;
+}
+/* 번호 없는 날짜 줄 */
+function stdDate(label, k){
+  return `<div class="doc-line nonum row-inline"><span class="ln">${label}:</span>
+    <div><input class="blank dateauto" style="width:118px;min-width:0;" data-k="${k}" placeholder="2026-08-20"></div></div>`;
+}
+/* 지급표 */
+function stdPayTable(pfx, rows, withNote){
+  const c = withNote? 'ptr' : 'ptr pt3';
+  const head = `<div class="stdrow ${c}"><span>구분</span><span>지급기한</span><span>금액</span>${withNote?'<span>비고</span>':''}</div>`;
+  const body = rows.map((nm,i)=>`<div class="stdrow ${c}"><span>${nm}</span>
+    <span>${SB(pfx+'_d'+i,'20  년   월   일')}</span>
+    <span>${SB(pfx+'_a'+i,'','100%','num amt')} 원</span>
+    ${withNote?`<span>${SB(pfx+'_n'+i,'')}</span>`:''}</div>`).join('');
+  return `<div class="paytbl">${head}${body}</div>`;
+}
+/* 특약조항 */
+function stdSpecial(pfx){
+  const id = pfx+'_sp';
+  CLAUSE_DEFAULTS[id] = SC.special;
+  return `<div class="doc-line"><span class="ln">특약조항</span>
+    <div class="clause-wrap">
+      <div class="clause-body" id="cl_${id}" contenteditable="true" oninput="markEdited('${id}')">${esc(SC.special)}</div>
+      <span class="reset-link" onclick="resetClause('${id}')" title="기본문구로 되돌리기" style="display:none;">↺</span>
+    </div>
+    <div class="stdrows">${[1,2,3].map(i=>
+      `<div class="stdrow">${i}. ${SB(pfx+'_sp'+i,'','78%')}</div>`).join('')}</div></div>`;
+}
+/* 확인 문구 + 서명 */
+function stdEnd(pfx, opt){
+  return stdPlain('확인', [
+    `세무사 <b>${OFFICE.대표자}</b>은 계약서 내용을 충분히 설명하였으며, 의뢰인 <b data-mirror="wName">○○○</b>은 위 사항을 모두 확인하여 숙지하였으며, 위 내용에 동의함에 따라 아래와 같이 서명합니다.`,
+    `위의 사실을 증명하기 위하여 본 계약서를 2부 작성하여 간인하고 갑과 을이 각각 1부씩 소지하기로 한다.`,
+  ]) + stdDate('계약일자','doc_date')
+    + taxSign({corp:!!(opt&&opt.corp), note:'위 계약 내용에 동의하며 아래와 같이 서명·날인합니다.'});
+}
+
+const SC = {
+  payWay: n => `제${n}조에 따른 보수는 을의 계좌(00은행, 000-0000-000000, 예금주 000)로 지급한다.\n을은 제${n}조에 따른 보수에 대하여 갑에게 세금계산서를 부가가치세법에 따른 공급시기에 발행한다.`,
+  late : '① 갑이 본 계약에 정한 비용 또는 보수의 지급을 지체한 때에는, 을은 위임사무에 착수하지 않거나 그 위임사무의 처리를 중단 또는 계약을 해지할 수 있다.\n② 전항의 경우 을은 신속하게 갑에게 그 취지를 통보하여야 한다.',
+  duty : '갑은 신의성실의 원칙에 따라 본 계약에 의한 업무수행에 필요한 증빙자료 및 제반 서류를 신속하고 정확하게 을에게 제공하여야 하며, 을은 세법에 따라 갑이 제공한 자료에 의해 합리·타당하고 성실하게 업무를 수행하여야 하는 선관주의 의무를 부담한다.',
+  free : '① 갑이 제공한 자료의 불비 및 사실과 다른 자료의 제시, 근거 없는 진술 등의 사유로 본 계약업무 수행이 불가능하거나 이로 인하여 발생하는 문제에 을은 그 책임을 지지 아니한다. 이러한 경우에도 갑은 을에게 보수를 지급하여야 한다.\n② 을은 갑이 제공한 자료에 대하여 허위가 없이 신뢰성이 있는 것으로 간주하여 업무를 수행하고, 갑이 제공한 자료에 허위사항이 있거나 요구자료의 지연 제시 또는 미제출로 인해서 장래 갑에게 발생하는 불이익한 행정처분 등에 대하여 갑은 을에게 그 책임을 물을 수 없다.\n③ 천재지변 기타 이에 준하는 사유로 본 계약을 수행할 수 없을 때는 갑·을 쌍방에게 본 계약 불이행의 책임이 없는 것으로 한다.',
+  limit: '① 본 계약과 관련하여 을의 채무불이행이나 불법행위로 인하여 갑에게 손해가 발생한 경우, 배상책임의 부담자 및 발생한 손해 액수 등은 관련 법률 규정에 따른다.\n② 을이 손해배상책임의 부담자가 되었을 경우, 을이 갑에게 배상할 금액은 수령한 보수액을 그 한도로 한다.\n③ 위 제1항에 따른 갑의 실제 손해액이 을에게 지급한 보수액을 초과할 경우, 갑이 실제 손해액을 입증하더라도 보수액을 초과하는 손해에 대해서는 이를 을에게 청구할 수 없다.',
+  secret: '을은 계약업무 수행과정에서 지득한 갑의 기밀을 엄수하여야 한다.',
+  dispute: '본 계약에서 발생한 분쟁은 갑과 을의 합의에 따라 해결함을 원칙으로 하고, 당사자 사이에 해결되지 않은 분쟁은 중재법에 따른 중재기관의 중재에 따라 최종 해결한다.',
+  special: '일반사항 외의 특약사항은 아래 각호에 기재하여 정하며, 일반사항과 특약사항이 상충하는 때에는 특약사항이 우선한다. 기타 본 계약에 명시되지 아니한 사항은 일반적인 관례에 따라 갑과 을이 상호 협의하여 정하기로 한다.',
+  quitB: '② 갑의 사정으로 본 계약을 해지하는 때는 계약해지 이후에 야기되는 세무 처리에 대하여 을은 그 책임을 지지 아니한다.\n③ 갑이 본 계약에 정한 의무를 이행하지 아니하거나 위임사무의 내용에 관하여 제공한 자료가 불비 및 허위일 때에는 고의가 아닌 경우라도 을은 본 계약을 해지하고 사임할 수 있다.\n④ 을의 사정으로 본 계약에 따른 업무를 수행할 수 없는 때에는 을은 그 시점까지 모든 업무를 정리하고, 갑과 을의 협의로 본 계약업무를 종결시키기로 한다.',
+};
+
+/* 세무대리 계약서 서두 */
+function stdIntroTax(){
+  return `<p class="doc-intro"><b data-mirror="wName">의뢰인</b>(이하 "갑")과 세무사 <b>${OFFICE.대표자}</b>(${OFFICE.상호}, 이하 "을")은 다음과 같이 계약한다.</p>`;
+}
+function stdTitle(name, term){
+  return `<h4 class="title-box"><span class="tb-name">${name}</span><span class="tb-term">${term}</span></h4>`;
+}
+
+/* ---------- 1. 세무대리 (세무조정) ---------- */
+function tplTaxAdj(){
+  const p='ta';
+  return stdTitle('세무대리 계약서','(세무조정)') + stdIntroTax() +
+  labeledClause(p+'_scope','업무 범위',
+    '갑은 을을 대리인으로 하여 세무조정에 관한 업무(세무사법 제2조 제2호)를 위임한다. 구체적인 업무 범위는 별첨(업무기준표)에 따른다.') +
+  stdClause('보수', [
+    `① 본 계약에 따른 보수는 일금 ${SB(p+'_feeh','','130px')} 원정(￦ ${SB(p+'_fee','','120px','num amt')} , 부가가치세 별도)으로 하고,
+      착수금 일금 ${SB(p+'_downh','','120px')} 원(￦ ${SB(p+'_down','','110px','num amt')} )은 반환하지 아니한다.
+      위 보수는 과세표준 및 납부세액 신고일로부터 ${SB(p+'_days','','56px','num')} 일 이내에 지급하기로 한다.`,
+    '② 본 계약에 따른 업무수행에 필요로 하는 서류징취비, 인지대, 출장비 및 기타경비 등의 실비는 갑이 부담하기로 한다.',
+  ]) +
+  labeledClause(p+'_payway','보수의 지급 방법', SC.payWay(2)) +
+  labeledClause(p+'_late','보수지급의 지체', SC.late) +
+  labeledClause(p+'_duty','의무', SC.duty) +
+  labeledClause(p+'_free','책임 및 면책', SC.free) +
+  labeledClause(p+'_limit','책임의 제한', SC.limit) +
+  stdClause('계약해지', [
+    `① 본 계약의 유효기간은 계약일로부터 ${SB(p+'_yr','','52px','num')} 년이 되는 날까지로 하고,
+      중도에 계약을 해지하고자 하는 때에는 계약해지일로부터 ${SB(p+'_m1','','52px','num')} 개월 이전까지 서면으로 통지하여야 한다.
+      다만, 본래의 계약종료일부터 ${SB(p+'_m2','','52px','num')} 개월 이전까지 계약의 갱신 거부의 의사를 밝히지 아니한 때에는
+      본 계약은 유효하게 자동 갱신되는 것으로 한다.`,
+    '② 갑의 사정으로 본 계약을 해지하는 때는 계약해지 이후에 야기되는 세무 처리에 대하여 을은 그 책임을 지지 아니한다.',
+    '③ 갑이 본 계약에 정한 의무를 이행하지 아니하거나 위임사무의 내용에 관하여 제공한 자료가 불비 및 허위일 때에는 고의가 아닌 경우라도 을은 본 계약을 해지할 수 있다.',
+    '④ 을의 사정으로 본 계약에 따른 업무를 수행할 수 없는 때에는 을은 그 시점까지 모든 업무를 정리하고, 갑과 을의 협의로 본 계약업무를 종결시키기로 한다.',
+  ]) +
+  labeledClause(p+'_secret','기밀보장', SC.secret) +
+  labeledClause(p+'_dispute','분쟁의 해결', SC.dispute) +
+  stdSpecial(p) +
+  `<div id="addClauseRow" class="add-clause-row"><button type="button" class="add-item-pill" onclick="addCustomClause()">+ 조항 추가</button></div>` +
+  stdEnd(p, {corp:true});
+}
+
+/* ---------- 2. 세무대리 (성실신고확인) ---------- */
+function tplTaxSincere(){
+  const p='ts';
+  return stdTitle('세무대리 계약서','(성실신고확인)') + stdIntroTax() +
+  labeledClause(p+'_scope','업무 범위',
+    '갑은 을을 대리인으로 하여 성실신고확인에 관한 업무(세무사법 제2조 제8호, 소득세법령 및 법인세법령)를 위임한다. 구체적인 업무 범위는 별첨(업무기준표)에 따른다.') +
+  stdClause('계약기간', [
+    `본 계약의 업무수행 기간은 계약일부터 ${SB(p+'_end','20  년   월   일','160px')} 까지로 한다.`,
+  ]) +
+  stdClause('보수', [
+    `① 본 계약에 따른 보수는 일금 ${SB(p+'_feeh','','130px')} 원정(￦ ${SB(p+'_fee','','120px','num amt')} , 부가가치세 별도)으로 하고,
+      보수금액은 ${SB(p+'_due','20  년   월   일','160px')} 까지 지급한다.`,
+    '② 을은 제1항에 따른 계약금액에 대하여 「조세특례제한법」 제126조의6에 따른 성실신고확인비용으로 일정액을 정부로부터 세액공제를 받을 수 있도록 한다.',
+  ]) +
+  labeledClause(p+'_payway','보수의 지급 방법', SC.payWay(3)) +
+  labeledClause(p+'_late','보수지급의 지체', SC.late) +
+  labeledClause(p+'_duty','신의성실의무', SC.duty) +
+  labeledClause(p+'_duty2','위임자의 의무',
+    '① 갑은 을이 성실신고확인에 필요한 일체의 장부 및 전표 등 증명서류와 재무 서류의 제공을 거부 또는 누락하거나 허위·가공 등 사실과 다른 자료를 제공해서는 안 된다.\n② 갑은 을이 성실신고확인을 하는데 필요한 사실관계에 관한 질문을 하는 경우 성실히 답변하고 필요한 문서를 제출하여야 한다.\n③ 갑은 을의 성실신고확인 업무수행에 필요한 장소를 제공하여야 하며, 관련 사업장 및 관계기관에 출장을 요하는 경우 편의를 제공하고 비용을 부담하여야 한다.\n④ 갑은 을이 성실신고확인 업무를 수임하거나 수행함에 있어 을에게 성실성의 확인을 강제하거나 직·간접적으로 압력을 행사하여서는 안 된다.') +
+  labeledClause(p+'_duty3','수임자의 의무',
+    '① 을은 전문직업인으로서 객관적인 입장에서 성실신고확인 업무를 성실히 수행하여야 하며, 일반적으로 인정되는 회계기준과 「소득세법」 및 「법인세법」 등 성실신고확인 업무와 관련한 규정과 법령을 준수하여야 한다.\n② 을은 성실신고확인을 위해 입수한 자료, 그 밖의 각종 정보에 관한 비밀을 유지하여야 하며 이를 타인에게 누설하여서는 안 된다.') +
+  labeledClause(p+'_report','성실신고확인서 제출',
+    '① 을은 본 계약기간이 끝나기 전까지 「성실신고확인서」 및 부속서류를 갑에게 제출하여야 한다.\n② 갑은 「성실신고확인서」를 작성할 때 성실신고확인에 필요한 진술 및 문답 서류 등을 성실히 작성하고 기명날인하여야 하며, 이를 허위로 작성하거나 거부하여 을이 「성실신고확인서」를 제출할 수 없을 때는 갑의 책임으로 한다.\n③ 을은 성실신고확인 업무의 적정한 수행을 확인하기 위한 감독기관의 감리 등에 사용하기 위해 「성실신고확인서」를 제출 또는 사용할 수 있다.') +
+  labeledClause(p+'_free','책임 및 면책', SC.free +
+    '\n④ 갑이 허위자료의 제출, 거짓된 진술을 신뢰하고 성실신고확인서를 제출한 후 감독기관으로부터 세무사법에 따라 자격정지 등 징계를 받는 경우 갑은 그에 대한 을의 손해액에 대한 배상책임을 진다.') +
+  labeledClause(p+'_limit','책임의 제한', SC.limit) +
+  stdClause('계약해지', [
+    `① 본 계약의 유효기간은 계약일로부터 ${SB(p+'_yr','','52px','num')} 년이 되는 날까지로 하고,
+      중도에 계약을 해지하고자 하는 때에는 계약해지일로부터 ${SB(p+'_m1','','52px','num')} 개월 이전까지 서면으로 통지하여야 한다.
+      다만, 본래의 계약종료일부터 ${SB(p+'_m2','','52px','num')} 개월 이전까지 계약의 갱신 거부의 의사를 밝히지 아니한 때에는
+      본 계약은 유효하게 자동 갱신되는 것으로 한다.`,
+    '② 갑의 사정으로 본 계약을 해지하는 때는 계약해지 이후에 야기되는 세무 처리에 대하여 을은 그 책임을 지지 아니한다.',
+    '③ 갑이 본 계약에 정한 의무를 이행하지 아니하거나 위임사무의 내용에 관하여 제공한 자료가 불비 및 허위일 때에는 고의가 아닌 경우라도 을은 본 계약을 해지할 수 있다.',
+    '④ 을의 사정으로 본 계약에 따른 업무를 수행할 수 없는 때에는 을은 그 시점까지 모든 업무를 정리하고, 갑과 을의 협의로 본 계약업무를 종결시키기로 한다.',
+  ]) +
+  labeledClause(p+'_secret','기밀보장', SC.secret) +
+  labeledClause(p+'_dispute','분쟁의 해결', SC.dispute) +
+  stdSpecial(p) +
+  `<div id="addClauseRow" class="add-clause-row"><button type="button" class="add-item-pill" onclick="addCustomClause()">+ 조항 추가</button></div>` +
+  stdEnd(p, {corp:true});
+}
+
+/* ---------- 3·5. 양도소득세 · 증여세 (같은 뼈대) ---------- */
+function tplTransfer(kind){
+  const gift = (kind==='gift');
+  const p = gift? 'tg':'tc';
+  const 물건 = gift? '증여 물건':'양도 물건';
+  const scope = gift
+    ? '갑은 을을 대리인으로 증여세 신고에 관한 업무(세무사법 제2조 제1호)를 위임한다. 구체적인 업무 범위는 별첨(업무기준표)에 따른다. 다만, 위임업무의 범위에 증여세 신고 후 이에 관한 조사 대응 업무는 포함하지 아니한다.'
+    : '갑은 을을 대리인으로 양도소득세 신고에 관한 업무(세무사법 제2조 제1호)를 위임한다. 구체적인 업무 범위는 별첨(업무기준표)에 따른다.';
+  const term = gift
+    ? `① 본 계약의 유효기간은 증여일로부터 3월이 되는 날이 속하는 달의 말일까지로 하고, 중도에 계약을 해지하고자 하는 때에는 계약해지일로부터 ${SB(p+'_d1','','56px','num')} 일 이전까지 서면으로 통지하여야 한다.`
+    : `① 본 계약의 유효기간은 매매계약일로부터 2월이 되는 날이 속하는 달의 말일까지로 하고, 중도에 계약을 해지하고자 하는 때에는 계약해지일로부터 ${SB(p+'_d1','','56px','num')} 일 이전까지 서면으로 통지하여야 한다.`;
+
+  const feeParas = [
+    `① 본 계약에 따른 보수는 일금 ${SB(p+'_feeh','','130px')} 원정(￦ ${SB(p+'_fee','','120px','num amt')} , 부가가치세 별도)으로 하고,
+      착수금 일금 ${SB(p+'_downh','','120px')} 원(￦ ${SB(p+'_down','','110px','num amt')} )은 반환하지 아니한다.
+      위 보수지급은 과세표준 및 납부세액 신고서 접수 전에 지급을 완료하기로 한다.`,
+    '② 제1항의 보수를 다음과 같이 갑이 을에게 지급하기로 한다.',
+    stdPayTable(p, ['착수금','중도금','잔　금'], true),
+    '③ 본 계약에 따른 업무수행에 필요로 하는 서류징취비, 인지대, 출장비 및 기타경비 등의 실비는 갑이 부담하기로 한다.',
+  ];
+  if(gift) feeParas.push('④ 본 건 증여세 신고 후 과세관청의 「증여세 조사와 관련한 보수」(소명 요구 사항에 대한 자료 검토 및 자료작성, 답변서 제출 등 조사와 관련한 일체의 업무) 및 지급 방법은 증여세 조사착수 때 「별도계약」에 의한다.');
+
+  return stdTitle('세무대리 계약서', gift? '(증여세)':'(양도소득세)') + stdIntroTax() +
+  stdClause('업무 범위', [ scope, `${물건}: ${SB(p+'_item','', '62%')}` ]) +
+  stdClause('보수', feeParas) +
+  labeledClause(p+'_payway','보수의 지급 방법', SC.payWay(2)) +
+  labeledClause(p+'_late','보수지급의 지체', SC.late) +
+  labeledClause(p+'_duty','의무', SC.duty) +
+  labeledClause(p+'_free','책임 및 면책', SC.free) +
+  labeledClause(p+'_limit','책임의 제한', SC.limit) +
+  stdClause('계약해지', [term,
+    '② 갑의 사정으로 본 계약을 해지하는 때는 계약해지 이후에 야기되는 세무 처리에 대하여 을은 그 책임을 지지 아니한다.',
+    gift? '③ 갑이 본 계약에 정한 의무를 이행하지 아니하거나 위임사무의 내용에 관하여 제공한 자료가 불비 및 허위일 때에는 고의가 아닌 경우라도 을은 본 계약을 해지할 수 있다.'
+        : '③ 갑이 본 계약에 정한 의무를 이행하지 아니하거나 위임사무의 내용에 관하여 제공한 자료가 불비 및 허위일 때에는 고의가 아닌 경우라도 을은 본 계약을 해지하고 사임할 수 있다.',
+    '④ 을의 사정으로 본 계약에 따른 업무를 수행할 수 없는 때에는 을은 그 시점까지 모든 업무를 정리하고, 갑과 을의 협의로 본 계약업무를 종결시키기로 한다.',
+  ]) +
+  labeledClause(p+'_secret','기밀보장', SC.secret) +
+  labeledClause(p+'_dispute','분쟁의 해결', SC.dispute) +
+  stdSpecial(p) +
+  `<div id="addClauseRow" class="add-clause-row"><button type="button" class="add-item-pill" onclick="addCustomClause()">+ 조항 추가</button></div>` +
+  stdEnd(p) +
+  (gift? stdPlain('붙임서류', ['증여계약서']) : '');
+}
+function tplTaxCgt(){ return tplTransfer('cgt'); }
+function tplTaxGift(){ return tplTransfer('gift'); }
+
+/* ---------- 4. 세무대리 (상속세) ---------- */
+function tplTaxInh(){
+  const p='ti';
+  return stdTitle('세무대리 계약서','(상속세)') +
+  `<p class="doc-intro">상속인을 대표하여 위임하시는 분이 작성합니다. 위임자(갑)와 수임자(을)의 정보를 확인해 주세요.</p>` +
+  stdPlain('위임자 (갑 · 상속인 대표)', [
+    `성　명 ${SB('wName','상속인 대표 성함','200px')} &nbsp; 주민등록번호 ${SB('wBirth','000000-0000000','170px')}`,
+    `관　계 피상속인 ${SB(p+'_dead','고인 성함','150px')} 의 ${SB(p+'_rel','관계','110px')} 으로,`,
+    `피상속인의 상속세 신고에 관한 상속인 ${SB(p+'_heir','대표 상속인','140px')} 외 ${SB(p+'_cnt','','56px','num')} 인의 대표자`,
+  ]) +
+  stdPlain('수임자 (을)', [
+    `사업장 <b>${OFFICE.주소}</b>`,
+    `상　호 <b>${OFFICE.상호}</b> (사업자등록번호 ${OFFICE.사업자등록번호}) &nbsp; 성　명 <b>${OFFICE.대표자}</b>`,
+  ]) +
+  stdPlain('', [`상기 <b data-mirror="wName">위임자</b>(이하 "갑")는 수임자 <b>${OFFICE.대표자}</b>(이하 "을")와 다음과 같이 계약한다.`]) +
+  labeledClause(p+'_scope','업무 범위',
+    '갑은 을을 대리인으로 상속세 신고에 관한 업무(세무사법 제2조 제1호)를 위임한다. 구체적인 업무 범위는 별첨(업무기준표)에 따른다. 다만, 위임업무의 범위에 상속세 신고 후 이에 관한 조사 대응 업무는 포함하지 아니한다.') +
+  stdClause('보수', [
+    `① 본 계약에 따른 보수는 일금 ${SB(p+'_feeh','','130px')} 원정(￦ ${SB(p+'_fee','','120px','num amt')} , 부가가치세 별도)으로 하고,
+      착수금 일금 ${SB(p+'_downh','','120px')} 원(￦ ${SB(p+'_down','','110px','num amt')} )은 반환하지 아니한다.
+      위 보수지급은 과세표준 및 납부세액 신고서 접수 전에 지급을 완료하기로 한다.`,
+    '② 제1항의 보수를 다음과 같이 갑이 을에게 지급하기로 한다.',
+    stdPayTable(p, ['착수금','중도금','잔　금'], true),
+    '③ 본 계약에 따른 업무수행에 필요로 하는 서류징취비, 인지대, 출장비 및 기타경비 등의 실비는 갑이 부담하기로 한다.',
+    '④ 본 건 상속세 신고 후 과세관청의 「상속세 조사와 관련한 보수」(소명 요구 사항에 대한 자료 검토 및 자료작성, 답변서 제출 등 조사와 관련한 일체의 업무) 및 지급 방법은 상속세 조사착수 때 「별도계약」에 의한다.',
+  ]) +
+  labeledClause(p+'_payway','보수의 지급 방법', SC.payWay(2)) +
+  labeledClause(p+'_late','보수지급의 지체', SC.late) +
+  labeledClause(p+'_duty','의무', SC.duty) +
+  labeledClause(p+'_free','책임 및 면책', SC.free) +
+  labeledClause(p+'_limit','책임의 제한', SC.limit) +
+  stdClause('계약해지', [
+    `① 본 계약의 유효기간은 상속개시일로부터 6월이 되는 날이 속하는 달의 말일까지로 하고,
+      중도에 계약을 해지하고자 하는 때에는 계약해지일로부터 ${SB(p+'_d1','','56px','num')} 일 이전까지 서면으로 통지하여야 한다.`,
+    '② 갑의 사정으로 본 계약을 해지하는 때는 계약해지 이후에 야기되는 세무 처리에 대하여 을은 그 책임을 지지 아니한다.',
+    '③ 갑이 본 계약에 정한 의무를 이행하지 아니하거나 위임사무의 내용에 관하여 제공한 자료가 불비 및 허위일 때에는 고의가 아닌 경우라도 을은 본 계약을 해지하고 사임할 수 있다.',
+    '④ 을의 사정으로 본 계약에 따른 업무를 수행할 수 없는 때에는 을은 그 시점까지 모든 업무를 정리하고, 갑과 을의 협의로 본 계약업무를 종결시키기로 한다.',
+  ]) +
+  labeledClause(p+'_secret','기밀보장', SC.secret) +
+  labeledClause(p+'_dispute','분쟁의 해결', SC.dispute) +
+  stdSpecial(p) +
+  `<div id="addClauseRow" class="add-clause-row"><button type="button" class="add-item-pill" onclick="addCustomClause()">+ 조항 추가</button></div>` +
+  stdEnd(p) +
+  stdPlain('붙임서류', ['1. 위임장', '2. 인감증명서']);
+}
+
+/* ---------- 6·7·8. 용역계약서 ---------- */
+const SVC_DEF = {
+  svcDiag: {p:'sd', term:'(기업진단)', subject:'「기업진단 및 자문」',
+    goal:'본 용역은 「건설산업기본법」 제10조(건설업의 등록기준) 및 제23조(시공능력의 평가 및 공시)에 따라서 자본금의 충족 여부 및 재무제표의 적정성과 각종 재무비율에 적합하도록 을은 갑에게 재무제표 작성지원 업무를 제공하는 것을 목적으로 한다.',
+    scope:'본 용역과 관련하여 을이 수행할 용역의 범위는 다음과 같다.\n1. 갑이 제시한 재무제표를 기준으로 건설업 등록기준자본금의 충족 여부 검토\n2. 갑이 제시한 재무제표의 오류에 대한 수정 회계처리 지원\n3. 갑이 제시한 재무제표를 기준으로 재무비율의 산정 및 양호한 비율을 충족하기 위한 컨설팅\n4. 위 수행과정에서 발생한 세무 컨설팅을 통한 대응 방안 제시 및 교육지원'},
+  svcCons: {p:'sc', term:'(건설업 컨설팅)', subject:'「건설업 컨설팅」',
+    goal:'본 용역은 「건설산업기본법」 제10조(건설업의 등록기준) 및 제23조(시공능력의 평가 및 공시)에 따라서 자본금의 충족 여부 및 재무제표의 적정성과 각종 재무비율에 적합하도록 을은 갑에게 재무제표 작성지원 업무를 제공하는 것을 목적으로 한다.',
+    scope:'본 용역과 관련하여 을이 수행할 용역의 범위는 다음과 같다.\n1. 갑이 제시한 재무제표를 기준으로 건설업 등록기준자본금의 충족 여부 검토\n2. 갑이 제시한 재무제표의 오류에 대한 수정 회계처리 지원\n3. 갑이 제시한 재무제표를 기준으로 재무비율의 산정 및 양호한 비율을 충족하기 위한 컨설팅\n4. 위 수행과정에서 발생한 세무컨설팅을 통한 대응 방안 제시 및 교육지원\n이 외의 구체적인 용역 업무 범위는 별첨한다.'},
+  svcDd:   {p:'sr', term:'(기업실사)', subject:'「기업실사」', dd:true,
+    goal:'본 계약의 목적은 기업의 재무 건전성을 분석하고 세무 리스크 해소를 위한 실사를 하기 위함에 있다.',
+    scope:'① 을은 갑의 요청에 따라 관련 업무를 수행하며 구두, 전화 또는 서면에 의한 상담, 현장실사, 서류작성 등 자문에 성실하게 응하여야 한다.\n② 제1항에 대한 구체적인 용역의 범위는 다음 각호와 같다.\n4. 위 수행과정에서 발생한 세무컨설팅을 통한 대응 방안 제시 및 교육지원\n이 외의 구체적인 용역 업무 범위는 갑과 을이 협의하여 별첨한다.'},
+};
+function tplSvc(key){
+  const d = SVC_DEF[key], p = d.p;
+  let out = stdTitle('용역계약서', d.term) +
+  `<p class="doc-intro"><b data-mirror="wName">의뢰인</b>(이하 "갑")와 세무사 <b>${OFFICE.대표자}</b>(${OFFICE.상호}, 이하 "을")는
+    ${d.subject}에 관한 용역에 관한 계약(이하 "본 계약")을 다음과 같이 체결한다.</p>` +
+  labeledClause(p+'_goal', d.dd? '목적':'용역의 목적', d.goal) +
+  labeledClause(p+'_scope','용역의 범위', d.scope);
+
+  if(d.dd){
+    out += stdClause('용역 기간', [
+      `① 본 계약의 존속기간은 계약체결일로부터 ${SB(p+'_end','20  년   월   일','160px')} 까지로 하되,
+        계약의 종기 전 본건이 완료되는 경우 그 완료일까지로 한다.`,
+      `② 다만, ${SB(p+'_end2','20  년   월   일','160px')} 까지 본건이 완료되지 아니할 경우에는 갑·을은 상호 협의하여
+        본 계약기간을 연장하되, 이 경우 을에 대한 추가보수는 상호 협의하여 결정하기로 한다.`,
+    ]);
+  } else {
+    out += stdClause('용역대상 사업연도', [
+      `매년 1월 1일부터 12월 31일을 1개의 사업연도로 하며, 용역대상 사업연도는
+        ${SB(p+'_fy1','20  ','70px')} 년 1월 1일부터 ${SB(p+'_fy2','20  ','70px')} 년 12월 31일까지로 한다.`,
+    ]) +
+    stdClause('용역제공 완료 및 산출물의 보고', [
+      `용역제공 완료일은 ${SB(p+'_done','20  년   월   일','160px')} 까지로 하고,
+        산출물의 최종보고는 ${SB(p+'_rep','20  년   월   일','160px')} 까지로 한다.
+        다만, 용역제공 완료 전에 중간보고를 할 수 있다.`,
+    ]);
+  }
+
+  const feeNo = d.dd? 4 : 5;
+  out += stdClause('용역 보수', [
+    `① 본 계약에 따른 용역 보수는 일금 ${SB(p+'_feeh','','130px')} 원(₩ ${SB(p+'_fee','','120px','num amt')} , 부가가치세 별도)으로 한다.`,
+    '② 갑은 본 계약과 관련하여 용역 보수를 다음과 같이 지급한다.',
+    stdPayTable(p, ['착수금','잔　금'], false),
+    '③ 상기 보수 이외에 인쇄비 및 출장비 등 실경비는 갑의 부담으로 한다.',
+  ]) +
+  labeledClause(p+'_payway','보수의 지급 방법', SC.payWay(feeNo)) +
+  labeledClause(p+'_late','보수지급의 지체', SC.late) +
+  labeledClause(p+'_duty','의무', SC.duty) +
+  labeledClause(p+'_free','책임 및 면책', SC.free) +
+  labeledClause(p+'_limit','책임의 제한', SC.limit) +
+  labeledClause(p+'_quit','계약해지',
+    '갑의 사정에 의하여 본 계약을 해약할 때에는 갑은 기지급한 보수액의 반환을 청구하지 못한다. 다만, 을의 사정으로 본 계약을 해약할 때는 을은 기수령한 보수액을 반환하며, 갑과 을의 사정으로 인한 불가항력적 사유로 인하여 계약의 이행이 불가능하게 된 때에는 계약은 종료하는 것으로 하고, 보수의 지급 등에 관하여는 상호 합의에 따라 정하는 것으로 한다.') +
+  labeledClause(p+'_secret','기밀보장', SC.secret) +
+  labeledClause(p+'_dispute','분쟁의 해결', SC.dispute) +
+  stdSpecial(p) +
+  `<div id="addClauseRow" class="add-clause-row"><button type="button" class="add-item-pill" onclick="addCustomClause()">+ 조항 추가</button></div>` +
+  stdEnd(p, {corp:true});
+  return out;
+}
+function tplSvcDiag(){ return tplSvc('svcDiag'); }
+function tplSvcCons(){ return tplSvc('svcCons'); }
+function tplSvcDd(){   return tplSvc('svcDd'); }
+
+/* ---------- 서식 → 템플릿 ---------- */
+const TPLS = {
+  poa:tplPoa, privacy:tplPrivacy, notice:tplNotice, request:tplRequest,
+  payroll:tplPayroll, vat:tplVat, cert:tplCert, apply:tplApply,
+  taxAdj:tplTaxAdj, taxSincere:tplTaxSincere, taxCgt:tplTaxCgt,
+  taxInh:tplTaxInh, taxGift:tplTaxGift,
+  svcDiag:tplSvcDiag, svcCons:tplSvcCons, svcDd:tplSvcDd,
+};
+
+function backToOffice(){
+  // 사무실 프로그램이 열어 준 탭이면 닫고, 아니면 이전 화면으로
+  try{ window.close(); }catch(e){}
+  setTimeout(()=>{ if(history.length>1) history.back(); }, 120);
+}
+
+/* ---------- 초기 렌더 ---------- */
+(function boot(){
+  // 주소에 ?doc=... 가 있으면 그 서식으로 연다
+  const q = (location.search||'').match(/[?&]doc=([a-zA-Z0-9_]+)/);
+  let missDoc = '';
+  if(q){ if(DOCS[q[1]]) curDoc = q[1]; else missDoc = q[1]; }
+  const had = applyStateFromUrl();
+  if(!had){
+    const t = new Date();
+    const isoD = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const lastM = new Date(t.getFullYear(), t.getMonth()-1, 1);
+    S.doc_date = isoD(t); S.pr_pay = isoD(t); S.nt_date = isoD(t);
+    S.pr_month = S.rq_month = lastM.getFullYear()+'-'+String(lastM.getMonth()+1).padStart(2,'0');
+  }
+  // 세무대리인 칸은 언제나 사무실 정보로 썬다
+  S.ofName = OFFICE.상호; S.ofRep = OFFICE.대표자;
+  S.ofNo = OFFICE.사업자등록번호; S.ofPhone = OFFICE.전화;
+
+  if(/[?&]from=office\b/.test(location.search)) document.body.classList.add('from-office');
+  renderDocPicker();
+  renderPanels();
+  document.querySelectorAll('#typeTabs .type-tab').forEach(b=>b.classList.toggle('active', b.dataset.type===curType));
+  document.querySelectorAll('#stdSubType button').forEach(b=>b.classList.toggle('on', b.dataset.v===curSub));
+  renderContract();
+  applyState(document.body);    // 정보 패널 입력칸도 링크 값으로 채우기
+  refreshMirrors();
+  renderSignPreviews();         // 링크에 담긴 서명 표시
+  if(missDoc){                  // 옆 서식 파일이면 조용히 고용계약서로 넘어가지 않고 알려 준다
+    const head = document.querySelector('.tool-head');
+    const w = document.createElement('div');
+    w.className = 'stale-warn';
+    w.innerHTML = `요청하신 서식(<b>${missDoc}</b>)이 이 파일에 없습니다.<br>`
+      + `사무실 프로그램과 <b>같은 폴더</b>의 <b>forms.html</b>을 최신 파일로 바꿔 주세요. `
+      + `(지금 열린 서식 파일: <b>${FORMS_VER}</b> · 서식 ${Object.keys(DOCS).length}종)`;
+    head.parentNode.insertBefore(w, head);
+  }
+})();
+</script>
+</body>
+</html>
